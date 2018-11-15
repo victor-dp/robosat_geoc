@@ -1,10 +1,9 @@
 <h1 align='center'>RoboSat</h1>
+<h2 align='center'>Generic ecosystem for feature extraction from aerial and satellite imagery</h2>
+
 
 <p align=center>
-  Generic ecosystem for feature extraction from aerial and satellite imagery
-
   <img src="https://pbs.twimg.com/media/DpjonykWwAANpPr.jpg" alt="RoboSat pipeline extracting buildings from aerial imagery" />
-  
 </p>
 
 
