@@ -6,7 +6,7 @@
 [common]
 
   # The slippy map dataset's base directory.
-  dataset = '/tmp/slippy-map-dir/'
+  dataset = '/tmp/robosat/'
 
   # Human representation for classes.
   classes = ['background', 'building']
