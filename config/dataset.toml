@@ -9,19 +9,11 @@
   dataset = '/tmp/slippy-map-dir/'
 
   # Human representation for classes.
-  classes = ['background', 'parking']
+  classes = ['background', 'building']
 
   # Color map for visualization and representing classes in masks.
   # Note: available colors are either CSS3 colors names or #RRGGBB hexadecimal representation.
-  colors  = ['denim', 'orange']
-
-
-# Dataset specific class weights computes on the training data.
-# Needed by 'mIoU' and 'CrossEntropy' losses to deal with unbalanced classes.
-# Note: use `./rs weights -h` to compute these for new datasets.
-[weights]
-  values = [1.6248, 5.762827]
-
+  colors  = ['white', 'deeppink']
 
 # Channels configuration let your indicate wich dataset sub-directory and bands to take as input
 # You could so, add several channels blocks to compose your input Tensor. Orders are meaningful.
