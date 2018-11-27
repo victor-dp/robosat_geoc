@@ -1,5 +1,5 @@
 <h1 align='center'>RoboSat.pink</h1>
-<h2 align='center'>Data Quality and feature extraction ecosystem, from imagery and Fusion</h2>
+<h2 align='center'>Data Quality and feature extraction ecosystem, from Imagery and Fusion</h2>
 
 
 <p align=center>
