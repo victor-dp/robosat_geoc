@@ -14,7 +14,6 @@ from robosat.tools import (
     merge,
     predict,
     rasterize,
-    serve,
     subset,
     tile,
     train,
@@ -41,8 +40,6 @@ def add_parsers():
     features.add_parser(subparser)
     merge.add_parser(subparser)
     dedupe.add_parser(subparser)
-
-    serve.add_parser(subparser)
 
     weights.add_parser(subparser)
 

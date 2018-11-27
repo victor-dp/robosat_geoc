@@ -27,7 +27,6 @@ from robosat.datasets import SlippyMapTilesConcatenation
 from robosat.metrics import Metrics
 from robosat.losses import CrossEntropyLoss2d, mIoULoss2d, FocalLoss2d, LovaszLoss2d
 from robosat.unet import UNet
-from robosat.utils import plot
 from robosat.config import load_config
 from robosat.log import Log
 
@@ -153,20 +152,11 @@ def main(args):
             )
         )
 
-        for k, v in train_hist.items():
-            history["train " + k].append(v)
-
-        val_hist = validate(val_loader, num_classes, device, net, criterion)
         log.log(
             "Validate loss: {:.4f}, mIoU: {:.3f}, {} IoU: {:.3f}, MCC: {:.3f}".format(
                 val_hist["loss"], val_hist["miou"], dataset["common"]["classes"][1], val_hist["fg_iou"], val_hist["mcc"]
             )
         )
-
-        for k, v in val_hist.items():
-            history["val " + k].append(v)
-        visual_path = os.path.join(args.out, "history-{:05d}-of-{:05d}.png".format(epoch + 1, num_epochs))
-        plot(visual_path, history)
 
         states = {"epoch": epoch + 1, "state_dict": net.state_dict(), "optimizer": optimizer.state_dict()}
         checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}-of-{:05d}.pth".format(epoch + 1, num_epochs))

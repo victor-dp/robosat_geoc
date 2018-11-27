@@ -2,32 +2,9 @@ import re
 import os
 import sys
 import json
-import matplotlib
 from pathlib import Path
 from mercantile import feature
 from robosat.tiles import pixel_to_location
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
-
-
-def plot(out, history):
-    plt.figure()
-
-    n = max(map(len, history.values()))
-    plt.xticks(range(n), [v + 1 for v in range(n)])
-
-    plt.grid()
-
-    for values in history.values():
-        plt.plot(values)
-
-    plt.xlabel("epoch")
-    plt.legend(list(history))
-
-    plt.savefig(out, format="png")
-    plt.close()
-
 
 def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
 

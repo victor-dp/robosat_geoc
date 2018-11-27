@@ -5,19 +5,6 @@ from PIL import Image
 from robosat.tiles import pixel_to_location
 
 
-def visualize(mask, path):
-    """Writes a visual representation `.png` file for a binary mask.
-
-    Args:
-      mask: the binary mask to visualize.
-      path: the path to save the `.png` image to.
-    """
-
-    out = Image.fromarray(mask, mode="P")
-    out.putpalette([0, 0, 0, 255, 255, 255])
-    out.save(path)
-
-
 def contours_to_mask(contours, shape):
     """Creates a binary mask for contours.
 
