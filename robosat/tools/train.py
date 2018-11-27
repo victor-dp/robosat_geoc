@@ -152,6 +152,7 @@ def main(args):
             )
         )
 
+        val_hist = validate(val_loader, num_classes, device, net, criterion)
         log.log(
             "Validate loss: {:.4f}, mIoU: {:.3f}, {} IoU: {:.3f}, MCC: {:.3f}".format(
                 val_hist["loss"], val_hist["miou"], dataset["common"]["classes"][1], val_hist["fg_iou"], val_hist["mcc"]
