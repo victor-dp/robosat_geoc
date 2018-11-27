@@ -17,7 +17,7 @@ Related resources:
 - <a href="https://github.com/mapbox/robosat">MapBox RoboSat github directory</a>
 
 Bibliography:
-- <a href="http://www.cs.umanitoba.ca/~ywang/papers/isvc16.pdf">Optimizing Intersection-Over-Union in Deep
+- <a href="http://www.cs.umanitoba.ca/~ywang/papers/isvc16.pdf">Optimizing IoU in Deep
 Neural Networks for Image Segmentation</a>
 - <a href="http://www.cs.toronto.edu/~wenjie/papers/iccv17/mattyus_etal_iccv17.pdf">DeepRoadMapper: Extracting Road Topology from Aerial Images</a>
 - <a href="https://arxiv.org/abs/1705.08790">The Lovász-Softmax loss: A tractable surrogate for the optimization of the IoU measure in neural networks</a>
