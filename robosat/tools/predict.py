@@ -72,10 +72,7 @@ def main(args):
     directory = BufferedSlippyMapDirectory(args.tiles, transform=transform, size=args.tile_size, overlap=args.overlap)
     loader = DataLoader(directory, batch_size=args.batch_size, num_workers=args.workers)
 
-    if args.masks_output:
-        palette = make_palette(dataset["common"]["colors"][0], dataset["common"]["colors"][1])
-    else:
-        palette = continuous_palette_for_color("pink", 256)
+    palette = make_palette(dataset["common"]["colors"][0], dataset["common"]["colors"][1])
 
     # don't track tensors with autograd during prediction
     with torch.no_grad():
