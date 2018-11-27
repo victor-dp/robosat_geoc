@@ -1,5 +1,5 @@
 <h1 align='center'>RoboSat.pink</h1>
-<h2 align='center'>Generic ecosystem for QoD and feature extraction from aerial and satellite imagery</h2>
+<h2 align='center'>Generic ecosystem for Data Quality improvments and feature extraction, from aerial and satellite imagery</h2>
 
 
 <p align=center>
