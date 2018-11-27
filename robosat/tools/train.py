@@ -97,12 +97,8 @@ def main(args):
             optimizer.load_state_dict(chkpt["optimizer"])
             resume = chkpt["epoch"]
 
-    if model["opt"]["loss"] == "CrossEntropy":
-        criterion = CrossEntropyLoss2d(weight=weight).to(device)
-    elif model["opt"]["loss"] == "mIoU":
+    if model["opt"]["loss"] == "mIoU":
         criterion = mIoULoss2d(weight=weight).to(device)
-    elif model["opt"]["loss"] == "Focal":
-        criterion = FocalLoss2d(weight=weight).to(device)
     elif model["opt"]["loss"] == "Lovasz":
         criterion = LovaszLoss2d().to(device)
     else:
