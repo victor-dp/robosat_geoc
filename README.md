@@ -3,7 +3,7 @@
 
 
 <p align=center>
-  <img src="https://pbs.twimg.com/media/DpjonykWwAANpPr.jpg" alt="RoboSat pipeline extracting buildings from aerial imagery" />
+  <img src="https://pbs.twimg.com/media/DpjonykWwAANpPr.jpg" alt="RoboSat pipeline extracting buildings from Imagery and Fusion" />
 </p>
 
 
