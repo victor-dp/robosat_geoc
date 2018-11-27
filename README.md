@@ -1,5 +1,5 @@
 <h1 align='center'>RoboSat.pink</h1>
-<h2 align='center'>Generic ecosystem for Data Quality improvments and feature extraction, from aerial and satellite imagery</h2>
+<h2 align='center'>Data Quality and feature extraction ecosystem, from satelite imagery</h2>
 
 
 <p align=center>
@@ -7,10 +7,11 @@
 </p>
 
 
+
+
 This repository is a DataPink flavor of RoboSat including our latests RoboSat core-dev.
 
-The official RoboSat github directory:
-<a href="https://github.com/mapbox/robosat">https://github.com/mapbox/robosat</a>
 
-Current DataPink RoboSat PR:
-<a href="https://github.com/mapbox/robosat/pull/138">https://github.com/mapbox/robosat/pull/138</a>
+Related resources:
+- <a href="http://www.datapink.com/presentations/2018-pyparis.pwd">Robosat slides @PyParis 2018</a>
+- <a href="https://github.com/mapbox/robosat">MapBox RoboSat github directory</a>
