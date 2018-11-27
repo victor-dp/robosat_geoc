@@ -35,7 +35,6 @@ def add_parser(subparser):
     parser.add_argument("--tile_size", type=int, required=True, help="tile size for slippy map tiles")
     parser.add_argument("--workers", type=int, default=0, help="number of workers pre-processing images")
     parser.add_argument("--dataset", type=str, required=True, help="path to dataset configuration file")
-    parser.add_argument("--masks_output", action="store_true", help="output masks rather than probs")
     parser.add_argument("--web_ui", type=str, help="web ui base url")
     parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
     parser.add_argument("tiles", type=str, help="directory to read slippy map image tiles from")
@@ -96,10 +95,7 @@ def main(args):
                 assert prob.shape[0] == 2, "single channel requires binary model"
                 assert np.allclose(np.sum(prob, axis=0), 1.0), "single channel requires probabilities to sum up to one"
 
-                if args.masks_output:
-                    image = np.around(prob[1:, :, :]).astype(np.uint8).squeeze()
-                else:
-                    image = (prob[1:, :, :] * 255).astype(np.uint8).squeeze()
+                image = np.around(prob[1:, :, :]).astype(np.uint8).squeeze()
 
                 out = Image.fromarray(image, mode="P")
                 out.putpalette(palette)
