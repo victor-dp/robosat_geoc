@@ -109,31 +109,3 @@ def simplify(polygon, eps):
 
     epsilon = eps * cv2.arcLength(polygon, closed=True)
     return cv2.approxPolyDP(polygon, epsilon=epsilon, closed=True)
-
-
-def parents_in_hierarchy(node, tree):
-    """Walks a hierarchy tree upwards from a starting node collecting all nodes on the way.
-
-    Args:
-      node: the index for the starting node in the hierarchy.
-      tree: the hierarchy tree containing tuples of (next, prev, first child, parent) ids.
-
-    Yields:
-      The node ids on the upwards path in the hierarchy tree.
-    """
-
-    def parent(n):
-        # next, prev, fst child, parent
-        return n[3]
-
-    at = tree[node]
-    up = parent(at)
-
-    while up != -1:
-        index = up
-        at = tree[index]
-        up = parent(at)
-
-        assert index != node, "upward path does not include starting node"
-
-        yield index
