@@ -20,7 +20,7 @@ Bibliography:
 - <a href="http://www.cs.umanitoba.ca/~ywang/papers/isvc16.pdf">Optimizing Intersection-Over-Union in Deep
 Neural Networks for Image Segmentation</a>
 - <a href="http://www.cs.toronto.edu/~wenjie/papers/iccv17/mattyus_etal_iccv17.pdf">DeepRoadMapper: Extracting Road Topology from Aerial Images</a>
-- <a href="https://arxiv.org/abs/1705.08790">The Lovász-Softmax loss: A tractable surrogate for the optimization of the intersection-over-union measure in neural networks</a>
+- <a href="https://arxiv.org/abs/1705.08790">The Lovász-Softmax loss: A tractable surrogate for the optimization of the IoU measure in neural networks</a>
 - <a href="https://arxiv.org/abs/1806.00844">TernausNetV2: Fully Convolutional Network for Instance Segmentation</a>
 - <a href="https://arxiv.org/abs/1512.03385">Deep Residual Learning for Image Recognition</a>
 - <a href="https://arxiv.org/abs/1505.04597">U-Net: Convolutional Networks for Biomedical Image Segmentation</a>
