@@ -1,4 +1,4 @@
-<h1 align='center'>RoboSat</h1>
+<h1 align='center'>RoboSat.pink</h1>
 <h2 align='center'>Generic ecosystem for QoD and feature extraction from aerial and satellite imagery</h2>
 
 
@@ -7,12 +7,10 @@
 </p>
 
 
-The official RoboSat github directory is: <a href="https://github.com/mapbox/robosat">https://github.com/mapbox/robosat</a>
+This repository is a DataPink flavor of RoboSat including our latests RoboSat core-dev.
 
-This repository is a mirror of DataPink latests RoboSat core-dev.
-It's only purpose, is to expose thoses new features, as they could be still in a PR process.
-So in short, hype stuff.
-
+The official RoboSat github directory:
+<a href="https://github.com/mapbox/robosat">https://github.com/mapbox/robosat</a>
 
 Current DataPink RoboSat PR:
 <a href="https://github.com/mapbox/robosat/pull/138">https://github.com/mapbox/robosat/pull/138</a>
