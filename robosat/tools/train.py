@@ -25,7 +25,7 @@ from robosat.transforms import (
 )
 from robosat.datasets import SlippyMapTilesConcatenation
 from robosat.metrics import Metrics
-from robosat.losses import CrossEntropyLoss2d, mIoULoss2d, FocalLoss2d, LovaszLoss2d
+from robosat.losses import mIoULoss2d, LovaszLoss2d
 from robosat.unet import UNet
 from robosat.config import load_config
 from robosat.log import Log
@@ -74,7 +74,7 @@ def main(args):
     pretrained = model["opt"]["pretrained"]
     net = DataParallel(UNet(num_classes, num_channels=num_channels, pretrained=pretrained)).to(device)
 
-    if model["opt"]["loss"] in ("CrossEntropy", "mIoU", "Focal"):
+    if model["opt"]["loss"] in ("mIoU"):
         try:
             weight = torch.Tensor(dataset["weights"]["values"])
         except KeyError:
