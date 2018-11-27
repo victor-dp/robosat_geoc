@@ -9,9 +9,9 @@
 
 
 
-This repository is a DataPink flavor of RoboSat including our latests RoboSat core-dev.
+This repository is a DataPink flavor of RoboSat, including our latests developments.
 
 
 Related resources:
-- <a href="http://www.datapink.com/presentations/2018-pyparis.pwd">Robosat slides @PyParis 2018</a>
+- <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">Robosat slides @PyParis 2018</a>
 - <a href="https://github.com/mapbox/robosat">MapBox RoboSat github directory</a>
