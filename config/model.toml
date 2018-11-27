@@ -6,7 +6,7 @@
 [common]
 
   # Batch size for training.
-  batch_size = 16
+  batch_size = 8
 
   # Image side size in pixels.
   image_size = 512
@@ -16,15 +16,15 @@
 [opt]
 
   # Total number of epochs to train for.
-  epochs     = 50
+  epochs     = 100
 
   # Learning rate for the optimizer.
-  lr         = 0.00025
+  lr         = 0.000025
 
   # Weight decay l2 penalty for the optimizer
   decay      = 0.0
 
-  # Loss function name (e.g 'Lovasz', 'mIoU' or 'CrossEntropy')
+  # Loss function name (e.g 'Lovasz' or 'mIoU')
   loss = 'Lovasz'
 
   # Data augmentation, Flip or Rotate probability
