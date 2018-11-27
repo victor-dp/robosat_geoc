@@ -12,6 +12,7 @@ from torchvision.transforms import Compose, Normalize
 
 import mercantile
 import requests
+import cv2
 from PIL import Image
 from flask import Flask, send_file, render_template, abort
 
@@ -19,7 +20,7 @@ from robosat.tiles import fetch_image
 from robosat.unet import UNet
 from robosat.config import load_config
 from robosat.colors import make_palette
-from robosat.transforms import ConvertImageMode, ImageToTensor
+from robosat.transforms import ImageToTensor
 
 """
 Simple tile server running a segmentation model on the fly.
@@ -62,7 +63,7 @@ def tile(z, x, y):
     if not res:
         abort(500)
 
-    image = Image.open(res)
+    image = cv2.imdecode(np.asarray(bytearray(res.read()), dtype=np.uint8), cv2.COLOR_BGR2RGB)
 
     mask = predictor.segment(image)
 
@@ -83,7 +84,6 @@ def add_parser(subparser):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument("--model", type=str, required=True, help="path to model configuration file")
     parser.add_argument("--dataset", type=str, required=True, help="path to dataset configuration file")
 
     parser.add_argument("--url", type=str, help="endpoint with {z}/{x}/{y} variables to fetch image tiles from")
@@ -96,13 +96,7 @@ def add_parser(subparser):
 
 
 def main(args):
-    model = load_config(args.model)
     dataset = load_config(args.dataset)
-
-    cuda = model["common"]["cuda"]
-
-    if cuda and not torch.cuda.is_available():
-        sys.exit("Error: CUDA requested but not available")
 
     global size
     size = args.tile_size
@@ -120,7 +114,7 @@ def main(args):
     tiles = args.url
 
     global predictor
-    predictor = Predictor(args.checkpoint, model, dataset)
+    predictor = Predictor(args.checkpoint, dataset)
 
     app.run(host=args.host, port=args.port, threaded=False)
 
@@ -133,16 +127,12 @@ def send_png(image):
 
 
 class Predictor:
-    def __init__(self, checkpoint, model, dataset):
-        cuda = model["common"]["cuda"]
+    def __init__(self, checkpoint, dataset):
 
-        assert torch.cuda.is_available() or not cuda, "cuda is available when requested"
-
-        self.cuda = cuda
-        self.device = torch.device("cuda" if cuda else "cpu")
+        self.cuda = torch.cuda.is_available()
+        self.device = torch.device("cuda" if self.cuda else "cpu")
 
         self.checkpoint = checkpoint
-        self.model = model
         self.dataset = dataset
 
         self.net = self.net_from_chkpt_()
@@ -152,7 +142,7 @@ class Predictor:
         with torch.no_grad():
             mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
 
-            transform = Compose([ConvertImageMode(mode="RGB"), ImageToTensor(), Normalize(mean=mean, std=std)])
+            transform = Compose([ImageToTensor(), Normalize(mean=mean, std=std)])
             image = transform(image)
 
             batch = image.unsqueeze(0).to(self.device)

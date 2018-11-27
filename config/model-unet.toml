@@ -5,17 +5,11 @@
 # Model specific common attributes.
 [common]
 
-  # Use CUDA for GPU acceleration.
-  cuda       = true
-
   # Batch size for training.
   batch_size = 2
 
   # Image side size in pixels.
   image_size = 512
-
-  # Directory where to save checkpoints to during training.
-  checkpoint = '/tmp/pth/'
 
 
 # Model specific optimization parameters.
@@ -32,3 +26,9 @@
 
   # Loss function name (e.g 'Lovasz', 'mIoU' or 'CrossEntropy')
   loss = 'Lovasz'
+
+  # Data augmentation, Flip or Rotate probability
+  data_augmentation = 0.75
+
+  # Use ImageNet weights pretraining
+  pretrained = true

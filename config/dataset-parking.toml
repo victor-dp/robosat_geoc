@@ -12,7 +12,7 @@
   classes = ['background', 'parking']
 
   # Color map for visualization and representing classes in masks.
-  # Note: available colors can be found in `robosat/colors.py`
+  # Note: available colors are either CSS3 colors names or #RRGGBB hexadecimal representation.
   colors  = ['denim', 'orange']
 
 
@@ -21,3 +21,10 @@
 # Note: use `./rs weights -h` to compute these for new datasets.
 [weights]
   values = [1.6248, 5.762827]
+
+
+# Channels configuration let your indicate wich dataset sub-directory and bands to take as input
+# You could so, add several channels blocks to compose your input Tensor. Orders are meaningful.
+[[channels]]
+sub = "images"
+bands = [1,2,3]
