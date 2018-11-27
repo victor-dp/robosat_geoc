@@ -4,12 +4,10 @@ pillow-simd
 scipy
 opencv-contrib-python
 tqdm
-flask
 requests
 geojson
 mercantile
 osmium
-matplotlib
 rasterio
 supermercado
 shapely
