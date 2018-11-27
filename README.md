@@ -14,10 +14,3 @@ The official RoboSat github directory:
 
 Current DataPink RoboSat PR:
 <a href="https://github.com/mapbox/robosat/pull/138">https://github.com/mapbox/robosat/pull/138</a>
-
-
-## License
-
-Copyright (c) 2018 DataPink
-
-Distributed under the MIT License (MIT).
