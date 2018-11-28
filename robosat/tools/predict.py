@@ -34,7 +34,7 @@ def add_parser(subparser):
     parser.add_argument("--overlap", type=int, default=32, help="tile pixel overlap to predict on")
     parser.add_argument("--tile_size", type=int, required=True, help="tile size for slippy map tiles")
     parser.add_argument("--workers", type=int, default=0, help="number of workers pre-processing images")
-    parser.add_argument("--dataset", type=str, required=True, help="path to dataset configuration file")
+    parser.add_argument("--config", type=str, required=True, help="path to configuration file")
     parser.add_argument("--web_ui", type=str, help="web ui base url")
     parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
     parser.add_argument("tiles", type=str, help="directory to read slippy map image tiles from")
@@ -44,8 +44,8 @@ def add_parser(subparser):
 
 
 def main(args):
-    dataset = load_config(args.dataset)
-    num_classes = len(dataset["common"]["classes"])
+    config = load_config(args.config)
+    num_classes = len(config["classes"]["titles"])
 
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -72,7 +72,7 @@ def main(args):
     directory = BufferedSlippyMapDirectory(args.tiles, transform=transform, size=args.tile_size, overlap=args.overlap)
     loader = DataLoader(directory, batch_size=args.batch_size, num_workers=args.workers)
 
-    palette = make_palette(dataset["common"]["colors"][0], dataset["common"]["colors"][1])
+    palette = make_palette(config["classes"]["colors"][0], config["classes"]["colors"][1])
 
     # don't track tensors with autograd during prediction
     with torch.no_grad():
