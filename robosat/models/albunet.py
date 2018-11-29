@@ -73,7 +73,7 @@ class DecoderBlock(nn.Module):
         return self.block(nn.functional.interpolate(x, scale_factor=2, mode="nearest"))
 
 
-class UNet(nn.Module):
+class AlbuNet(nn.Module):
     """The "U-Net" architecture for semantic segmentation, adapted by changing the encoder to a ResNet feature extractor.
 
        Also known as AlbuNet due to its inventor Alexander Buslaev.

@@ -25,8 +25,8 @@ from robosat.transforms import (
 )
 from robosat.datasets import SlippyMapTilesConcatenation
 from robosat.metrics import Metrics
-from robosat.losses import mIoULoss2d, LovaszLoss2d
-from robosat.unet import UNet
+from robosat.losses.lovasz import LovaszLoss
+from robosat.models.albunet import AlbuNet
 from robosat.config import load_config
 from robosat.log import Log
 
@@ -76,7 +76,7 @@ def main(args):
     for channel in config["channels"]:
         num_channels += len(channel["bands"])
     pretrained = config["model"]["pretrained"]
-    net = DataParallel(UNet(num_classes, num_channels=num_channels, pretrained=pretrained)).to(device)
+    net = DataParallel(AlbuNet(num_classes, num_channels=num_channels, pretrained=pretrained)).to(device)
     optimizer = Adam(net.parameters(), lr=lr, weight_decay=config["model"]["decay"])
 
     resume = 0
@@ -95,7 +95,7 @@ def main(args):
             resume = chkpt["epoch"]
 
     if config["model"]["loss"] == "Lovasz":
-        criterion = LovaszLoss2d().to(device)
+        criterion = LovaszLoss().to(device)
     else:
         sys.exit("Error: Unknown [model][loss] value !")
 
@@ -122,8 +122,6 @@ def main(args):
     log.log("Weight Decay:\t\t {}".format(config["model"]["decay"]))
     log.log("Loss function:\t\t {}".format(config["model"]["loss"]))
     log.log("ResNet pre-trained:\t {}".format(config["model"]["pretrained"]))
-    if "weight" in locals():
-        log.log("Weights :\t\t {}".format(config["dataset"]["weights"]))
     log.log("")
 
     for epoch in range(resume, num_epochs):
