@@ -16,7 +16,9 @@ from robosat_pink.logs import Logs
 
 def add_parser(subparser):
     parser = subparser.add_parser(
-        "download", help="downloads images from a remote server (XYZ, WMS, or TMS)", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        "download",
+        help="downloads images from a remote server (XYZ, WMS, or TMS)",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
     parser.add_argument(

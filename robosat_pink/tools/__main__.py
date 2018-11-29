@@ -5,11 +5,11 @@ import argparse
 from robosat_pink.tools import (
     compare,
     cover,
-    #dedupe,
+    # dedupe,
     download,
     extract,
     export,
-    #features,
+    # features,
     predict,
     rasterize,
     subset,
@@ -34,8 +34,8 @@ def add_parsers():
     export.add_parser(subparser)
     predict.add_parser(subparser)
 
-    #features.add_parser(subparser)
-    #dedupe.add_parser(subparser)
+    # features.add_parser(subparser)
+    # dedupe.add_parser(subparser)
 
     compare.add_parser(subparser)
     subset.add_parser(subparser)

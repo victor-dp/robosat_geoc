@@ -24,7 +24,9 @@ from robosat_pink.logs import Logs
 
 def add_parser(subparser):
     parser = subparser.add_parser(
-        "rasterize", help="rasterize GeoJSON features to raster labels", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        "rasterize",
+        help="rasterize GeoJSON features to raster labels",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
     parser.add_argument("--config", type=str, required=True, help="path to configuration file")
