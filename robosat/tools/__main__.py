@@ -15,7 +15,6 @@ from robosat.tools import (
     subset,
     tile,
     train,
-    weights,
 )
 
 
@@ -36,8 +35,6 @@ def add_parsers():
     predict.add_parser(subparser)
     features.add_parser(subparser)
     dedupe.add_parser(subparser)
-
-    weights.add_parser(subparser)
 
     compare.add_parser(subparser)
     subset.add_parser(subparser)

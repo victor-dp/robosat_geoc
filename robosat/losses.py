@@ -1,41 +1,5 @@
-"""PyTorch-compatible losses and loss functions.
-"""
-
 import torch
 import torch.nn as nn
-
-
-class mIoULoss2d(nn.Module):
-    """mIoU Loss.
-
-    See:
-      - http://www.cs.umanitoba.ca/~ywang/papers/isvc16.pdf
-      - http://www.cs.toronto.edu/~wenjie/papers/iccv17/mattyus_etal_iccv17.pdf
-    """
-
-    def __init__(self, weight=None):
-        """Creates a `mIoULoss2d` instance.
-
-        Args:
-          weight: rescaling weight for each class.
-        """
-
-        super().__init__()
-        self.nll_loss = nn.NLLLoss(weight)
-
-    def forward(self, inputs, targets):
-
-        N, C, H, W = inputs.size()
-
-        softs = nn.functional.softmax(inputs, dim=1).permute(1, 0, 2, 3)
-        masks = torch.zeros(N, C, H, W).to(targets.device).scatter_(1, targets.view(N, 1, H, W), 1).permute(1, 0, 2, 3)
-
-        inters = softs * masks
-        unions = (softs + masks) - (softs * masks)
-
-        miou = 1. - (inters.view(C, N, -1).sum(2) / unions.view(C, N, -1).sum(2)).mean()
-
-        return max(miou, self.nll_loss(nn.functional.log_softmax(inputs, dim=1), targets))
 
 
 class LovaszLoss2d(nn.Module):

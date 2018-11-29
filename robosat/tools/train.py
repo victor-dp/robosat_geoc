@@ -77,13 +77,6 @@ def main(args):
         num_channels += len(channel["bands"])
     pretrained = config["model"]["pretrained"]
     net = DataParallel(UNet(num_classes, num_channels=num_channels, pretrained=pretrained)).to(device)
-
-    if model["opt"]["loss"] in ("mIoU"):
-        try:
-            weight = torch.Tensor(config["classes"]["weights"])
-        except KeyError:
-            sys.exit("Error: The loss function used, need dataset weights values")
-
     optimizer = Adam(net.parameters(), lr=lr, weight_decay=config["model"]["decay"])
 
     resume = 0
@@ -101,9 +94,7 @@ def main(args):
             optimizer.load_state_dict(chkpt["optimizer"])
             resume = chkpt["epoch"]
 
-    if model["opt"]["loss"] == "mIoU":
-        criterion = mIoULoss2d(weight=weight).to(device)
-    elif model["opt"]["loss"] == "Lovasz":
+    if config["model"]["loss"] == "Lovasz":
         criterion = LovaszLoss2d().to(device)
     else:
         sys.exit("Error: Unknown [model][loss] value !")
