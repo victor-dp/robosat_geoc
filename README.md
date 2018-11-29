@@ -21,11 +21,11 @@ Bibliography:
 Neural Networks for Image Segmentation</a>
 - <a href="http://www.cs.toronto.edu/~wenjie/papers/iccv17/mattyus_etal_iccv17.pdf">DeepRoadMapper: Extracting Road Topology from Aerial Images</a>
 - <a href="https://arxiv.org/abs/1705.08790">The Lovász-Softmax loss: A tractable surrogate for the optimization of the IoU measure in neural networks</a>
-- <a href="https://arxiv.org/abs/1806.00844">TernausNetV2: Fully Convolutional Network for Instance Segmentation</a>
-- <a href="https://arxiv.org/abs/1512.03385">Deep Residual Learning for Image Recognition</a>
 - <a href="https://arxiv.org/abs/1505.04597">U-Net: Convolutional Networks for Biomedical Image Segmentation</a>
-- <a href="https://arxiv.org/pdf/1606.02147.pdf">ENet: A Deep Neural Network Architecture for
-Real-Time Semantic Segmentation</a>
+- <a href="https://arxiv.org/abs/1512.03385">Deep Residual Learning for Image Recognition</a>
+- <a href="https://arxiv.org/pdf/1804.08024.pdf">Angiodysplasia Detection and Localization Using Deep
+Convolutional Neural Networks</a>
+- <a href="https://arxiv.org/abs/1806.00844">TernausNetV2: Fully Convolutional Network for Instance Segmentation</a>
 - <a href="https://hal.archives-ouvertes.fr/hal-01523573/document">Joint Learning from Earth Observation and
 OpenStreetMap Data to Get Faster Better Semantic Maps</a>
 - <a href="https://arxiv.org/abs/1712.02616">In-Place Activated BatchNorm for Memory-Optimized Training of DNNs</a>
