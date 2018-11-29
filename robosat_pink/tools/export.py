@@ -6,8 +6,8 @@ import torch.onnx
 import torch.autograd
 import torch.nn as nn
 
-from robosat.config import load_config
-from robosat.unet import UNet
+from robosat_pink.config import load_config
+from robosat_pink.models.albunet import AlbuNet
 
 
 def add_parser(subparser):
@@ -43,7 +43,7 @@ def main(args):
     def map_location(storage, _):
         return storage.cpu()
 
-    net = UNet(num_classes, num_channels=num_channels).to("cpu")
+    net = AlbuNet(num_classes, num_channels=num_channels).to("cpu")
     chkpt = torch.load(args.checkpoint, map_location=map_location)
     net = torch.nn.DataParallel(net)
     net.load_state_dict(chkpt["state_dict"])

@@ -10,8 +10,8 @@ import pkgutil
 from pathlib import Path
 from importlib import import_module
 
-from robosat.config import load_config
-from robosat.tiles import tiles_from_slippy_map
+from robosat_pink.config import load_config
+from robosat_pink.tiles import tiles_from_slippy_map
 
 
 def add_parser(subparser):

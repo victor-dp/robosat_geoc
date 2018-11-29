@@ -4,7 +4,7 @@ import sys
 import json
 from pathlib import Path
 from mercantile import feature
-from robosat.tiles import pixel_to_location
+from robosat_pink.tiles import pixel_to_location
 
 
 def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):

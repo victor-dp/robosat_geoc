@@ -2,7 +2,7 @@
 
 import argparse
 
-from robosat.tools import (
+from robosat_pink.tools import (
     compare,
     cover,
     dedupe,

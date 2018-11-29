@@ -16,11 +16,11 @@ from rasterio.warp import transform
 from supermercado import burntiles
 from shapely.geometry import mapping
 
-from robosat.config import load_config
-from robosat.colors import make_palette, complementary_palette
-from robosat.tiles import tiles_from_csv
-from robosat.utils import web_ui
-from robosat.log import Log
+from robosat_pink.config import load_config
+from robosat_pink.colors import make_palette, complementary_palette
+from robosat_pink.tiles import tiles_from_csv
+from robosat_pink.utils import web_ui
+from robosat_pink.log import Log
 
 
 def add_parser(subparser):

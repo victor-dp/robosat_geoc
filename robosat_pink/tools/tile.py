@@ -15,9 +15,9 @@ from rasterio.enums import Resampling
 from rasterio.warp import transform_bounds, calculate_default_transform
 from rasterio.transform import from_bounds
 
-from robosat.config import load_config
-from robosat.colors import make_palette
-from robosat.utils import web_ui
+from robosat_pink.config import load_config
+from robosat_pink.colors import make_palette
+from robosat_pink.utils import web_ui
 
 
 def add_parser(subparser):

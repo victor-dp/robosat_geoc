@@ -6,9 +6,9 @@ import shutil
 from glob import glob
 from tqdm import tqdm
 
-from robosat.tiles import tiles_from_csv
-from robosat.utils import web_ui
-from robosat.log import Log
+from robosat_pink.tiles import tiles_from_csv
+from robosat_pink.utils import web_ui
+from robosat_pink.log import Log
 
 
 def add_parser(subparser):

@@ -8,7 +8,7 @@ from tqdm import tqdm
 from mercantile import tiles
 from supermercado import burntiles
 
-from robosat.datasets import tiles_from_slippy_map
+from robosat_pink.datasets import tiles_from_slippy_map
 
 
 def add_parser(subparser):

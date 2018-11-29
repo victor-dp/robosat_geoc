@@ -4,7 +4,7 @@ import osmium
 import geojson
 import shapely.geometry
 
-from robosat.osm.core import is_polygon
+from robosat_pink.osm.core import is_polygon
 
 
 class BuildingHandler(osmium.SimpleHandler):

@@ -11,12 +11,12 @@ import numpy as np
 
 from mercantile import feature
 
-from robosat.colors import make_palette, complementary_palette
-from robosat.tiles import tiles_from_slippy_map, tile_image
-from robosat.config import load_config
-from robosat.metrics import Metrics
-from robosat.utils import web_ui
-from robosat.log import Log
+from robosat_pink.colors import make_palette, complementary_palette
+from robosat_pink.tiles import tiles_from_slippy_map, tile_image
+from robosat_pink.config import load_config
+from robosat_pink.metrics import Metrics
+from robosat_pink.utils import web_ui
+from robosat_pink.log import Log
 
 
 def add_parser(subparser):

@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from PIL import Image
 
-from robosat.tiles import pixel_to_location
+from robosat_pink.tiles import pixel_to_location
 
 
 def contours_to_mask(contours, shape):

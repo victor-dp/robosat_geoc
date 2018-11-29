@@ -15,7 +15,7 @@ from torchvision.transforms import Normalize
 
 from tqdm import tqdm
 
-from robosat.transforms import (
+from robosat_pink.transforms import (
     JointCompose,
     JointTransform,
     JointResize,
@@ -23,12 +23,12 @@ from robosat.transforms import (
     ImageToTensor,
     MaskToTensor,
 )
-from robosat.datasets import SlippyMapTilesConcatenation
-from robosat.metrics import Metrics
-from robosat.losses.lovasz import LovaszLoss
-from robosat.models.albunet import AlbuNet
-from robosat.config import load_config
-from robosat.log import Log
+from robosat_pink.datasets import SlippyMapTilesConcatenation
+from robosat_pink.metrics import Metrics
+from robosat_pink.losses.lovasz import LovaszLoss
+from robosat_pink.models.albunet import AlbuNet
+from robosat_pink.config import load_config
+from robosat_pink.log import Log
 
 
 @contextmanager

@@ -13,13 +13,13 @@ from torchvision.transforms import Compose, Normalize
 from tqdm import tqdm
 from PIL import Image
 
-from robosat.datasets import BufferedSlippyMapDirectory
-from robosat.tiles import tiles_from_slippy_map
-from robosat.unet import UNet
-from robosat.config import load_config
-from robosat.colors import continuous_palette_for_color, make_palette
-from robosat.transforms import ImageToTensor
-from robosat.utils import web_ui
+from robosat_pink.datasets import BufferedSlippyMapDirectory
+from robosat_pink.tiles import tiles_from_slippy_map
+from robosat_pink.models.albunet import AlbuNet
+from robosat_pink.config import load_config
+from robosat_pink.colors import continuous_palette_for_color, make_palette
+from robosat_pink.transforms import ImageToTensor
+from robosat_pink.utils import web_ui
 
 
 def add_parser(subparser):
@@ -59,7 +59,7 @@ def main(args):
     # https://github.com/pytorch/pytorch/issues/7178
     chkpt = torch.load(args.checkpoint, map_location=map_location)
 
-    net = UNet(num_classes).to(device)
+    net = AlbuNet(num_classes).to(device)
     net = nn.DataParallel(net)
 
     net.load_state_dict(chkpt["state_dict"])
