@@ -20,7 +20,7 @@ from robosat_pink.config import load_config
 from robosat_pink.colors import make_palette, complementary_palette
 from robosat_pink.tiles import tiles_from_csv
 from robosat_pink.web_ui import web_ui
-from robosat_pink.log import Log
+from robosat_pink.logs import Logs
 
 
 def add_parser(subparser):
@@ -92,7 +92,7 @@ def main(args):
 
     # Find all tiles the features cover and make a map object for quick lookup.
     feature_map = collections.defaultdict(list)
-    log = Log(os.path.join(args.out, "log"), out=sys.stderr)
+    log = Logs(os.path.join(args.out, "log"), out=sys.stderr)
 
     def parse_polygon(feature_map, polygon, i):
 

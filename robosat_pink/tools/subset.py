@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 from robosat_pink.tiles import tiles_from_csv
 from robosat_pink.web_ui import web_ui
-from robosat_pink.log import Log
+from robosat_pink.logs import Logs
 
 
 def add_parser(subparser):
@@ -28,7 +28,7 @@ def add_parser(subparser):
 
 
 def main(args):
-    log = Log(os.path.join(args.out, "log"), out=sys.stderr)
+    log = Logs(os.path.join(args.out, "log"), out=sys.stderr)
 
     tiles = set(tiles_from_csv(args.cover))
     extension = ""

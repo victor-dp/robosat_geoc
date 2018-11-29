@@ -11,7 +11,7 @@ from mercantile import xy_bounds
 
 from robosat_pink.tiles import tiles_from_csv, fetch_image
 from robosat_pink.web_ui import web_ui
-from robosat_pink.log import Log
+from robosat_pink.logs import Logs
 
 
 def add_parser(subparser):
@@ -43,7 +43,7 @@ def main(args):
         num_workers = args.rate
 
         os.makedirs(os.path.join(args.out), exist_ok=True)
-        log = Log(os.path.join(args.out, "log"), out=sys.stderr)
+        log = Logs(os.path.join(args.out, "log"), out=sys.stderr)
         log.log("Begin download from {}".format(args.url))
 
         # tqdm has problems with concurrent.futures.ThreadPoolExecutor; explicitly call `.update`

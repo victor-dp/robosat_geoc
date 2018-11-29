@@ -5,9 +5,9 @@ import os
 import sys
 
 
-class Log:
+class Logs:
 
-    """Create a log instance on a log file
+    """Create a logs instance on a logs file
     """
 
     def __init__(self, path, out=sys.stdout):
@@ -20,9 +20,9 @@ class Log:
                     os.makedirs(os.path.dirname(path), exist_ok=True)
                 self.fp = open(path, mode="a")
         except:
-            sys.exit("Unable to write in log directory")
+            sys.exit("Unable to write in logs directory")
 
-    """Log a new message to the opened log file, and optionnaly on stdout or stderr too
+    """Log a new message to the opened logs file, and optionnaly on stdout or stderr too
     """
 
     def log(self, msg):
@@ -34,4 +34,4 @@ class Log:
             if self.out:
                 print(msg, file=self.out)
         except:
-            sys.exit("Unable to write in log file")
+            sys.exit("Unable to write in logs file")

@@ -28,7 +28,7 @@ from robosat_pink.metrics import Metrics
 from robosat_pink.losses.lovasz import LovaszLoss
 from robosat_pink.models.albunet import AlbuNet
 from robosat_pink.config import load_config
-from robosat_pink.log import Log
+from robosat_pink.logs import Logs
 
 
 @contextmanager
@@ -60,7 +60,7 @@ def main(args):
     dataset_path = args.dataset if args.dataset else config["dataset"]["path"]
     num_epochs = args.epochs if args.epochs else config["model"]["epochs"]
 
-    log = Log(os.path.join(args.out, "log"))
+    log = Logs(os.path.join(args.out, "log"))
 
     if torch.cuda.is_available():
         device = torch.device("cuda")

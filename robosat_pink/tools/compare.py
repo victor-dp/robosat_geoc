@@ -16,7 +16,6 @@ from robosat_pink.tiles import tiles_from_slippy_map, tile_image
 from robosat_pink.config import load_config
 from robosat_pink.metrics import Metrics
 from robosat_pink.web_ui import web_ui
-from robosat_pink.log import Log
 
 
 def add_parser(subparser):
