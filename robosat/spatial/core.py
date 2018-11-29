@@ -75,7 +75,7 @@ def make_index(shapes):
       The spatial index created from the shape's bounding boxes.
     """
 
-    # Todo: benchmark these for our use-cases
+    # TODO: benchmark these
     prop = Property()
     prop.dimension = 2
     prop.leaf_capacity = 1000

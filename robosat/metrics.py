@@ -86,7 +86,3 @@ class Metrics:
             mcc = float("NaN")
 
         return mcc
-
-
-# Todo:
-# - Rewrite mIoU to handle N classes (and not only binary SemSeg)
