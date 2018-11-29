@@ -24,7 +24,7 @@ from robosat_pink.web_ui import web_ui
 def add_parser(subparser):
     parser = subparser.add_parser(
         "predict",
-        help="predicts probability masks for slippy map tiles",
+        help="from a trained model and predict inputs, predicts masks",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
@@ -60,12 +60,10 @@ def main(args):
 
     net = AlbuNet(num_classes).to(device)
     net = nn.DataParallel(net)
-
     net.load_state_dict(chkpt["state_dict"])
     net.eval()
 
-    mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
-
+    mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225] # from ImageNet
     transform = Compose([ImageToTensor(), Normalize(mean=mean, std=std)])
 
     directory = BufferedSlippyMapDirectory(args.tiles, transform=transform, size=args.tile_size, overlap=args.overlap)

@@ -36,7 +36,7 @@ def no_grad():
 
 def add_parser(subparser):
     parser = subparser.add_parser(
-        "train", help="trains model on dataset", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        "train", help="trains a model on a dataset", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument("--config", type=str, required=True, help="path to configuration file")

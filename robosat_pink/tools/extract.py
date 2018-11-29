@@ -10,7 +10,7 @@ from importlib import import_module
 def add_parser(subparser):
     parser = subparser.add_parser(
         "extract",
-        help="extracts GeoJSON features from OpenStreetMap",
+        help="extracts GeoJSON features from OpenStreetMap .pbf",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 

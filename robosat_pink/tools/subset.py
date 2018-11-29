@@ -14,7 +14,7 @@ from robosat_pink.logs import Logs
 def add_parser(subparser):
     parser = subparser.add_parser(
         "subset",
-        help="filter images in a slippy map directory using a csv",
+        help="filter images in a slippy map dir using a csv tiles cover",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("dir", type=str, help="directory to read slippy map tiles from for filtering")

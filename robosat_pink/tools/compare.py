@@ -19,7 +19,8 @@ from robosat_pink.web_ui import web_ui
 
 def add_parser(subparser):
     parser = subparser.add_parser(
-        "compare", help="compare images and/or labels and masks", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        "compare", help="Compute composite images and/or metrics to compare several slippy map dirs.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument("--mode", type=str, default="side", choices=["side", "stack", "list"], help="compare mode")
     parser.add_argument("--images", type=str, nargs="+", help="slippy map images dirs to render (stack or side mode)")

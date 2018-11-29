@@ -12,7 +12,7 @@ from robosat_pink.models.albunet import AlbuNet
 
 def add_parser(subparser):
     parser = subparser.add_parser(
-        "export", help="exports or prunes model", formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        "export", help="exports or prunes a trained model", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument("--config", type=str, required=True, help="path to configuration file")
