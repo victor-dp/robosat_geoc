@@ -3,7 +3,6 @@
 
 import colorsys
 import webcolors
-import numpy as np
 
 
 def make_palette(*colors):

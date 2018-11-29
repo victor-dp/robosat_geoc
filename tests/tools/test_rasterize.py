@@ -6,7 +6,7 @@ import mercantile
 
 from PIL import Image
 
-from robosat.tools.rasterize import burn, feature_to_mercator
+from robosat_pink.tools.rasterize import burn, feature_to_mercator
 
 
 def get_parking():

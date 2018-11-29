@@ -1,6 +1,5 @@
 import argparse
 import os
-import sys
 
 import numpy as np
 
@@ -17,7 +16,7 @@ from robosat_pink.datasets import BufferedSlippyMapDirectory
 from robosat_pink.tiles import tiles_from_slippy_map
 from robosat_pink.models.albunet import AlbuNet
 from robosat_pink.config import load_config
-from robosat_pink.colors import continuous_palette_for_color, make_palette
+from robosat_pink.colors import make_palette
 from robosat_pink.transforms import ImageToTensor
 from robosat_pink.web_ui import web_ui
 

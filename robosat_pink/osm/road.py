@@ -11,61 +11,26 @@ class RoadHandler(osmium.SimpleHandler):
     """
 
     highway_attributes = {
-        "motorway": {
-            "lanes": 4,
-            "lane_width": 3.75,
-            "left_hard_shoulder_width": 0.75,
-            "right_hard_shoulder_width": 3.0,
-        },
+        "motorway": {"lanes": 4, "lane_width": 3.75, "left_hard_shoulder_width": 0.75, "right_hard_shoulder_width": 3.0},
         "trunk": {"lanes": 3, "lane_width": 3.75, "left_hard_shoulder_width": 0.75, "right_hard_shoulder_width": 3.0},
-        "primary": {
-            "lanes": 2,
-            "lane_width": 3.75,
-            "left_hard_shoulder_width": 0.50,
-            "right_hard_shoulder_width": 1.50,
-        },
-        "secondary": {
-            "lanes": 1,
-            "lane_width": 3.50,
-            "left_hard_shoulder_width": 0.00,
-            "right_hard_shoulder_width": 0.75,
-        },
-        "tertiary": {
-            "lanes": 1,
-            "lane_width": 3.50,
-            "left_hard_shoulder_width": 0.00,
-            "right_hard_shoulder_width": 0.75,
-        },
+        "primary": {"lanes": 2, "lane_width": 3.75, "left_hard_shoulder_width": 0.50, "right_hard_shoulder_width": 1.50},
+        "secondary": {"lanes": 1, "lane_width": 3.50, "left_hard_shoulder_width": 0.00, "right_hard_shoulder_width": 0.75},
+        "tertiary": {"lanes": 1, "lane_width": 3.50, "left_hard_shoulder_width": 0.00, "right_hard_shoulder_width": 0.75},
         "unclassified": {
             "lanes": 1,
             "lane_width": 3.50,
             "left_hard_shoulder_width": 0.00,
             "right_hard_shoulder_width": 0.00,
         },
-        "residential": {
-            "lanes": 1,
-            "lane_width": 3.50,
-            "left_hard_shoulder_width": 0.00,
-            "right_hard_shoulder_width": 0.75,
-        },
-        "service": {
-            "lanes": 1,
-            "lane_width": 3.00,
-            "left_hard_shoulder_width": 0.00,
-            "right_hard_shoulder_width": 0.00,
-        },
+        "residential": {"lanes": 1, "lane_width": 3.50, "left_hard_shoulder_width": 0.00, "right_hard_shoulder_width": 0.75},
+        "service": {"lanes": 1, "lane_width": 3.00, "left_hard_shoulder_width": 0.00, "right_hard_shoulder_width": 0.00},
         "motorway_link": {
             "lanes": 2,
             "lane_width": 3.75,
             "left_hard_shoulder_width": 0.75,
             "right_hard_shoulder_width": 3.00,
         },
-        "trunk_link": {
-            "lanes": 2,
-            "lane_width": 3.75,
-            "left_hard_shoulder_width": 0.50,
-            "right_hard_shoulder_width": 1.50,
-        },
+        "trunk_link": {"lanes": 2, "lane_width": 3.75, "left_hard_shoulder_width": 0.50, "right_hard_shoulder_width": 1.50},
         "primary_link": {
             "lanes": 1,
             "lane_width": 3.50,

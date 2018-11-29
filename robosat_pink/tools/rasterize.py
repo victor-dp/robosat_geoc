@@ -14,7 +14,6 @@ from rasterio.transform import from_bounds
 from rasterio.features import rasterize
 from rasterio.warp import transform
 from supermercado import burntiles
-from shapely.geometry import mapping
 
 from robosat_pink.config import load_config
 from robosat_pink.colors import make_palette, complementary_palette
@@ -103,7 +102,7 @@ def main(args):
             for tile in burntiles.burn([{"type": "feature", "geometry": polygon}], zoom=args.zoom):
                 feature_map[mercantile.Tile(*tile)].append({"type": "feature", "geometry": polygon})
 
-        except ValueError as e:
+        except ValueError:
             log.log("Warning: invalid feature {}, skipping".format(i))
 
         return feature_map

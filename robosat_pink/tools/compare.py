@@ -11,7 +11,6 @@ import numpy as np
 
 from mercantile import feature
 
-from robosat_pink.colors import make_palette, complementary_palette
 from robosat_pink.tiles import tiles_from_slippy_map, tile_image
 from robosat_pink.config import load_config
 from robosat_pink.metrics import Metrics

@@ -12,9 +12,7 @@ from robosat_pink.vectors import make_index, iou
 
 def add_parser(subparser):
     parser = subparser.add_parser(
-        "dedupe",
-        help="deduplicates features against OpenStreetMap",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        "dedupe", help="deduplicates features against OpenStreetMap", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
     parser.add_argument(

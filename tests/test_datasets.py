@@ -1,10 +1,10 @@
 import unittest
 
 import torch
-from robosat.transforms import JointCompose, JointTransform, ImageToTensor, MaskToTensor
+from robosat_pink.transforms import JointCompose, JointTransform, ImageToTensor, MaskToTensor
 import mercantile
 
-from robosat.datasets import SlippyMapTiles, SlippyMapTilesConcatenation
+from robosat_pink.datasets import SlippyMapTiles, SlippyMapTilesConcatenation
 
 
 class TestSlippyMapTiles(unittest.TestCase):

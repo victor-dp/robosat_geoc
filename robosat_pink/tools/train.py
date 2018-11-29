@@ -1,10 +1,7 @@
 import os
 import sys
 import argparse
-import collections
 from contextlib import contextmanager
-
-from PIL import Image
 
 import torch
 import torch.backends.cudnn
@@ -103,8 +100,6 @@ def main(args):
 
     if resume >= num_epochs:
         sys.exit("Error: Epoch {} set in {} already reached by the checkpoint provided".format(num_epochs, args.config))
-
-    history = collections.defaultdict(list)
 
     log.log("")
     log.log("--- Input tensor from Dataset: {} ---".format(dataset_path))

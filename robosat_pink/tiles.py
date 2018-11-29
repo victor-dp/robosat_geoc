@@ -17,8 +17,6 @@ import cv2
 from PIL import Image
 import numpy as np
 
-from rasterio.warp import transform
-from rasterio.crs import CRS
 import mercantile
 
 

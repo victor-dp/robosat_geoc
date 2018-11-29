@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-from PIL import Image
 
 from robosat_pink.tiles import pixel_to_location
 

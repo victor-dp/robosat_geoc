@@ -2,7 +2,7 @@ import unittest
 
 import mercantile
 
-from robosat.tiles import tiles_from_slippy_map, tiles_from_csv
+from robosat_pink.tiles import tiles_from_slippy_map, tiles_from_csv
 
 
 class TestSlippyMapTiles(unittest.TestCase):
