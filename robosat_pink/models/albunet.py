@@ -4,6 +4,7 @@ See:
 - https://arxiv.org/abs/1505.04597 - U-Net: Convolutional Networks for Biomedical Image Segmentation
 - https://arxiv.org/abs/1411.4038  - Fully Convolutional Networks for Semantic Segmentation
 - https://arxiv.org/abs/1512.03385 - Deep Residual Learning for Image Recognition
+- https://arxiv.org/pdf/1804.08024 - Angiodysplasia Detection and Localization Using Deep Convolutional Neural Networks
 - https://arxiv.org/abs/1801.05746 - TernausNet: U-Net with VGG11 Encoder Pre-Trained on ImageNet for Image Segmentation
 - https://arxiv.org/abs/1806.00844 - TernausNetV2: Fully Convolutional Network for Instance Segmentation
 
@@ -16,71 +17,35 @@ from torchvision.models import resnet50
 
 
 class ConvRelu(nn.Module):
-    """3x3 convolution followed by ReLU activation building block.
-    """
+    """3x3 convolution followed by ReLU activation building block."""
 
     def __init__(self, num_in, num_out):
-        """Creates a `ConvReLU` building block.
-
-        Args:
-          num_in: number of input feature maps
-          num_out: number of output feature maps
-        """
-
         super().__init__()
-
         self.block = nn.Conv2d(num_in, num_out, kernel_size=3, padding=1, bias=False)
 
     def forward(self, x):
-        """The networks forward pass for which autograd synthesizes the backwards pass.
-
-        Args:
-          x: the input tensor
-
-        Returns:
-          The networks output tensor.
-        """
-
         return nn.functional.relu(self.block(x), inplace=True)
 
 
 class DecoderBlock(nn.Module):
-    """Decoder building block upsampling resolution by a factor of two.
-    """
+    """Decoder building block upsampling resolution by a factor of two."""
 
     def __init__(self, num_in, num_out):
-        """Creates a `DecoderBlock` building block.
-
-        Args:
-          num_in: number of input feature maps
-          num_out: number of output feature maps
-        """
-
         super().__init__()
-
         self.block = ConvRelu(num_in, num_out)
 
     def forward(self, x):
-        """The networks forward pass for which autograd synthesizes the backwards pass.
-
-        Args:
-          x: the input tensor
-
-        Returns:
-          The networks output tensor.
-        """
-
         return self.block(nn.functional.interpolate(x, scale_factor=2, mode="nearest"))
 
 
 class AlbuNet(nn.Module):
-    """The "U-Net" architecture for semantic segmentation, adapted by changing the encoder to a ResNet feature extractor.
+    """The U-Net like architecture for semantic segmentation, adapted by changing the encoder to a ResNet feature extractor.
 
        Also known as AlbuNet due to its inventor Alexander Buslaev.
     """
 
     def __init__(self, num_classes, num_channels=3, num_filters=32, pretrained=True):
-        """Creates an `UNet` instance for semantic segmentation.
+        """Creates an `AlbuNet` instance for semantic segmentation.
 
         Args:
           num_classes: number of classes to predict.
@@ -116,14 +81,7 @@ class AlbuNet(nn.Module):
         self.final = nn.Conv2d(num_filters, num_classes, kernel_size=1)
 
     def forward(self, x):
-        """The networks forward pass for which autograd synthesizes the backwards pass.
-
-        Args:
-          x: the input tensor
-
-        Returns:
-          The networks output tensor.
-        """
+        """The networks forward pass for which autograd synthesizes the backwards pass."""
         size = x.size()
         assert size[-1] % 32 == 0 and size[-2] % 32 == 0, "image resolution has to be divisible by 32 for resnet"
 
