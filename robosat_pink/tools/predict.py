@@ -19,7 +19,7 @@ from robosat_pink.models.albunet import AlbuNet
 from robosat_pink.config import load_config
 from robosat_pink.colors import continuous_palette_for_color, make_palette
 from robosat_pink.transforms import ImageToTensor
-from robosat_pink.utils import web_ui
+from robosat_pink.web_ui import web_ui
 
 
 def add_parser(subparser):

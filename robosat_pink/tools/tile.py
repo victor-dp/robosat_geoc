@@ -17,7 +17,7 @@ from rasterio.transform import from_bounds
 
 from robosat_pink.config import load_config
 from robosat_pink.colors import make_palette
-from robosat_pink.utils import web_ui
+from robosat_pink.web_ui import web_ui
 
 
 def add_parser(subparser):

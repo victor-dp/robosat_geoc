@@ -19,7 +19,7 @@ from shapely.geometry import mapping
 from robosat_pink.config import load_config
 from robosat_pink.colors import make_palette, complementary_palette
 from robosat_pink.tiles import tiles_from_csv
-from robosat_pink.utils import web_ui
+from robosat_pink.web_ui import web_ui
 from robosat_pink.log import Log
 
 

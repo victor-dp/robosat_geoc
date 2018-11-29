@@ -10,7 +10,7 @@ from tqdm import tqdm
 from mercantile import xy_bounds
 
 from robosat_pink.tiles import tiles_from_csv, fetch_image
-from robosat_pink.utils import web_ui
+from robosat_pink.web_ui import web_ui
 from robosat_pink.log import Log
 
 
