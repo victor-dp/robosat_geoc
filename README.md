@@ -38,6 +38,13 @@ Install:
 
 
 
+WorkFlows:
+--------
+![Data Preparation Workflow](docs/img/data_preparation.png)
+![Training Workflow](docs/img/training.png)      
+
+
+
 Related resources:
 -----------------
 
