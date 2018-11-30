@@ -55,7 +55,7 @@ def main(args):
             if args.mode == "copy":
                 shutil.copyfile(src, dst)
 
-            if args.mode == "del":
+            if args.mode == "delete":
                 assert os.path.isfile(src)
                 os.remove(src)
 
