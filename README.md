@@ -27,7 +27,7 @@ Install:
 ```
      python3 -m pip install requirements.txt
 ```
-  Common issue: if Pillow and Pillow-simd are both installed, you will have to remove both, and install back only Pillow-simd.
+  TIPS: if you want to significantly increase performances switch from Pillow to <a href="https://github.com/uploadcare/pillow-simd">Pillow-simd</a>.
 
 
  #3 Deploy:

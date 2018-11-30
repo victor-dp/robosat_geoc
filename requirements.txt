@@ -1,6 +1,6 @@
 torchvision
 numpy
-pillow-simd
+pillow
 opencv-contrib-python
 tqdm
 requests
