@@ -3,7 +3,7 @@
 
 [dataset]
   # The slippy map dataset's base directory.
-  path = '~/robosat/dataset'
+  path = '~/rsp/dataset'
 
 [classes]
   # Human representation for classes.
