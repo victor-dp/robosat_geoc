@@ -11,12 +11,42 @@
 
 This repository is a DataPink flavor of RoboSat, including our latests developments.
 
+Install:
+-------
+
+#1 Prerequisites:
+   - PyTorch >= 0.4 installed, with related Nvidia GPU drivers, CUDA and CUDNN libs.
+   - At least one GPU. With total RAM of all GPUs > 8Go (default batchsize settings is targeted to 11Go).
+   - Libs with headers: libjpeg, libwebp, libbz2, zlib, libboost. 
+     On a recent Ubuntu-server, could be done with:
+ ```
+     apt-get install build-essential libboost-python-dev zlib1g-dev libbz2-dev libjpeg-turbo8-dev libwebp-dev
+ ```
+
+ #2 Python libs Install:
+```
+     python3 -m pip install requirements.txt
+```
+  Common issue: if Pillow and Pillow-simd are both installed, you will have to remove both, and install back only Pillow-simd.
+
+
+ #3 Deploy:
+  - Move the `rsp` command to a bin directory covered by your `PATH` (or update your `PATH`)
+  - Move the robosat_pink dir to somewhere covered by your `PYTHONPATH` (or update your `PYTHONPATH`)
+
+
+
+
 
 Related resources:
+-----------------
+
 - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">Robosat slides @PyParis 2018</a>
 - <a href="https://github.com/mapbox/robosat">MapBox RoboSat github directory</a>
 
 Bibliography:
+-------------
+
 - <a href="http://www.cs.umanitoba.ca/~ywang/papers/isvc16.pdf">Optimizing IoU in Deep
 Neural Networks for Image Segmentation</a>
 - <a href="http://www.cs.toronto.edu/~wenjie/papers/iccv17/mattyus_etal_iccv17.pdf">DeepRoadMapper: Extracting Road Topology from Aerial Images</a>
