@@ -11,7 +11,7 @@
 
   # Color map for visualization and representing classes in masks.
   # Note: available colors are either CSS3 colors names or #RRGGBB hexadecimal representation.
-  colors  = ['white', 'deeppink']
+  colors = ['white', 'deeppink']
 
 
 # Channels configuration let your indicate wich dataset sub-directory and bands to take as input
@@ -27,19 +27,19 @@
   # Batch size for training.
   batch_size = 8
 
-  # Image side size in pixels.
-  image_size = 512
+  # tile side size in pixels.
+  tile_size = 512
 
   # Total number of epochs to train for.
-  epochs     = 20
+  epochs = 20
 
   # Learning rate for the optimizer.
-  lr         = 0.000025
+  lr = 0.000025
 
   # Weight decay l2 penalty for the optimizer
-  decay      = 0.0
+  decay = 0.0
 
-  # Loss function name (e.g 'Lovasz', 'mIoU' or 'CrossEntropy')
+  # Loss function name
   loss = 'Lovasz'
 
   # Data augmentation, Flip or Rotate probability

@@ -111,7 +111,7 @@ def main(args):
     log.log("")
     log.log("--- Hyper Parameters ---")
     log.log("Batch Size:\t\t {}".format(config["model"]["batch_size"]))
-    log.log("Image Size:\t\t {}".format(config["model"]["image_size"]))
+    log.log("Tile Size:\t\t {}".format(config["model"]["tile_size"]))
     log.log("Data Augmentation:\t {}".format(config["model"]["data_augmentation"]))
     log.log("Learning Rate:\t\t {}".format(lr))
     log.log("Weight Decay:\t\t {}".format(config["model"]["decay"]))
@@ -236,7 +236,7 @@ def get_dataset_loaders(path, config, workers):
 
     transform = JointCompose(
         [
-            JointResize(config["model"]["image_size"]),
+            JointResize(config["model"]["tile_size"]),
             JointRandomFlipOrRotate(config["model"]["data_augmentation"]),
             JointTransform(ImageToTensor(), MaskToTensor()),
             JointTransform(Normalize(mean=mean, std=std), None),

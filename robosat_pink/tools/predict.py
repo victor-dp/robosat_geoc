@@ -28,12 +28,12 @@ def add_parser(subparser):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    parser.add_argument("--batch_size", type=int, default=1, help="images per batch")
     parser.add_argument("--checkpoint", type=str, required=True, help="model checkpoint to load")
-    parser.add_argument("--overlap", type=int, default=32, help="tile pixel overlap to predict on")
-    parser.add_argument("--tile_size", type=int, required=True, help="tile size for slippy map tiles")
     parser.add_argument("--workers", type=int, default=0, help="number of workers pre-processing images")
+    parser.add_argument("--overlap", type=int, default=64, help="tile pixel overlap to predict on")
     parser.add_argument("--config", type=str, required=True, help="path to configuration file")
+    parser.add_argument("--batch_size", type=int, help="if set, override batch_size value from config file")
+    parser.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
     parser.add_argument("--web_ui", type=str, help="web ui base url")
     parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
     parser.add_argument("tiles", type=str, help="directory to read slippy map image tiles from")
@@ -45,6 +45,8 @@ def add_parser(subparser):
 def main(args):
     config = load_config(args.config)
     num_classes = len(config["classes"]["titles"])
+    batch_size = args.batch_size if args.batch_size else config["model"]["batch_size"]
+    tile_size = args.tile_size if args.tile_size else config["model"]["tile_size"]
 
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -66,8 +68,8 @@ def main(args):
     mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]  # from ImageNet
     transform = Compose([ImageToTensor(), Normalize(mean=mean, std=std)])
 
-    directory = BufferedSlippyMapDirectory(args.tiles, transform=transform, size=args.tile_size, overlap=args.overlap)
-    loader = DataLoader(directory, batch_size=args.batch_size, num_workers=args.workers)
+    directory = BufferedSlippyMapDirectory(args.tiles, transform=transform, size=tile_size, overlap=args.overlap)
+    loader = DataLoader(directory, batch_size=batch_size, num_workers=args.workers)
 
     palette = make_palette(config["classes"]["colors"][0], config["classes"]["colors"][1])
 

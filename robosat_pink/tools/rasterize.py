@@ -31,7 +31,7 @@ def add_parser(subparser):
 
     parser.add_argument("--config", type=str, required=True, help="path to configuration file")
     parser.add_argument("--zoom", type=int, required=True, help="zoom level of tiles")
-    parser.add_argument("--size", type=int, default=512, help="size of rasterized image tiles in pixels")
+    parser.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
     parser.add_argument("--web_ui", type=str, help="web ui client base url")
     parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
     parser.add_argument("features", type=str, nargs="+", help="path to GeoJSON features file")
@@ -57,13 +57,13 @@ def feature_to_mercator(feature):
         yield {"coordinates": list(xys), "type": "Polygon"}
 
 
-def burn(tile, features, size, burn_value=1):
+def burn(tile, features, tile_size, burn_value=1):
     """Burn tile with features.
 
     Args:
       tile: the mercantile tile to burn.
       features: the geojson features to burn.
-      size: the size of burned image.
+      tile_size: the size of burned image.
       burn_value: the value you want in the output raster where a shape exists
 
     Returns:
@@ -73,13 +73,14 @@ def burn(tile, features, size, burn_value=1):
     shapes = ((geometry, burn_value) for feature in features for geometry in feature_to_mercator(feature))
 
     bounds = mercantile.xy_bounds(tile)
-    transform = from_bounds(*bounds, size, size)
+    transform = from_bounds(*bounds, tile_size, tile_size)
 
-    return rasterize(shapes, out_shape=(size, size), transform=transform)
+    return rasterize(shapes, out_shape=(tile_size, tile_size), transform=transform)
 
 
 def main(args):
     config = load_config(args.config)
+    tile_size = args.tile_size if args.tile_size else config["model"]["tile_size"]
 
     classes = config["classes"]["titles"]
     colors = config["classes"]["colors"]
@@ -136,9 +137,9 @@ def main(args):
     # Burn features to tiles and write to a slippy map directory.
     for tile in tqdm(list(tiles_from_csv(args.cover)), ascii=True, unit="tile"):
         if tile in feature_map:
-            out = burn(tile, feature_map[tile], args.size)
+            out = burn(tile, feature_map[tile], tile_size)
         else:
-            out = np.zeros(shape=(args.size, args.size), dtype=np.uint8)
+            out = np.zeros(shape=(tile_size, tile_size), dtype=np.uint8)
 
         out_dir = os.path.join(args.out, str(tile.z), str(tile.x))
         os.makedirs(out_dir, exist_ok=True)

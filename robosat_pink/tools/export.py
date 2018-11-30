@@ -18,7 +18,7 @@ def add_parser(subparser):
     parser.add_argument("--config", type=str, required=True, help="path to configuration file")
     parser.add_argument("--export_channels", type=int, help="export channels to use (keep the first ones)")
     parser.add_argument("--type", type=str, choices=["onnx", "pth"], default="onnx", help="output type")
-    parser.add_argument("--image_size", type=int, default=512, help="image size to use for model")
+    parser.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
     parser.add_argument("--checkpoint", type=str, required=True, help="model checkpoint to load")
     parser.add_argument("out", type=str, help="path to save export model to")
 
@@ -27,6 +27,7 @@ def add_parser(subparser):
 
 def main(args):
     config = load_config(args.config)
+    tile_size = args.tile_size if args.tile_size else config["model"]["tile_size"]
 
     if args.type == "onnx":
         os.environ["CUDA_VISIBLE_DEVICES"] = ""
@@ -55,7 +56,7 @@ def main(args):
         net.module.resnet.conv1.weight = nn.Parameter(weights)
 
     if args.type == "onnx":
-        batch = torch.autograd.Variable(torch.randn(1, export_channels, args.image_size, args.image_size))
+        batch = torch.autograd.Variable(torch.randn(1, export_channels, tile_size, tile_size))
         torch.onnx.export(net, batch, args.out)
 
     elif args.type == "pth":
