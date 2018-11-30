@@ -3,7 +3,7 @@
 
 [dataset]
   # The slippy map dataset's base directory.
-  path = '~/rsp/dataset'
+  path = '~/rsp_dataset'
 
 [classes]
   # Human representation for classes.
