@@ -31,7 +31,7 @@
   tile_size = 512
 
   # Total number of epochs to train for.
-  epochs = 20
+  epochs = 10
 
   # Learning rate for the optimizer.
   lr = 0.000025
