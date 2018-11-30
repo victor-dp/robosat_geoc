@@ -14,7 +14,7 @@ This repository is a DataPink flavor of RoboSat, including our latests developme
 Install:
 -------
 
-#1 Prerequisites:
+**1) Prerequisites:**
    - PyTorch >= 0.4 installed, with related Nvidia GPU drivers, CUDA and CUDNN libs.
    - At least one GPU. With total RAM of all GPUs > 8Go (default batchsize settings is targeted to 11Go).
    - Libs with headers: libjpeg, libwebp, libbz2, zlib, libboost. 
@@ -23,14 +23,14 @@ Install:
      apt-get install build-essential libboost-python-dev zlib1g-dev libbz2-dev libjpeg-turbo8-dev libwebp-dev
  ```
 
- #2 Python libs Install:
+ **2) Python libs Install:**
 ```
      python3 -m pip install requirements.txt
 ```
-  TIPS: if you want to significantly increase performances switch from Pillow to <a href="https://github.com/uploadcare/pillow-simd">Pillow-simd</a>.
+  NOTA: if you want to significantly increase performances switch from Pillow to <a href="https://github.com/uploadcare/pillow-simd">Pillow-simd</a>.
 
 
- #3 Deploy:
+ **3) Deploy:**
   - Move the `rsp` command to a bin directory covered by your `PATH` (or update your `PATH`)
   - Move the robosat_pink dir to somewhere covered by your `PYTHONPATH` (or update your `PYTHONPATH`)
 
@@ -43,6 +43,7 @@ Related resources:
 
 - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">Robosat slides @PyParis 2018</a>
 - <a href="https://github.com/mapbox/robosat">MapBox RoboSat github directory</a>
+- <a href="https://github.com/chrieke/awesome-satellite-imagery-datasets">Christoph Rieke's Awesome Satellite Imagery Datasets</a>
 
 Bibliography:
 -------------
