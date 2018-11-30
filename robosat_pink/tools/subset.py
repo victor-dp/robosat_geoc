@@ -17,19 +17,17 @@ def add_parser(subparser):
         help="filter images in a slippy map dir using a csv tiles cover",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("dir", type=str, help="directory to read slippy map tiles from for filtering")
-    parser.add_argument("cover", type=str, help="csv cover to filter tiles by")
-    parser.add_argument("out", type=str, help="directory to save filtered tiles to")
-    parser.add_argument("--move", action="store_true", help="move files from src to dst (rather than copy them)")
+    parser.add_argument("--mode", type=str, default="copy", choices={"copy", "move", "delete"}, help="filtering mode")
     parser.add_argument("--web_ui", type=str, help="web ui base url")
     parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
+    parser.add_argument("--dir", type=str, required=True, help="directory to read slippy map tiles from for filtering")
+    parser.add_argument("--cover", type=str, required=True, help="csv cover to filter tiles by")
+    parser.add_argument("--out", type=str, help="directory to save filtered tiles to (on copy or move mode)")
 
     parser.set_defaults(func=main)
 
 
 def main(args):
-    log = Logs(os.path.join(args.out, "log"), out=sys.stderr)
-
     tiles = set(tiles_from_csv(args.cover))
     extension = ""
 
@@ -37,20 +35,30 @@ def main(args):
 
         paths = glob(os.path.join(args.dir, str(tile.z), str(tile.x), "{}.*".format(tile.y)))
         if len(paths) != 1:
-            log.log("Warning: {} skipped.".format(tile))
+            print("Warning: {} skipped.".format(tile))
             continue
         src = paths[0]
 
         try:
-            extension = os.path.splitext(src)[1][1:]
-            dst = os.path.join(args.out, str(tile.z), str(tile.x), "{}.{}".format(tile.y, extension))
-            if not os.path.isdir(os.path.join(args.out, str(tile.z), str(tile.x))):
-                os.makedirs(os.path.join(args.out, str(tile.z), str(tile.x)), exist_ok=True)
-            if args.move:
+            if args.mode in ["copy", "move"]:
+                assert(args.out)
+                if not os.path.isdir(os.path.join(args.out, str(tile.z), str(tile.x))):
+                    os.makedirs(os.path.join(args.out, str(tile.z), str(tile.x)), exist_ok=True)
+
+                extension = os.path.splitext(src)[1][1:]
+                dst = os.path.join(args.out, str(tile.z), str(tile.x), "{}.{}".format(tile.y, extension))
+
+            if args.mode == "move":
                 assert os.path.isfile(src)
                 shutil.move(src, dst)
-            else:
+
+            if args.mode == "copy":
                 shutil.copyfile(src, dst)
+
+            if args.mode == "del":
+                assert os.path.isfile(src)
+                os.remove(src)
+
         except:
             sys.exit("Error: Unable to process {}".format(tile))
 
