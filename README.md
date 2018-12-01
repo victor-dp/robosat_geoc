@@ -16,7 +16,7 @@ Spirit:
 - State of art Computer Vision algorithms and methods
 - Industrial code robustness
 - Several tools, you could combined together (as Lego)
-- Extensible, in userland by design
+- Extensible, by design
 - GeoSpatial standards compliancy
 - OSM and MapBox ecosystem friendly 
 
@@ -77,3 +77,8 @@ Convolutional Neural Networks</a>
 - <a href="https://hal.archives-ouvertes.fr/hal-01523573/document">Joint Learning from Earth Observation and
 OpenStreetMap Data to Get Faster Better Semantic Maps</a>
 - <a href="https://arxiv.org/abs/1712.02616">In-Place Activated BatchNorm for Memory-Optimized Training of DNNs</a>
+
+
+Arch:
+----
+![Stacks](docs/img/stacks.png)
