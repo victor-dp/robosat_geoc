@@ -17,6 +17,8 @@ Spirit:
 - Industrial code robustness
 - Several tools, you could combined together (as Lego)
 - Extensible, by design
+- High performances
+- Minimalism as a code aesthetic
 - GeoSpatial standards compliancy
 - OSM and MapBox ecosystem friendly 
 
