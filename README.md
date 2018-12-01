@@ -17,17 +17,23 @@ Spirit:
 - Industrial code robustness
 - Several tools, you could combined together (as Lego)
 - Extensible, by design
-- High performances
+- High performances in mind
 - Minimalism as a code aesthetic
 - GeoSpatial standards compliancy
 - OSM and MapBox ecosystem friendly 
+
+
+Aims:
+-----
+- DataSet Quality Analysis
+- Features extraction and completion
 
 
 Install:
 -------
 
 **1) Prerequisites:**
-   - PyTorch >= 0.4 installed, with related Nvidia GPU drivers, CUDA and CUDNN libs.
+   - Python >= 3.5 and PyTorch >= 0.4 installed, with related Nvidia GPU drivers, CUDA and CUDNN libs.
    - At least one GPU, with RAM GPU >= 6Go (default batch_size settings is targeted to 11Go).
    - Libs with headers: libjpeg, libwebp, libbz2, zlib, libboost. 
      On a recent Ubuntu-server, could be done with:
