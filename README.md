@@ -1,5 +1,5 @@
 <h1 align='center'>RoboSat.pink</h1>
-<h2 align='center'>Data Quality and feature extraction ecosystem, from Imagery</h2>
+<h2 align='center'>Semantic Segmentation ecosystem for GeoSpatial Imagery</h2>
 
 
 <p align=center>
@@ -10,6 +10,16 @@
 
 
 This repository is a DataPink flavor of RoboSat, including our latests developments.
+
+Spirit:
+-------
+- State of art Computer Vision algorithms and methods
+- Industrial code robustness
+- Several tools, you could combined together (as Lego)
+- Extensible, in userland by design
+- GeoSpatial standards compliancy
+- OSM and MapBox ecosystem friendly 
+
 
 Install:
 -------
