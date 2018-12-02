@@ -38,6 +38,9 @@ NOTA:
 - Launch this command again, if any tile download error, till the whole coverage is fully downloaded.
 
 
+![Web UI images](img/from_opendata_to_opendataset/images.png)
+
+
 
 Then to download buildings vector roof print, throught <a href="https://www.opengeospatial.org/standards/wfs">WFS</a>, 
 
@@ -58,6 +61,8 @@ Now you have to transform vector roofprints, to raster labels:
 ```
 rsp rasterize --config config.toml --zoom 18 --web_ui $RSP_URL/labels ~/rsp_dataset/lyon_roofprint.json ~/rsp_dataset/cover ~/rsp_dataset/labels
 ```
+
+![Web UI labels](img/from_opendata_to_opendataset/labels.png)
 
 
 Then to create a training / validation dataset, with imagery and related roofprint labels:
@@ -101,16 +106,23 @@ Predict masks
 rsp predict --config config.toml --checkpoint ~/rsp_dataset/pth/checkpoint-00010-of-00010.pth --web_ui $RSP_URL/masks ~/rsp_dataset/images ~/rsp_dataset/masks
 ```
 
+![Web UI masks](img/from_opendata_to_opendataset/masks.png)
+
 
 Compare
 ```
-rsp compare --images ~/rsp_dataset/images ~/rsp_dataset/labels ~/rsp_dataset/masks --mode stack --labels ~/rsp_dataset/labels --masks ~/rsp_dataset/masks --config config.toml --ext jpeg --web_ui $RSP_URL/compare_lyon ~/rsp_dataset/compare_lyon
-rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks --config config.toml --geojson ~/rsp_dataset/compare_lyon/tiles.json
+rsp compare --images ~/rsp_dataset/images ~/rsp_dataset/labels ~/rsp_dataset/masks --mode stack --labels ~/rsp_dataset/labels --masks ~/rsp_dataset/masks --config config.toml --ext jpeg --web_ui $RSP_URL/compare ~/rsp_dataset/compare
+
+rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks --config config.toml --geojson ~/rsp_dataset/compare/tiles.json
 ```
 
+![Web UI compare_lyon](img/from_opendata_to_opendataset/compare.png)
+
 ```
-rsp compare --mode side --images ~/rsp_dataset/images ~/rsp_dataset/compare_lyon --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks --config config.toml --ext jpeg --web_ui $RSP_URL/compare_lyon_side ~/rsp_dataset/compare_lyon_side
+rsp compare --mode side --images ~/rsp_dataset/images ~/rsp_dataset/compare --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks --config config.toml --ext jpeg --web_ui $RSP_URL/compare_side ~/rsp_dataset/compare_side
 ```
+
+![Web UI compare_side](img/from_opendata_to_opendataset/compare_side.png)
 
 
 Filter

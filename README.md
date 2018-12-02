@@ -58,8 +58,8 @@ Install:
 
 WorkFlows:
 --------
-![Data Preparation Workflow](docs/img/data_preparation.png)
-![Training Workflow](docs/img/training.png)      
+![Data Preparation Workflow](docs/img/readme/data_preparation.png)
+![Training Workflow](docs/img/readme/training.png)
 
 
 
@@ -89,4 +89,4 @@ OpenStreetMap Data to Get Faster Better Semantic Maps</a>
 
 Arch:
 ----
-![Stacks](docs/img/stacks.png)
+![Stacks](docs/img/readme/stacks.png)
