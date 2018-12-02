@@ -39,7 +39,7 @@ NOTA:
 
 
 
-<a target="_blank" href="http://www.datapink.tools/rsp/opendata_to_opendataset/images/"><img src="img/from_opendata_to_opendataset/images.png" /></a>
+<a href="http://www.datapink.tools/rsp/opendata_to_opendataset/images/"><img src="img/from_opendata_to_opendataset/images.png" /></a>
 
 
 Then to download buildings vector roof print, throught <a href="https://www.opengeospatial.org/standards/wfs">WFS</a>, 
@@ -62,7 +62,7 @@ Now you have to transform vector roofprints, to raster labels:
 rsp rasterize --config config.toml --zoom 18 --web_ui $RSP_URL/labels ~/rsp_dataset/lyon_roofprint.json ~/rsp_dataset/cover ~/rsp_dataset/labels
 ```
 
-<a target="_blank" href="http://www.datapink.tools/rsp/opendata_to_opendataset/labels/"><img src="img/from_opendata_to_opendataset/labels.png" /></a>
+<a href="http://www.datapink.tools/rsp/opendata_to_opendataset/labels/"><img src="img/from_opendata_to_opendataset/labels.png" /></a>
 
 
 Then to create a training / validation dataset, with imagery and related roofprint labels:
@@ -106,7 +106,7 @@ Predict masks
 rsp predict --config config.toml --checkpoint ~/rsp_dataset/pth/checkpoint-00010-of-00010.pth --web_ui $RSP_URL/masks ~/rsp_dataset/images ~/rsp_dataset/masks
 ```
 
-<a target="_blank" href="http://www.datapink.tools/rsp/opendata_to_opendataset/masks/"><img src="img/from_opendata_to_opendataset/masks.png" /></a>
+<a href="http://www.datapink.tools/rsp/opendata_to_opendataset/masks/"><img src="img/from_opendata_to_opendataset/masks.png" /></a>
 
 
 Compare
@@ -116,14 +116,14 @@ rsp compare --images ~/rsp_dataset/images ~/rsp_dataset/labels ~/rsp_dataset/mas
 rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks --config config.toml --geojson ~/rsp_dataset/compare/tiles.json
 ```
 
-<a target="_blank" href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare/"><img src="img/from_opendata_to_opendataset/compare.png" /></a>
+<a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare/"><img src="img/from_opendata_to_opendataset/compare.png" /></a>
 
 
 ```
 rsp compare --mode side --images ~/rsp_dataset/images ~/rsp_dataset/compare --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks --config config.toml --ext jpeg --web_ui $RSP_URL/compare_side ~/rsp_dataset/compare_side
 ```
 
-<a target="_blank" href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_side/"><img src="img/from_opendata_to_opendataset/compare_side.png" /></a>
+<a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_side/"><img src="img/from_opendata_to_opendataset/compare_side.png" /></a>
 
 
 Filter
