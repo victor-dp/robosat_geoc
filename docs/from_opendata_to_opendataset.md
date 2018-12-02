@@ -102,6 +102,9 @@ It's already a good result, at the state of art, with real world data, but we wi
 Predict masks
 -------------
 
+
+To create predict masks from our first model, on the whole coverage:
+
 ```
 rsp predict --config config.toml --checkpoint ~/rsp_dataset/pth/checkpoint-00010-of-00010.pth --web_ui $RSP_URL/masks ~/rsp_dataset/images ~/rsp_dataset/masks
 ```
@@ -110,6 +113,14 @@ rsp predict --config config.toml --checkpoint ~/rsp_dataset/pth/checkpoint-00010
 
 
 Compare
+-------
+
+Then to compare how our first model react with this raw data, we compute a composite stack image, with imagery, label and predicted mask. As we colors for labels and masks are complementary when they both present the result is a medium grey.
+So a quick way to check when labels and masks converge or not.
+
+We launch also a csv list diff, to only keep tiles with a low Quality of Data metric (here 80% as a threshold), and with at least few buildings pixels supposed to be present in the tile (5% of foreground building as a threshold).
+
+
 ```
 rsp compare --images ~/rsp_dataset/images ~/rsp_dataset/labels ~/rsp_dataset/masks --mode stack --labels ~/rsp_dataset/labels --masks ~/rsp_dataset/masks --config config.toml --ext jpeg --web_ui $RSP_URL/compare ~/rsp_dataset/compare
 
@@ -119,6 +130,18 @@ rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare/"><img src="img/from_opendata_to_opendataset/compare.png" /></a>
 
 
+And if we zoom back on the map, we only could see the tiles matching the previous filters:
+
+
+<img src="img/from_opendata_to_opendataset/compare_zoom_out.png" />
+
+
+And it becomes clear that some area are not well labelled in the original OpenData.
+So we would have to remove them from the dataset.
+
+To do so, first step is to select the wrong labelled ones, and the compare tool again is helpfull,
+as it allow to check side by side several tiles directory, and to manual select thoses we want.
+
 ```
 rsp compare --mode side --images ~/rsp_dataset/images ~/rsp_dataset/compare --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks --config config.toml --ext jpeg --web_ui $RSP_URL/compare_side ~/rsp_dataset/compare_side
 ```
@@ -126,9 +149,15 @@ rsp compare --mode side --images ~/rsp_dataset/images ~/rsp_dataset/compare --la
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_side/"><img src="img/from_opendata_to_opendataset/compare_side.png" /></a>
 
 
-Filter
-Manually generate: `~rsp_dataset/cover.to_remove`
 
+
+Filter
+------
+
+The result from the compare selection produce a csv cover list, in the clipboard.
+We put the result in `~rsp_dataset/cover.to_remove`
+
+Then we just remove all theses tiles from the dataset:
 ```
 rsp subset --mode delete --dir ~/rsp_dataset/training/images --cover ~/rsp_dataset/cover.to_remove > /dev/null
 rsp subset --mode delete --dir ~/rsp_dataset/training/labels --cover ~/rsp_dataset/cover.to_remove > /dev/null
@@ -136,10 +165,19 @@ rsp subset --mode delete --dir ~/rsp_dataset/validation/images --cover ~/rsp_dat
 rsp subset --mode delete --dir ~/rsp_dataset/validation/labels --cover ~/rsp_dataset/cover.to_remove > /dev/null
 ```
 
+For information, i remove more than 500 tiles from the raw dataset, in order to clean it up, from obvious inconsistency labelling.
+
 
 Train
+-----
+
+Then with a cleaner dataset, we can launch a new, and longer, training:
+
 ```
 rsp train --config config.toml --epochs 100 ~/rsp_dataset/pth_clean
 ```
+
+After 10 epochs the building IoU metric is now **~0.84** (so better than our previous **~0.82**),
+and after 100 epochs we achieve a **~0.87** (rather than a **0.84** with raw data).
 
 
