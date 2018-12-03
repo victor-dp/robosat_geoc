@@ -94,7 +94,7 @@ Now to launch a first model train:
 rsp train --config config.toml ~/rsp_dataset/pth
 ```
 
-After 10 epochs, the building IoU metric on validation dataset, is **~0.82**. 
+After 10 epochs, the building IoU metric on validation dataset, is about **0.82**. 
 It's already a good result, at the state of art, with real world data, but we will see how to increase it.
 
 
@@ -165,19 +165,33 @@ rsp subset --mode delete --dir ~/rsp_dataset/validation/images --cover ~/rsp_dat
 rsp subset --mode delete --dir ~/rsp_dataset/validation/labels --cover ~/rsp_dataset/cover.to_remove > /dev/null
 ```
 
-For information, i remove more than 500 tiles from the raw dataset, in order to clean it up, from obvious inconsistency labelling.
+For information, we remove more than 500 tiles from this raw dataset, in order to clean it up, from obvious inconsistency labelling.
 
 
-Train
+Train 
 -----
 
-Then with a cleaner dataset, we can launch a new, and longer, training:
+Then with a cleanest dataset, we can launch a new, and longer, training:
 
 ```
 rsp train --config config.toml --epochs 100 ~/rsp_dataset/pth_clean
 ```
 
-After 10 epochs the building IoU metric is now **~0.84** (so better than our previous **~0.82**),
-and after 100 epochs we achieve a **~0.87** (rather than a **0.84** with raw data).
+After 10 epochs the building IoU metric is now **0.84** (so better than our previous **0.82**),
+and after 100 epochs the model achieve a **0.87** (rather than **0.84** with raw data).
 
 
+Predict and compare
+-------------------
+
+And now we only had to generate masks prediction, and compare generation as previously:
+
+```
+rsp predict --config config.toml --checkpoint ~/rsp_dataset/pth_clean/checkpoint-00100-of-00100.pth ~/rsp_dataset/images ~/rsp_dataset/masks_clean
+
+rsp compare --images ~/rsp_dataset/images ~/rsp_dataset/labels ~/rsp_dataset/masks_clean --mode stack --labels ~/rsp_dataset/labels --masks ~/rsp_dataset/masks_clean --config config.toml --ext jpeg --web_ui $RSP_URL/compare_clean ~/rsp_dataset/compare_clean
+
+rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks_clean --config config.toml --geojson ~/rsp_dataset/compare_clean/tiles.json
+```
+
+<a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_clean/"><img src="img/from_opendata_to_opendataset/compare_clean.png" /></a>
