@@ -206,7 +206,7 @@ rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_clean/"><img src="img/from_opendata_to_opendataset/compare_clean.png" /></a>
 
 
-And to compare only with filered validation tiles, in side by side mode: 
+And to compare only with filtered validation tiles, in side by side mode: 
 
 ```
 rsp cover --type dir ~/rsp_dataset/validation/images  ~/rsp_dataset/validation/cover.clean
