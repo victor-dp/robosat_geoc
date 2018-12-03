@@ -204,3 +204,18 @@ rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_clean/"><img src="img/from_opendata_to_opendataset/compare_clean.png" /></a>
+
+
+And to compare only with filered validation tiles, in side by side mode: 
+
+```
+rsp cover --type dir ~/rsp_dataset/validation/images  ~/rsp_dataset/validation/cover.clean
+
+rsp subset --dir ~/rsp_dataset/compare_clean --cover ~/rsp_dataset/validation/cover.clean --out ~/rsp_dataset/validation/compare_clean
+
+rsp subset --dir ~/rsp_dataset/masks_clean --cover ~/rsp_dataset/validation/cover.clean --out ~/rsp_dataset/validation/masks_clean
+
+rsp compare --mode side --images ~/rsp_dataset/validation/images ~/rsp_dataset/validation/compare_clean --labels ~/rsp_dataset/validation/labels --masks ~/rsp_dataset/validation/masks_clean --config config.toml --ext jpeg --web_ui $RSP_URL/compare_side_clean ~/rsp_dataset/validation/compare_side_clean
+```
+
+<a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_side_clean/"><img src="img/from_opendata_to_opendataset/compare_side_clean.png" /></a>
