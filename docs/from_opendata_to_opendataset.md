@@ -1,15 +1,18 @@
 # From OpenData to OpenDataSet
 
 
-Goals:
------
+Context:
+-------
 
 Data preparation could be a painful and time consuming task, if you don't use tools abstract and efficient enough.
+
+In supervised learning, you can't expect to produce a good trained model, with inacurate labels: Garbage In Garbage Out.
 
 OpenData became more and more available. But we still lack DataSets good enough to be used to train models.
 And at the state of art, best results in model training are achieved by players who can afford to labelize by hand and with pixel accuracy their own dataset.
 
-This tutorial aim is to show you, how you could quite easily retrieve and qualify OpenData with RoboSat.pink in order to create your own training DataSet.
+So how you could we retrieve and qualify OpenData in order to create your own training DataSet ?
+That's what's this tutorial is about !
 
 
 
@@ -27,14 +30,14 @@ rsp cover --zoom 18 --type bbox 4.795,45.628,4.935,45.853  ~/rsp_dataset/cover
 ```
 
 
-Then to download imagery, throught <a href="https://www.opengeospatial.org/standards/wms">WMS</a>,
+Then to download imagery, throught <a href="https://www.opengeospatial.org/standards/wms">WMS</a>:
 
 ```
 rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' --ext jpeg --web_ui $RSP_URL/images ~/rsp_dataset/cover ~/rsp_dataset/images
 ```
 
 NOTA:
-- Retina resolution of 512px is prefered to a regular 256px, because it will quite obviously improve the training accuracy result. 
+- Retina resolution of 512px is prefered to a regular 256px, because it will improve the training accuracy result. 
 - Launch this command again, if any tile download error, till the whole coverage is fully downloaded.
 
 
@@ -48,7 +51,7 @@ Then to download buildings vector roof print, throught <a href="https://www.open
 wget -O ~/rsp_dataset/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&outputFormat=application/json; subtype=geojson'
 ```
 
-Roofprint choice is meaningful here, as we use aerial imagery to retrieve patterns. If we use footprint instead, our later training accuracy performances would be poorer. 
+Roofprint choice is meaningful here, as we use aerial imagery to retrieve patterns. If we used footprint instead, our later training accuracy performances would be poorer. 
 
 
 
@@ -102,7 +105,6 @@ It's already a good result, at the state of art, with real world data, but we wi
 Predict masks
 -------------
 
-
 To create predict masks from our first model, on the whole coverage:
 
 ```
@@ -115,8 +117,13 @@ rsp predict --config config.toml --checkpoint ~/rsp_dataset/pth/checkpoint-00010
 Compare
 -------
 
-Then to compare how our first model react with this raw data, we compute a composite stack image, with imagery, label and predicted mask. As we colors for labels and masks are complementary when they both present the result is a medium grey.
-So a quick way to check when labels and masks converge or not.
+Then to compare how our first model react with this raw data, we compute a composite stack image, with imagery, label and predicted mask. 
+
+Color representation meaning is:
+ - pink: predicted by the model (but not present in the initial labels)
+ - green: present in the labels (but not predicted by the model)
+ - grey: both model prediction and labels are synchronized.
+
 
 We launch also a csv list diff, to only keep tiles with a low Quality of Data metric (here 80% as a threshold), and with at least few buildings pixels supposed to be present in the tile (5% of foreground building as a threshold).
 
@@ -137,7 +144,7 @@ And if we zoom back on the map, we only could see the tiles matching the previou
 
 
 And it becomes clear that some area are not well labelled in the original OpenData.
-So we would have to remove them from the dataset.
+So we would have to remove them from the training and validation dataset.
 
 To do so, first step is to select the wrong labelled ones, and the compare tool again is helpfull,
 as it allow to check side by side several tiles directory, and to manual select thoses we want.
@@ -171,15 +178,17 @@ For information, we remove more than 500 tiles from this raw dataset, in order t
 Train 
 -----
 
-Then with a cleanest dataset, we can launch a new, and longer, training:
+Then with a cleanest training and validation dataset, we can launch a new, and longer, training:
 
 ```
 rsp train --config config.toml --epochs 100 ~/rsp_dataset/pth_clean
 ```
 
-After 10 epochs the building IoU metric is now **0.84** (so better than our previous **0.82**),
-and after 100 epochs the model achieve a **0.87** (rather than **0.84** with raw data).
-
+Building IoU metrics on validation dataset:
+ - 10  epochs: **0.84** 
+ - 100 epochs: **0.87**
+ 
+ 
 
 Predict and compare
 -------------------
