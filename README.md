@@ -90,3 +90,17 @@ OpenStreetMap Data to Get Faster Better Semantic Maps</a>
 Arch:
 ----
 <img alt="Stacks" src="docs/img/readme/stacks.png" />
+
+
+
+Contributions and Services:
+---------------------------
+
+- Pull Requests are welcome ! Feel free to send your code...
+  Don't hesitate either to initiate a prior discussion throught tickets on any implementation question.
+  
+- If you need to add a new feature, but don't want to implement it, <a href="http://datapink.com">DataPink</a> provide core-dev services. 
+
+- Expertise and training on RoboSat.pink are also provided by <a href="http://datapink.com">DataPink</a>.
+
+- And if you want to support new versions, and long-term development of this application, funding is also welcome.
