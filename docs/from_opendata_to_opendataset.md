@@ -8,7 +8,7 @@ Data preparation could be a painful and time consuming task, if you don't use to
 
 In supervised learning, you can't expect to produce a good trained model, with inacurate labels: Garbage In Garbage Out.
 
-OpenData became more and more available. But we still lack DataSets good enough to be used to train models.
+OpenData became more and more available. But we still lack OpenDataSets good enough to be used to train models.
 And at the state of art, best results in model training are achieved by players who can afford to labelize by hand and with pixel accuracy their own dataset.
 
 So how you could we retrieve and qualify OpenData in order to create your own training DataSet ?
@@ -125,7 +125,6 @@ Color representation meaning is:
  - grey: both model prediction and labels are synchronized.
 
 
-We launch also a csv list diff, to only keep tiles with a low Quality of Data metric (here 80% as a threshold), and with at least few buildings pixels supposed to be present in the tile (5% of foreground building as a threshold).
 
 
 ```
@@ -136,6 +135,7 @@ rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare/"><img src="img/from_opendata_to_opendataset/compare.png" /></a>
 
+We launch also a csv list diff, to only keep tiles with a low Quality of Data metric (here below 80% on QoD metric as a threshold), and with at least few buildings pixels supposed to be present in the tile (5% of foreground building as a threshold).
 
 And if we zoom back on the map, we only could see the tiles matching the previous filters:
 
