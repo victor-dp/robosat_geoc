@@ -11,7 +11,7 @@ In supervised learning, you can't expect to produce a good trained model, from i
 OpenData became more and more available. But we still lack OpenDataSets good enough to be used to train models.
 And at the state of art, best results in model training are achieved by players who can afford to labelize by hand and with pixel accuracy their own dataset.
 
-So how could we retrieve and qualify OpenData in order to create your own training DataSet ?
+So how could we retrieve and qualify OpenData in order to create our own training DataSet ?
 That's what's this tutorial is about !
 
 
@@ -52,7 +52,7 @@ Then to download buildings vector roof print, throught <a href="https://www.open
 wget -O ~/rsp_dataset/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&outputFormat=application/json; subtype=geojson'
 ```
 
-Roofprint choice is meaningful here, as we use aerial imagery to retrieve patterns. If we used footprint instead, our later training accuracy performances would be poorer. 
+Roofprint choice is meaningful here, as we use aerial imagery to retrieve patterns. If we used building's footprints instead, our later training accuracy performances would be poorer.
 
 
 
@@ -60,7 +60,7 @@ Roofprint choice is meaningful here, as we use aerial imagery to retrieve patter
 Prepare DataSet
 ----------------
 
-Now you have to transform vector roofprints, to raster labels:
+Now to transform the vector roofprints, to raster labels:
 
 ```
 rsp rasterize --config config.toml --zoom 18 --web_ui $RSP_URL/labels ~/rsp_dataset/lyon_roofprint.json ~/rsp_dataset/cover ~/rsp_dataset/labels
@@ -86,7 +86,7 @@ rsp subset --web_ui $RSP_URL/validation/labels --dir ~/rsp_dataset/labels --cove
 
 Two points to emphasize there:
  - It's a good idea to take enough data for the validation part (here we took a 70/30 ratio).
- - The shuffle part help to reduce spatial bias in train/validation sets.
+ - The shuffle step help to reduce spatial bias in train/validation sets.
 
 
 Train
@@ -98,8 +98,9 @@ Now to launch a first model train:
 rsp train --config config.toml ~/rsp_dataset/pth
 ```
 
-After 10 epochs, the building IoU metric on validation dataset, is about **0.82**. 
+After only 10 epochs, the building IoU metric on validation dataset, is about **0.82**. 
 It's already a good result, at the state of art, with real world data, but we will see how to increase it.
+
 
 
 
@@ -118,7 +119,7 @@ rsp predict --config config.toml --checkpoint ~/rsp_dataset/pth/checkpoint-00010
 Compare
 -------
 
-Then to compare how our first model react with this raw data, we compute a composite stack image, with imagery, label and predicted mask. 
+Then to compare how our first model reacts with this raw data, we compute a composite stack image, with imagery, label and predicted mask.
 
 Color representation meaning is:
  - pink: predicted by the model (but not present in the initial labels)
@@ -138,7 +139,7 @@ rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum
 
 We launch also a csv list diff, to only keep tiles with a low Quality of Data metric (here below 80% on QoD metric as a threshold), and with at least few buildings pixels supposed to be present in the tile (5% of foreground building as a threshold).
 
-And if we zoom back on the map, we only could see the tiles matching the previous filters:
+And if we zoom back on the map, we could see tiles matching the previous filters:
 
 
 <img src="img/from_opendata_to_opendataset/compare_zoom_out.png" />
@@ -173,7 +174,7 @@ rsp subset --mode delete --dir ~/rsp_dataset/validation/images --cover ~/rsp_dat
 rsp subset --mode delete --dir ~/rsp_dataset/validation/labels --cover ~/rsp_dataset/cover.to_remove > /dev/null
 ```
 
-For information, we remove more than 500 tiles from this raw dataset, in order to clean it up, from obvious inconsistency labelling.
+For information, we remove about 500 tiles from this raw dataset, in order to clean it up, from obvious inconsistency labelling.
 
 
 Train 
@@ -186,15 +187,15 @@ rsp train --config config.toml --epochs 100 ~/rsp_dataset/pth_clean
 ```
 
 Building IoU metrics on validation dataset:
- - 10  epochs: **0.84** 
- - 100 epochs: **0.87**
+ - After 10  epochs: **0.84** 
+ - After 100 epochs: **0.87**
  
  
 
 Predict and compare
 -------------------
 
-And now we only had to generate masks prediction, and compare generation as previously:
+And now to generate masks prediction, and compare composite images, as previously:
 
 ```
 rsp predict --config config.toml --checkpoint ~/rsp_dataset/pth_clean/checkpoint-00100-of-00100.pth ~/rsp_dataset/images ~/rsp_dataset/masks_clean
