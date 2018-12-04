@@ -15,9 +15,9 @@ Spirit:
 -------
 - State of art Computer Vision algorithms and methods
 - Industrial code robustness
-- Several tools, you could combined together (as Lego)
+- Several tools, you can combine together (as Lego)
 - Extensible, by design
-- High performances in mind
+- High performances
 - Minimalism as a code aesthetic
 - GeoSpatial standards compliancy
 - OSM and MapBox ecosystem friendly 
@@ -99,7 +99,9 @@ Contributions and Services:
 
 - Pull Requests are welcome ! Feel free to send your code...
   Don't hesitate either to initiate a prior discussion throught tickets on any implementation question.
-  
+
+- If you want to collaborate through code production and maintenance on a long term basis, please get in touch.
+
 - If you need to add a new feature, but don't want to implement it, <a href="http://datapink.com">DataPink</a> provide core-dev services. 
 
 - Expertise and training on RoboSat.pink are also provided by <a href="http://datapink.com">DataPink</a>.
