@@ -39,6 +39,7 @@ rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVI
 NOTA:
 - Retina resolution of 512px is prefered to a regular 256px, because it will improve the training accuracy result. 
 - Launch this command again, if any tile download error, till the whole coverage is fully downloaded.
+- Jpeg is prefered over default webp only because some browser still not handle webp format
 
 
 
