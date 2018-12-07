@@ -41,7 +41,7 @@ def main(args):
 
         try:
             if args.mode in ["copy", "move"]:
-                assert(args.out)
+                assert args.out
                 if not os.path.isdir(os.path.join(args.out, str(tile.z), str(tile.x))):
                     os.makedirs(os.path.join(args.out, str(tile.z), str(tile.x)), exist_ok=True)
 
