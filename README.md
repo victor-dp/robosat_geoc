@@ -70,6 +70,7 @@ Related resources:
 - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">Robosat slides @PyParis 2018</a>
 - <a href="https://github.com/mapbox/robosat">MapBox RoboSat github directory</a>
 - <a href="https://github.com/chrieke/awesome-satellite-imagery-datasets">Christoph Rieke's Awesome Satellite Imagery Datasets</a>
+- <a href="https://github.com/mrgloom/awesome-semantic-segmentation">Mr Gloom's Awesome Semantic Segmentation</a>
 
 Bibliography:
 -------------
