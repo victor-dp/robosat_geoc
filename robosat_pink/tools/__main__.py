@@ -1,53 +1,25 @@
 #!/usr/bin/env python3
 
+import os
 import argparse
 
-from robosat_pink.tools import (
-    compare,
-    cover,
-    # dedupe,
-    download,
-    extract,
-    export,
-    # features,
-    predict,
-    rasterize,
-    subset,
-    tile,
-    train,
-)
-
-
-def add_parsers():
-    parser = argparse.ArgumentParser(prog="./rs")
-    subparser = parser.add_subparsers(title="robosat tools", metavar="")
-
-    # Add your tool's entry point below.
-
-    tile.add_parser(subparser)
-    extract.add_parser(subparser)
-    cover.add_parser(subparser)
-    download.add_parser(subparser)
-    rasterize.add_parser(subparser)
-
-    train.add_parser(subparser)
-    export.add_parser(subparser)
-    predict.add_parser(subparser)
-
-    # features.add_parser(subparser)
-    # dedupe.add_parser(subparser)
-
-    compare.add_parser(subparser)
-    subset.add_parser(subparser)
-
-    # We return the parsed arguments, but the sub-command parsers
-    # are responsible for adding a function hook to their command.
-
-    subparser.required = True
-
-    return parser.parse_args()
+import pkgutil
+from pathlib import Path
+from importlib import import_module
 
 
 if __name__ == "__main__":
-    args = add_parsers()
+    parser = argparse.ArgumentParser(prog="./rsp")
+    subparser = parser.add_subparsers(title="RoboSat.pink tools", metavar="")
+
+    search_path = os.path.join(Path(__file__).parent.parent, "tools")
+    tools = [name for _, name, _ in pkgutil.iter_modules(search_path) if name != "__main__"] 
+
+    for tool in tools:
+        if os.access(os.path.join(search_path, tool) + ".py", os.X_OK):
+            module = import_module(tool)
+            module.add_parser(subparser)
+
+    subparser.required = True
+    args = parser.parse_args()
     args.func(args)
