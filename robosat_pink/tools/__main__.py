@@ -7,17 +7,16 @@ import pkgutil
 from pathlib import Path
 from importlib import import_module
 
+import robosat_pink.tools
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog="./rsp")
     subparser = parser.add_subparsers(title="RoboSat.pink tools", metavar="")
+    path = os.path.dirname(robosat_pink.tools.__file__)
 
-    search_path = os.path.join(Path(__file__).parent.parent, "tools")
-    tools = [name for _, name, _ in pkgutil.iter_modules(search_path) if name != "__main__"] 
-
-    for tool in tools:
-        if os.access(os.path.join(search_path, tool) + ".py", os.X_OK):
-            module = import_module(tool)
+    for tool in [name for _, name, _ in pkgutil.iter_modules([path]) if name != "__main__"]:
+        if os.access("{}.py".format(os.path.join(path, tool)), os.X_OK):
+            module = import_module("robosat_pink.tools.{}".format(tool))
             module.add_parser(subparser)
 
     subparser.required = True
