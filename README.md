@@ -101,7 +101,7 @@ Contributions and Services:
 - Pull Requests are welcome ! Feel free to send code...
   Don't hesitate either to initiate a prior discussion throught tickets on any implementation question.
 
-- If you want to collaborate through code production and maintenance on a long term basis, please get in touch, co-edition with an appropriate gouvernance can be considered.
+- If you want to collaborate through code production and maintenance on a long term basis, please get in touch, co-edition with an ad hoc governance can be considered.
 
 - If you want a new feature, but don't want to implement it, <a href="http://datapink.com">DataPink</a> provide core-dev services.
 
