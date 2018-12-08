@@ -1,7 +1,6 @@
 import os
 import sys
 import argparse
-from contextlib import contextmanager
 
 import torch
 import torch.backends.cudnn
@@ -11,6 +10,9 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import Normalize
 
 from tqdm import tqdm
+
+import pkgutil
+from importlib import import_module
 
 from robosat_pink.transforms import (
     JointCompose,
@@ -22,16 +24,11 @@ from robosat_pink.transforms import (
 )
 from robosat_pink.datasets import SlippyMapTilesConcatenation
 from robosat_pink.metrics import Metrics
-from robosat_pink.losses.lovasz import LovaszLoss
 from robosat_pink.models.albunet import AlbuNet
 from robosat_pink.config import load_config
 from robosat_pink.logs import Logs
+import robosat_pink.losses
 
-
-@contextmanager
-def no_grad():
-    with torch.no_grad():
-        yield
 
 
 def add_parser(subparser):
@@ -91,10 +88,12 @@ def main(args):
             optimizer.load_state_dict(chkpt["optimizer"])
             resume = chkpt["epoch"]
 
-    if config["model"]["loss"] == "Lovasz":
-        criterion = LovaszLoss().to(device)
-    else:
-        sys.exit("Error: Unknown [model][loss] value !")
+    losses = [name for _, name, _ in pkgutil.iter_modules([os.path.dirname(robosat_pink.losses.__file__)])]
+    if config["model"]["loss"] not in [loss.title() for loss in losses]:
+        sys.exit("Unknown loss, thoses available are {}".format([loss.title() for loss in losses]))
+
+    loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"].lower()))
+    criterion = getattr(loss_module, "{}Loss".format(config["model"]["loss"]))().to(device)
 
     train_loader, val_loader = get_dataset_loaders(dataset_path, config, args.workers)
 
@@ -190,34 +189,32 @@ def train(loader, num_classes, device, net, optimizer, criterion):
     }
 
 
-@no_grad()
 def validate(loader, num_classes, device, net, criterion):
+
     num_samples = 0
     running_loss = 0
 
     metrics = Metrics(range(num_classes))
-
     net.eval()
 
-    for images, masks, tiles in tqdm(loader, desc="Validate", unit="batch", ascii=True):
-        images = images.to(device)
-        masks = masks.to(device)
+    with torch.no_grad():
+        for images, masks, tiles in tqdm(loader, desc="Validate", unit="batch", ascii=True):
+            images = images.to(device)
+            masks = masks.to(device)
 
-        assert images.size()[2:] == masks.size()[1:], "resolutions for images and masks are in sync"
+            assert images.size()[2:] == masks.size()[1:], "resolutions for images and masks are in sync"
 
-        num_samples += int(images.size(0))
+            num_samples += int(images.size(0))
+            outputs = net(images)
 
-        outputs = net(images)
+            assert outputs.size()[2:] == masks.size()[1:], "resolutions for predictions and masks are in sync"
+            assert outputs.size()[1] == num_classes, "classes for predictions and dataset are in sync"
 
-        assert outputs.size()[2:] == masks.size()[1:], "resolutions for predictions and masks are in sync"
-        assert outputs.size()[1] == num_classes, "classes for predictions and dataset are in sync"
+            loss = criterion(outputs, masks)
+            running_loss += loss.item()
 
-        loss = criterion(outputs, masks)
-
-        running_loss += loss.item()
-
-        for mask, output in zip(masks, outputs):
-            metrics.add(mask, output)
+            for mask, output in zip(masks, outputs):
+                metrics.add(mask, output)
 
     assert num_samples > 0, "dataset contains validation images and labels"
 
