@@ -4,7 +4,6 @@ import os
 import argparse
 
 import pkgutil
-from pathlib import Path
 from importlib import import_module
 
 import robosat_pink.tools
