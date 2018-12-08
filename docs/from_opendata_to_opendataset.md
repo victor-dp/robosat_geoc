@@ -63,7 +63,7 @@ Prepare DataSet
 Now to transform the vector roofprints, to raster labels:
 
 ```
-rsp rasterize --config config.toml --zoom 18 --web_ui $RSP_URL/labels ~/rsp_dataset/lyon_roofprint.json ~/rsp_dataset/cover ~/rsp_dataset/labels
+rsp rasterize --config config.toml --zoom 18 --web_ui ~/rsp_dataset/lyon_roofprint.json ~/rsp_dataset/cover ~/rsp_dataset/labels
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/labels/"><img src="img/from_opendata_to_opendataset/labels.png" /></a>
