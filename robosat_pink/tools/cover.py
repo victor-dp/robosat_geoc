@@ -50,7 +50,7 @@ def main(args):
     elif args.type == "dir":
         cover = [tile for tile, _ in tiles_from_slippy_map(args.input)]
 
-    if not os.path.isdir(os.path.dirname(args.out)):
+    if os.path.dirname(args.out) and not os.path.isdir(os.path.dirname(args.out)):
         os.makedirs(os.path.dirname(args.out), exist_ok=True)
 
     with open(args.out, "w") as fp:
