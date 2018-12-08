@@ -2,7 +2,7 @@
 
 Guaranteed to implement `__len__`, and `__getitem__`.
 
-See: http://pytorch.org/docs/0.3.1/data.html
+See: https://pytorch.org/docs/stable/data.html
 """
 
 import os
