@@ -30,7 +30,6 @@ from robosat_pink.logs import Logs
 import robosat_pink.losses
 
 
-
 def add_parser(subparser):
     parser = subparser.add_parser(
         "train", help="trains a model on a dataset", formatter_class=argparse.ArgumentDefaultsHelpFormatter
@@ -228,7 +227,7 @@ def validate(loader, num_classes, device, net, criterion):
 
 def get_dataset_loaders(path, config, workers):
 
-    mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225] # Values computed on ImageNet DataSet
+    mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]  # Values computed on ImageNet DataSet
 
     transform = JointCompose(
         [
