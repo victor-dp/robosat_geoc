@@ -231,8 +231,7 @@ def validate(loader, num_classes, device, net, criterion):
 
 def get_dataset_loaders(path, config, workers):
 
-    # Values computed on ImageNet DataSet
-    mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+    mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225] # Values computed on ImageNet DataSet
 
     transform = JointCompose(
         [
