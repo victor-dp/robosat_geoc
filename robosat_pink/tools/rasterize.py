@@ -163,4 +163,4 @@ def main(args):
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
         tiles = [tile for tile in tiles_from_csv(args.cover)]
-        web_ui(args.out, args.web_ui, tiles, tiles, "png", template)
+        web_ui(args.out, base_url, tiles, tiles, "png", template)
