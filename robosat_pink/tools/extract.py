@@ -33,7 +33,7 @@ def main(args):
         sys.path.append(args.path)
         module = import_module(args.type)
     else:
-        module = import_module("robosat.osm.{}".format(args.type))
+        module = import_module("robosat_pink.osm.{}".format(args.type))
 
     handler = getattr(module, "{}Handler".format(args.type.title()))()
     handler.apply_file(filename=args.pbf, locations=True)

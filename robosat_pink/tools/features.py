@@ -48,7 +48,7 @@ def main(args):
         sys.path.append(args.path)
         module = import_module(args.type)
     else:
-        module = import_module("robosat.features.{}".format(args.type))
+        module = import_module("robosat_pink.features.{}".format(args.type))
 
     handler = getattr(module, "{}Handler".format(args.type.title()))()
 
