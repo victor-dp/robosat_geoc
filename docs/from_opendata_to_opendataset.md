@@ -33,7 +33,7 @@ rsp cover --zoom 18 --type bbox 4.795,45.628,4.935,45.853  ~/rsp_dataset/cover
 Then to download imagery, throught <a href="https://www.opengeospatial.org/standards/wms">WMS</a>:
 
 ```
-rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' --ext jpeg --web_ui $RSP_URL/images ~/rsp_dataset/cover ~/rsp_dataset/images
+rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' --web_ui --ext jpeg ~/rsp_dataset/cover ~/rsp_dataset/images
 ```
 
 NOTA:
@@ -78,10 +78,10 @@ cat ~/rsp_dataset/cover | sort -R >  ~/rsp_dataset/cover.shuffled
 head -n 16384 ~/rsp_dataset/cover.shuffled > ~/rsp_dataset/training/cover
 tail -n 7924  ~/rsp_dataset/cover.shuffled > ~/rsp_dataset/validation/cover
 
-rsp subset --web_ui $RSP_URL/training/images --dir ~/rsp_dataset/images --cover ~/rsp_dataset/training/cover --out ~/rsp_dataset/training/images
-rsp subset --web_ui $RSP_URL/training/labels --dir ~/rsp_dataset/labels --cover ~/rsp_dataset/training/cover --out ~/rsp_dataset/training/labels
-rsp subset --web_ui $RSP_URL/validation/images --dir ~/rsp_dataset/images --cover ~/rsp_dataset/validation/cover --out ~/rsp_dataset/validation/images
-rsp subset --web_ui $RSP_URL/validation/labels --dir ~/rsp_dataset/labels --cover ~/rsp_dataset/validation/cover --out ~/rsp_dataset/validation/labels
+rsp subset --web_ui --dir ~/rsp_dataset/images --cover ~/rsp_dataset/training/cover --out ~/rsp_dataset/training/images
+rsp subset --web_ui --dir ~/rsp_dataset/labels --cover ~/rsp_dataset/training/cover --out ~/rsp_dataset/training/labels
+rsp subset --web_ui --dir ~/rsp_dataset/images --cover ~/rsp_dataset/validation/cover --out ~/rsp_dataset/validation/images
+rsp subset --web_ui --dir ~/rsp_dataset/labels --cover ~/rsp_dataset/validation/cover --out ~/rsp_dataset/validation/labels
 ```
 
 Two points to emphasize there:
@@ -130,7 +130,7 @@ Color representation meaning is:
 
 
 ```
-rsp compare --images ~/rsp_dataset/images ~/rsp_dataset/labels ~/rsp_dataset/masks --mode stack --labels ~/rsp_dataset/labels --masks ~/rsp_dataset/masks --config config.toml --ext jpeg --web_ui $RSP_URL/compare ~/rsp_dataset/compare
+rsp compare --images ~/rsp_dataset/images ~/rsp_dataset/labels ~/rsp_dataset/masks --mode stack --labels ~/rsp_dataset/labels --masks ~/rsp_dataset/masks --config config.toml --ext jpeg --web_ui ~/rsp_dataset/compare
 
 rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks --config config.toml --geojson ~/rsp_dataset/compare/tiles.json
 ```
@@ -152,7 +152,7 @@ To do so, first step is to select the wrong labelled ones, and the compare tool 
 as it allow to check side by side several tiles directory, and to manual select thoses we want.
 
 ```
-rsp compare --mode side --images ~/rsp_dataset/images ~/rsp_dataset/compare --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks --config config.toml --ext jpeg --web_ui $RSP_URL/compare_side ~/rsp_dataset/compare_side
+rsp compare --mode side --images ~/rsp_dataset/images ~/rsp_dataset/compare --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks --config config.toml --ext jpeg --web_ui ~/rsp_dataset/compare_side
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_side/"><img src="img/from_opendata_to_opendataset/compare_side.png" /></a>
@@ -200,7 +200,7 @@ And now to generate masks prediction, and compare composite images, as previousl
 ```
 rsp predict --config config.toml --checkpoint ~/rsp_dataset/pth_clean/checkpoint-00100-of-00100.pth ~/rsp_dataset/images ~/rsp_dataset/masks_clean
 
-rsp compare --images ~/rsp_dataset/images ~/rsp_dataset/labels ~/rsp_dataset/masks_clean --mode stack --labels ~/rsp_dataset/labels --masks ~/rsp_dataset/masks_clean --config config.toml --ext jpeg --web_ui $RSP_URL/compare_clean ~/rsp_dataset/compare_clean
+rsp compare --images ~/rsp_dataset/images ~/rsp_dataset/labels ~/rsp_dataset/masks_clean --mode stack --labels ~/rsp_dataset/labels --masks ~/rsp_dataset/masks_clean --config config.toml --web_ui --ext jpeg ~/rsp_dataset/compare_clean
 
 rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks_clean --config config.toml --geojson ~/rsp_dataset/compare_clean/tiles.json
 ```
@@ -217,7 +217,7 @@ rsp subset --dir ~/rsp_dataset/compare_clean --cover ~/rsp_dataset/validation/co
 
 rsp subset --dir ~/rsp_dataset/masks_clean --cover ~/rsp_dataset/validation/cover.clean --out ~/rsp_dataset/validation/masks_clean
 
-rsp compare --mode side --images ~/rsp_dataset/validation/images ~/rsp_dataset/validation/compare_clean --labels ~/rsp_dataset/validation/labels --masks ~/rsp_dataset/validation/masks_clean --config config.toml --ext jpeg --web_ui $RSP_URL/compare_side_clean ~/rsp_dataset/validation/compare_side_clean
+rsp compare --mode side --images ~/rsp_dataset/validation/images ~/rsp_dataset/validation/compare_clean --labels ~/rsp_dataset/validation/labels --masks ~/rsp_dataset/validation/masks_clean --config config.toml --web_ui --ext jpeg ~/rsp_dataset/validation/compare_side_clean
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_side_clean/"><img src="img/from_opendata_to_opendataset/compare_side_clean.png" /></a>
