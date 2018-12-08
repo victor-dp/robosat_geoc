@@ -30,7 +30,8 @@ def add_parser(subparser):
     parser.add_argument("--type", type=str, choices=["image", "label"], default="image", help="image or label tiling")
     parser.add_argument("--config", type=str, help="path to configuration file, mandatory for label tiling")
     parser.add_argument("--no_data", type=int, help="color considered as no data [0-255]. Skip related tile")
-    parser.add_argument("--web_ui", type=str, help="web ui base url")
+    parser.add_argument("--web_ui", action="store_true", help="activate web ui output")
+    parser.add_argument("--web_ui_base_url", type=str, help="web ui alternate base url")
     parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
     parser.add_argument("raster", type=str, help="path to the raster to tile")
     parser.add_argument("out", type=str, help="directory to write tiles")
@@ -119,4 +120,5 @@ def main(args):
     if args.web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         tiles = [tile for tile in tiles if tile not in tiles_nodata]
-        web_ui(args.out, args.web_ui, tiles, tiles, ext, template)
+        base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
+        web_ui(args.out, base_url, tiles, tiles, ext, template)

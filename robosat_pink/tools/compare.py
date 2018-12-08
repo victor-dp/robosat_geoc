@@ -35,7 +35,8 @@ def add_parser(subparser):
     parser.add_argument("--maximum_qod", type=float, default=100.0, help="skip tile if QoD metric above, [0-100]")
     parser.add_argument("--vertical", action="store_true", help="render vertical image aggregate, for side mode")
     parser.add_argument("--geojson", action="store_true", help="output geojson based, for list mode")
-    parser.add_argument("--web_ui", type=str, help="web ui base url")
+    parser.add_argument("--web_ui", action="store_true", help="activate web ui output")
+    parser.add_argument("--web_ui_base_url", type=str, help="web ui alternate base url")
     parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
     parser.add_argument("out", type=str, help="directory or path (upon mode) to save output to")
 
@@ -156,11 +157,13 @@ def main(args):
             out.write("]}")
         out.close()
 
-    elif args.mode == "side" and args.web_ui:
-        template = "compare.html" if not args.web_ui_template else args.web_ui_template
-        web_ui(args.out, args.web_ui, None, tiles_compare, args.ext, template)
+    base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
 
-    elif args.mode == "stack" and args.web_ui:
+    if args.mode == "side" and args.web_ui:
+        template = "compare.html" if not args.web_ui_template else args.web_ui_template
+        web_ui(args.out, base_url, None, tiles_compare, args.ext, template)
+
+    if args.mode == "stack" and args.web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         tiles = [tile for tile, _ in tiles_from_slippy_map(args.images[0])]
-        web_ui(args.out, args.web_ui, tiles, tiles_compare, args.ext, template)
+        web_ui(args.out, base_url, tiles, tiles_compare, args.ext, template)

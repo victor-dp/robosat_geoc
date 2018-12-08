@@ -18,7 +18,8 @@ def add_parser(subparser):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("--mode", type=str, default="copy", choices={"copy", "move", "delete"}, help="filtering mode")
-    parser.add_argument("--web_ui", type=str, help="web ui base url")
+    parser.add_argument("--web_ui", action="store_true", help="activate web ui output")
+    parser.add_argument("--web_ui_base_url", type=str, help="web ui alternate base url")
     parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
     parser.add_argument("--dir", type=str, required=True, help="directory to read slippy map tiles from for filtering")
     parser.add_argument("--cover", type=str, required=True, help="csv cover to filter tiles by")
@@ -64,4 +65,5 @@ def main(args):
 
     if args.web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
-        web_ui(args.out, args.web_ui, tiles, tiles, extension, template)
+        base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
+        web_ui(args.out, base_url, tiles, tiles, extension, template)

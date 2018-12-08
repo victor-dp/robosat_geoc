@@ -32,7 +32,8 @@ def add_parser(subparser):
     parser.add_argument("--config", type=str, required=True, help="path to configuration file")
     parser.add_argument("--zoom", type=int, required=True, help="zoom level of tiles")
     parser.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
-    parser.add_argument("--web_ui", type=str, help="web ui client base url")
+    parser.add_argument("--web_ui", action="store_true", help="activate web ui output")
+    parser.add_argument("--web_ui_base_url", type=str, help="web ui alternate base url")
     parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
     parser.add_argument("features", type=str, nargs="+", help="path to GeoJSON features file")
     parser.add_argument("cover", type=str, help="path to csv tiles cover file")
@@ -160,5 +161,6 @@ def main(args):
 
     if args.web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
+        base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
         tiles = [tile for tile in tiles_from_csv(args.cover)]
         web_ui(args.out, args.web_ui, tiles, tiles, "png", template)

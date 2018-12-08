@@ -34,7 +34,8 @@ def add_parser(subparser):
     parser.add_argument("--config", type=str, required=True, help="path to configuration file")
     parser.add_argument("--batch_size", type=int, help="if set, override batch_size value from config file")
     parser.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
-    parser.add_argument("--web_ui", type=str, help="web ui base url")
+    parser.add_argument("--web_ui", action="store_true", help="activate web ui output")
+    parser.add_argument("--web_ui_base_url", type=str, help="web ui alternate base url")
     parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
     parser.add_argument("tiles", type=str, help="directory to read slippy map image tiles from")
     parser.add_argument("probs", type=str, help="directory to save slippy map probability masks to")
@@ -103,5 +104,6 @@ def main(args):
 
     if args.web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
+        base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
         tiles = [tile for tile, _ in tiles_from_slippy_map(args.tiles)]
-        web_ui(args.probs, args.web_ui, tiles, tiles, "png", template)
+        web_ui(args.probs, base_url, tiles, tiles, "png", template)
