@@ -8,7 +8,6 @@ from tqdm import tqdm
 
 from robosat_pink.tiles import tiles_from_csv
 from robosat_pink.web_ui import web_ui
-from robosat_pink.logs import Logs
 
 
 def add_parser(subparser):
