@@ -62,7 +62,7 @@ def main(args):
         log.log("RoboSat - training on {} GPUs, with {} workers".format(torch.cuda.device_count(), args.workers))
     else:
         device = torch.device("cpu")
-        log.log("RoboSat - training on CPU, with {} workers", format(args.workers))
+        log.log("RoboSat - training on CPU, with {} workers".format(args.workers))
 
     num_classes = len(config["classes"]["titles"])
     num_channels = 0
