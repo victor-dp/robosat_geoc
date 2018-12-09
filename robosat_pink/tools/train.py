@@ -69,7 +69,10 @@ def main(args):
     for channel in config["channels"]:
         num_channels += len(channel["bands"])
     pretrained = config["model"]["pretrained"]
-    net = DataParallel(AlbuNet(num_classes, num_channels=num_channels, pretrained=pretrained)).to(device)
+    encoder = config["model"]["encoder"]
+    net = DataParallel(
+        AlbuNet(num_classes=num_classes, num_channels=num_channels, encoder=encoder, pretrained=pretrained)
+    ).to(device)
     optimizer = Adam(net.parameters(), lr=lr, weight_decay=config["model"]["decay"])
 
     resume = 0
@@ -114,6 +117,7 @@ def main(args):
     log.log("Learning Rate:\t\t {}".format(lr))
     log.log("Weight Decay:\t\t {}".format(config["model"]["decay"]))
     log.log("Loss function:\t\t {}".format(config["model"]["loss"]))
+    log.log("Encoder model:\t\t {}".format(config["model"]["encoder"].title()))
     log.log("ResNet pre-trained:\t {}".format(config["model"]["pretrained"]))
     log.log("")
 

@@ -1,29 +1,27 @@
-# RoboSat Configuration
-# For syntax see: https://github.com/toml-lang/toml#table-of-contents
+# RoboSat.pink Configuration
 
 [dataset]
   # The slippy map dataset's base directory.
-  path = '~/rsp_dataset'
+  path = "~/rsp_dataset"
 
 [classes]
   # Human representation for classes.
-  titles = ['background', 'building']
+  titles = ["background", "building"]
 
   # Color map for visualization and representing classes in masks.
-  # Note: available colors are either CSS3 colors names or #RRGGBB hexadecimal representation.
-  colors = ['white', 'deeppink']
+  # Nota: available colors are either CSS3 colors names or #RRGGBB hexadecimal representation.
+  colors = ["white", "deeppink"]
 
 
-# Channels configuration let your indicate wich dataset sub-directory and bands to take as input
+# Channels configuration let your indicate wich dataset sub-directory and bands to take as input.
 # You could so, add several channels blocks to compose your input Tensor. Orders are meaningful.
 [[channels]]
   sub = "images"
   bands = [1,2,3]
 
 
-# Model specific attributes.
-[model]
 
+[model]
   # Batch size for training.
   batch_size = 8
 
@@ -36,14 +34,17 @@
   # Learning rate for the optimizer.
   lr = 0.000025
 
-  # Weight decay l2 penalty for the optimizer
+  # Weight decay l2 penalty for the optimizer.
   decay = 0.0
 
-  # Loss function name
-  loss = 'Lovasz'
+  # Loss function name.
+  loss = "Lovasz"
 
-  # Data augmentation, Flip or Rotate probability
+  # Data augmentation, Flip or Rotate probability.
   data_augmentation = 0.75
 
-  # Use ImageNet weights pretraining
+  # Encoder model name.
+  encoder = "resnet152"
+  
+  # Use, or not, ImageNet weights pretraining.
   pretrained = true

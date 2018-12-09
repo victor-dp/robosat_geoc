@@ -12,8 +12,7 @@ See:
 
 import torch
 import torch.nn as nn
-
-from torchvision.models import resnet50
+import torchvision.models
 
 
 class ConvRelu(nn.Module):
@@ -39,26 +38,13 @@ class DecoderBlock(nn.Module):
 
 
 class AlbuNet(nn.Module):
-    """The U-Net like architecture for semantic segmentation, adapted by changing the encoder to a ResNet feature extractor.
-
-       Also known as AlbuNet due to its inventor Alexander Buslaev.
-    """
-
-    def __init__(self, num_classes, num_channels=3, num_filters=32, pretrained=True):
-        """Creates an `AlbuNet` instance for semantic segmentation.
-
-        Args:
-          num_classes: number of classes to predict.
-          num_channels: number of inputs channels (e.g bands)
-          pretrained: use ImageNet pre-trained ResNet Encoder weights
-        """
+    def __init__(self, num_classes=2, num_channels=3, num_filters=32, encoder="resnet50", pretrained=True):
 
         super().__init__()
 
-        self.resnet = resnet50(pretrained=pretrained)
+        self.resnet = getattr(torchvision.models, encoder)(pretrained=pretrained)
 
         assert num_channels
-
         if num_channels != 3:
             weights = nn.init.xavier_uniform_(torch.zeros((64, num_channels, 7, 7)))
             if pretrained:
@@ -67,7 +53,7 @@ class AlbuNet(nn.Module):
             self.resnet.conv1 = nn.Conv2d(num_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
             self.resnet.conv1.weight = nn.Parameter(weights)
 
-        # No encoder reference, give a look at https://github.com/pytorch/pytorch/issues/8392
+        # No encoder reference, cf: https://github.com/pytorch/pytorch/issues/8392
 
         self.center = DecoderBlock(2048, num_filters * 8)
 
@@ -81,7 +67,6 @@ class AlbuNet(nn.Module):
         self.final = nn.Conv2d(num_filters, num_classes, kernel_size=1)
 
     def forward(self, x):
-        """The networks forward pass for which autograd synthesizes the backwards pass."""
         size = x.size()
         assert size[-1] % 32 == 0 and size[-2] % 32 == 0, "image resolution has to be divisible by 32 for resnet"
 
