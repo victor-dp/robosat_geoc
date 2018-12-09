@@ -43,7 +43,7 @@ Install:
 
  **2) Python libs Install:**
 ```
-     python3 -m pip install requirements.txt
+     python3 -m pip install -r requirements.txt
 ```
   NOTA: if you want to significantly increase performances switch from Pillow to <a href="https://github.com/uploadcare/pillow-simd">Pillow-simd</a>.
 
