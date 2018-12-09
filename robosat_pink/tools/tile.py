@@ -28,7 +28,7 @@ def add_parser(subparser):
     parser.add_argument("--size", type=int, default=512, help="size of tiles side in pixels")
     parser.add_argument("--zoom", type=int, required=True, help="zoom level of tiles")
     parser.add_argument("--type", type=str, choices=["image", "label"], default="image", help="image or label tiling")
-    parser.add_argument("--config", type=str, help="path to configuration file, mandatory for label tiling")
+    parser.add_argument("--config", type=str, required=True, help="path to configuration file")
     parser.add_argument("--no_data", type=int, help="color considered as no data [0-255]. Skip related tile")
     parser.add_argument("--web_ui", action="store_true", help="activate web ui output")
     parser.add_argument("--web_ui_base_url", type=str, help="web ui alternate base url")
@@ -41,22 +41,17 @@ def add_parser(subparser):
 
 def main(args):
 
-    if args.type == "label":
-        try:
-            config = load_config(args.config)
-        except:
-            sys.exit("Error: Unable to load DataSet config file")
-
-        classes = config["classes"]["titles"]
-        colors = config["classes"]["colors"]
-        assert len(classes) == len(colors), "classes and colors coincide"
-        assert len(colors) == 2, "only binary models supported right now"
+    config = load_config(args.config)
+    classes = config["classes"]["titles"]
+    colors = config["classes"]["colors"]
+    assert len(classes) == len(colors), "classes and colors coincide"
+    assert len(colors) == 2, "only binary models supported right now"
 
     try:
         raster = rasterio_open(args.raster)
         w, s, e, n = bounds = transform_bounds(raster.crs, "EPSG:4326", *raster.bounds)
         transform, _, _ = calculate_default_transform(raster.crs, "EPSG:3857", raster.width, raster.height, *bounds)
-    except:
+    except:  # noqa E722
         sys.exit("Error: Unable to load raster or deal with it's projection")
 
     tiles = [mercantile.Tile(x=x, y=y, z=z) for x, y, z in mercantile.tiles(w, s, e, n, args.zoom)]
