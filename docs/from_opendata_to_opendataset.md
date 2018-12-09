@@ -8,8 +8,8 @@ Data preparation could be a painful and time consuming task, if you don't use to
 
 In supervised learning, you can't expect to produce a good trained model, from inacurate labels: Garbage In Garbage Out.
 
-OpenData became more and more available. But we still lack OpenDataSets good enough to be used to train models.
-And at the state of art, best results in model training are achieved by players who can afford to labelize by hand and with pixel accuracy their own dataset.
+OpenData became more and more available. But we still lack OpenDataSets good enough to be used as-is to train decents models.
+And at the state of art, best results in model training are achieved by players who can afford to labelize by (small) hands and with pixel accuracy their own dataset.
 
 So how could we retrieve and qualify OpenData in order to create our own training DataSet ?
 That's what's this tutorial is about !
