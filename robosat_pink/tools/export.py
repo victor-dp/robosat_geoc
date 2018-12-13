@@ -1,10 +1,13 @@
+import os
+import sys
 import argparse
 
-import os
+import pkgutil
+from importlib import import_module
+
 import torch
 import torch.onnx
 import torch.autograd
-import torch.nn as nn
 
 from robosat_pink.config import load_config
 import robosat_pink.models
@@ -63,8 +66,8 @@ def main(args):
     if export_channels < num_channels:
         weights = torch.zeros((64, export_channels, 7, 7))
         weights.data = net.module.resnet.conv1.weight.data[:, :export_channels, :, :]
-        net.module.resnet.conv1 = nn.Conv2d(num_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
-        net.module.resnet.conv1.weight = nn.Parameter(weights)
+        net.module.resnet.conv1 = torch.nn.Conv2d(num_channels, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        net.module.resnet.conv1.weight = torch.nn.Parameter(weights)
 
     if args.type == "onnx":
         batch = torch.autograd.Variable(torch.randn(1, export_channels, tile_size, tile_size))
