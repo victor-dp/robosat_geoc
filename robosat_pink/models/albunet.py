@@ -1,15 +1,3 @@
-"""U-Net inspired encoder-decoder architecture with a ResNet encoder as proposed by Alexander Buslaev.
-
-See:
-- https://arxiv.org/abs/1505.04597 - U-Net: Convolutional Networks for Biomedical Image Segmentation
-- https://arxiv.org/abs/1411.4038  - Fully Convolutional Networks for Semantic Segmentation
-- https://arxiv.org/abs/1512.03385 - Deep Residual Learning for Image Recognition
-- https://arxiv.org/pdf/1804.08024 - Angiodysplasia Detection and Localization Using Deep Convolutional Neural Networks
-- https://arxiv.org/abs/1801.05746 - TernausNet: U-Net with VGG11 Encoder Pre-Trained on ImageNet for Image Segmentation
-- https://arxiv.org/abs/1806.00844 - TernausNetV2: Fully Convolutional Network for Instance Segmentation
-
-"""
-
 import torch
 import torch.nn as nn
 import torchvision.models
@@ -37,7 +25,14 @@ class DecoderBlock(nn.Module):
         return self.block(nn.functional.interpolate(x, scale_factor=2, mode="nearest"))
 
 
-class AlbuNet(nn.Module):
+class Albunet(nn.Module):
+    """U-Net inspired encoder-decoder architecture with a ResNet encoder as proposed by Alexander Buslaev.
+
+        - https://arxiv.org/abs/1505.04597 - U-Net: Convolutional Networks for Biomedical Image Segmentation
+        - https://arxiv.org/pdf/1804.08024 - Angiodysplasia Detection and Localization Using DCNN
+        - https://arxiv.org/abs/1806.00844 - TernausNetV2: Fully Convolutional Network for Instance Segmentation
+    """
+
     def __init__(self, num_classes=2, num_channels=3, num_filters=32, encoder="resnet50", pretrained=True):
 
         super().__init__()

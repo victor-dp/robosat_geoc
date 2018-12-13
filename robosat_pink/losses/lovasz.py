@@ -2,14 +2,10 @@ import torch
 import torch.nn as nn
 
 
-class LovaszLoss(nn.Module):
-    """Lovasz Loss.
-
-    See: https://arxiv.org/abs/1705.08790
-    """
+class Lovasz(nn.Module):
+    """Lovasz Loss. Cf: https://arxiv.org/abs/1705.08790 """
 
     def __init__(self):
-        """Creates a `LovaszLoss` instance."""
         super().__init__()
 
     def forward(self, inputs, targets):

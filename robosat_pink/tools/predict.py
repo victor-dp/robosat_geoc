@@ -4,7 +4,6 @@ import os
 import numpy as np
 
 import torch
-import torch.nn as nn
 import torch.backends.cudnn
 from torch.utils.data import DataLoader
 from torchvision.transforms import Compose, Normalize
@@ -12,9 +11,9 @@ from torchvision.transforms import Compose, Normalize
 from tqdm import tqdm
 from PIL import Image
 
+import robosat_pink.models
 from robosat_pink.datasets import BufferedSlippyMapDirectory
 from robosat_pink.tiles import tiles_from_slippy_map
-from robosat_pink.models.albunet import AlbuNet
 from robosat_pink.config import load_config
 from robosat_pink.colors import make_palette
 from robosat_pink.transforms import ImageToTensor
@@ -61,8 +60,25 @@ def main(args):
     # https://github.com/pytorch/pytorch/issues/7178
     chkpt = torch.load(args.checkpoint, map_location=map_location)
 
-    net = AlbuNet(num_classes).to(device)
-    net = nn.DataParallel(net)
+    models = [name for _, name, _ in pkgutil.iter_modules([os.path.dirname(robosat_pink.models.__file__)])]
+    if config["model"]["name"] not in [model for model in models]:
+        sys.exit("Unknown model, thoses available are {}".format([model for model in models]))
+
+    num_channels = 0
+    for channel in config["channels"]:
+        num_channels += len(channel["bands"])
+
+    pretrained = config["model"]["pretrained"]
+    encoder = config["model"]["encoder"]
+
+    model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
+
+    net = getattr(model_module, "{}".format(config["model"]["name"].title()))(
+        num_classes=num_classes, num_channels=num_channels, encoder=encoder, pretrained=pretrained
+    ).to(device)
+
+    net = torch.nn.DataParallel(net)
+
     net.load_state_dict(chkpt["state_dict"])
     net.eval()
 
@@ -81,7 +97,7 @@ def main(args):
             outputs = net(images)
 
             # manually compute segmentation mask class probabilities per pixel
-            probs = nn.functional.softmax(outputs, dim=1).data.cpu().numpy()
+            probs = torch.nn.functional.softmax(outputs, dim=1).data.cpu().numpy()
 
             for tile, prob in zip(tiles, probs):
                 x, y, z = list(map(int, tile))

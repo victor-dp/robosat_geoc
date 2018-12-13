@@ -4,7 +4,6 @@ import argparse
 
 import torch
 import torch.backends.cudnn
-from torch.nn import DataParallel
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 from torchvision.transforms import Normalize
@@ -24,10 +23,10 @@ from robosat_pink.transforms import (
 )
 from robosat_pink.datasets import SlippyMapTilesConcatenation
 from robosat_pink.metrics import Metrics
-from robosat_pink.models.albunet import AlbuNet
 from robosat_pink.config import load_config
 from robosat_pink.logs import Logs
 import robosat_pink.losses
+import robosat_pink.models
 
 
 def add_parser(subparser):
@@ -70,9 +69,17 @@ def main(args):
         num_channels += len(channel["bands"])
     pretrained = config["model"]["pretrained"]
     encoder = config["model"]["encoder"]
-    net = DataParallel(
-        AlbuNet(num_classes=num_classes, num_channels=num_channels, encoder=encoder, pretrained=pretrained)
+
+    models = [name for _, name, _ in pkgutil.iter_modules([os.path.dirname(robosat_pink.models.__file__)])]
+    if config["model"]["name"] not in [model for model in models]:
+        sys.exit("Unknown model, thoses available are {}".format([model for model in models]))
+
+    model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
+    net = getattr(model_module, "{}".format(config["model"]["name"].title()))(
+        num_classes=num_classes, num_channels=num_channels, encoder=encoder, pretrained=pretrained
     ).to(device)
+
+    net = torch.nn.DataParallel(net)
     optimizer = Adam(net.parameters(), lr=lr, weight_decay=config["model"]["decay"])
 
     resume = 0
@@ -91,11 +98,11 @@ def main(args):
             resume = chkpt["epoch"]
 
     losses = [name for _, name, _ in pkgutil.iter_modules([os.path.dirname(robosat_pink.losses.__file__)])]
-    if config["model"]["loss"] not in [loss.title() for loss in losses]:
-        sys.exit("Unknown loss, thoses available are {}".format([loss.title() for loss in losses]))
+    if config["model"]["loss"] not in [loss for loss in losses]:
+        sys.exit("Unknown loss, thoses available are {}".format([loss for loss in losses]))
 
-    loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"].lower()))
-    criterion = getattr(loss_module, "{}Loss".format(config["model"]["loss"]))().to(device)
+    loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"]))
+    criterion = getattr(loss_module, "{}".format(config["model"]["loss"].title()))().to(device)
 
     train_loader, val_loader = get_dataset_loaders(dataset_path, config, args.workers)
 
@@ -111,14 +118,15 @@ def main(args):
             num_channel += 1
     log.log("")
     log.log("--- Hyper Parameters ---")
+    log.log("Model:\t\t {}".format(config["model"]["name"]))
+    log.log("Encoder model:\t\t {}".format(config["model"]["encoder"]))
+    log.log("Loss function:\t\t {}".format(config["model"]["loss"]))
+    log.log("ResNet pre-trained:\t {}".format(config["model"]["pretrained"]))
     log.log("Batch Size:\t\t {}".format(config["model"]["batch_size"]))
     log.log("Tile Size:\t\t {}".format(config["model"]["tile_size"]))
     log.log("Data Augmentation:\t {}".format(config["model"]["data_augmentation"]))
     log.log("Learning Rate:\t\t {}".format(lr))
     log.log("Weight Decay:\t\t {}".format(config["model"]["decay"]))
-    log.log("Loss function:\t\t {}".format(config["model"]["loss"]))
-    log.log("Encoder model:\t\t {}".format(config["model"]["encoder"].title()))
-    log.log("ResNet pre-trained:\t {}".format(config["model"]["pretrained"]))
     log.log("")
 
     for epoch in range(resume, num_epochs):

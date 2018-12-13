@@ -7,7 +7,7 @@ import torch.autograd
 import torch.nn as nn
 
 from robosat_pink.config import load_config
-from robosat_pink.models.albunet import AlbuNet
+import robosat_pink.models
 
 
 def add_parser(subparser):
@@ -44,7 +44,18 @@ def main(args):
     def map_location(storage, _):
         return storage.cpu()
 
-    net = AlbuNet(num_classes, num_channels=num_channels).to("cpu")
+    encoder = config["model"]["encoder"]
+    pretrained = config["model"]["pretrained"]
+
+    models = [name for _, name, _ in pkgutil.iter_modules([os.path.dirname(robosat_pink.models.__file__)])]
+    if config["model"]["name"] not in [model for model in models]:
+        sys.exit("Unknown model, thoses available are {}".format([model for model in models]))
+
+    model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
+    net = getattr(model_module, "{}".format(config["model"]["name"].title()))(
+        num_classes=num_classes, num_channels=num_channels, encoder=encoder, pretrained=pretrained
+    ).to("cpu")
+
     chkpt = torch.load(args.checkpoint, map_location=map_location)
     net = torch.nn.DataParallel(net)
     net.load_state_dict(chkpt["state_dict"])
