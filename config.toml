@@ -44,7 +44,7 @@
   data_augmentation = 0.75
 
   # Encoder model name.
-  encoder = "resnet152"
+  encoder = "resnet50"
   
   # Use, or not, ImageNet weights pretraining.
   pretrained = true
