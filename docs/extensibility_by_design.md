@@ -1,11 +1,6 @@
 # Extensibility by Design
 
-
-Concept:
--------
-
-RoboSat.pink is extensible in several ways, by design.
-To easily custom or enhance only the needed components, and keep everything else as-is.
+RoboSat.pink extensibility allows to easily custom or enhance only the needed components, and keep everything else as-is.
  
 
 Tools:
