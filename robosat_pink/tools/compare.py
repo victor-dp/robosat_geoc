@@ -52,7 +52,7 @@ def compare(masks, labels, tile, classes):
     assert label.shape == mask.shape
     assert len(label.shape) == 2 and len(classes) == 2  # Still binary centric
 
-    metrics = Metrics(classes)
+    metrics = Metrics()
     metrics.add(torch.from_numpy(label), torch.from_numpy(mask), is_prob=False)
     fg_iou = metrics.get_fg_iou()
 

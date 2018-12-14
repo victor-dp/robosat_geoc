@@ -1,24 +1,12 @@
-"""Metrics for segmentation.
-"""
-
 import torch
 import math
 import numpy as np
 
 
 class Metrics:
-    """Tracking mean metrics
-    """
+    """Tracking mean metrics """
 
-    def __init__(self, labels):
-        """Creates an new `Metrics` instance.
-
-        Args:
-          labels: the labels for all classes.
-        """
-
-        self.labels = labels
-
+    def __init__(self):
         self.tn = 0
         self.fn = 0
         self.fp = 0
@@ -44,11 +32,7 @@ class Metrics:
         self.tp += torch.sum(confusion == 1).item()
 
     def get_miou(self):
-        """Retrieves the mean Intersection over Union score.
-
-        Returns:
-          The mean Intersection over Union score for all observations seen so far.
-        """
+        """Retrieves the mean Intersection over Union score."""
 
         try:
             miou = np.nanmean([self.tn / (self.tn + self.fn + self.fp), self.tp / (self.tp + self.fn + self.fp)])
@@ -58,11 +42,7 @@ class Metrics:
         return miou
 
     def get_fg_iou(self):
-        """Retrieves the foreground Intersection over Union score.
-
-        Returns:
-          The foreground Intersection over Union score for all observations seen so far.
-        """
+        """Retrieves the foreground Intersection over Union score."""
 
         try:
             iou = self.tp / (self.tp + self.fn + self.fp)
@@ -72,11 +52,7 @@ class Metrics:
         return iou
 
     def get_mcc(self):
-        """Retrieves the Matthew's Coefficient Correlation score.
-
-        Returns:
-          The Matthew's Coefficient Correlation score for all observations seen so far.
-        """
+        """Retrieves the Matthew's Coefficient Correlation score."""
 
         try:
             mcc = (self.tp * self.tn - self.fp * self.fn) / math.sqrt(

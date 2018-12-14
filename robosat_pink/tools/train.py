@@ -161,7 +161,7 @@ def train(loader, num_classes, device, net, optimizer, criterion):
     num_samples = 0
     running_loss = 0
 
-    metrics = Metrics(range(num_classes))
+    metrics = Metrics()
 
     net.train()
 
@@ -205,7 +205,7 @@ def validate(loader, num_classes, device, net, criterion):
     num_samples = 0
     running_loss = 0
 
-    metrics = Metrics(range(num_classes))
+    metrics = Metrics()
     net.eval()
 
     with torch.no_grad():
