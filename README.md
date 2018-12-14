@@ -62,11 +62,11 @@ WorkFlows:
 <img alt="Training" src="docs/img/readme/training.png" />
 
 
-
 Related resources:
 -----------------
 
 - <a href="./docs/from_opendata_to_opendataset.md">RoboSat.pink tutorial: from OpenData to OpenDataSet</a>
+- <a href="./docs/extensibility_by_design.md">RoboSat.pink extensibility documentation</a>
 - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">Robosat slides @PyParis 2018</a>
 - <a href="https://github.com/mapbox/robosat">MapBox RoboSat github directory</a>
 - <a href="https://github.com/chrieke/awesome-satellite-imagery-datasets">Christoph Rieke's Awesome Satellite Imagery Datasets</a>
