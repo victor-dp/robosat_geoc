@@ -118,7 +118,7 @@ def main(args):
             num_channel += 1
     log.log("")
     log.log("--- Hyper Parameters ---")
-    log.log("Model:\t\t {}".format(config["model"]["name"]))
+    log.log("Model:\t\t\t {}".format(config["model"]["name"]))
     log.log("Encoder model:\t\t {}".format(config["model"]["encoder"]))
     log.log("Loss function:\t\t {}".format(config["model"]["loss"]))
     log.log("ResNet pre-trained:\t {}".format(config["model"]["pretrained"]))
