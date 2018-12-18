@@ -18,7 +18,7 @@ if __name__ == "__main__":
     try:
         module = import_module("robosat_pink.tools.{}".format(sys.argv[1]))
         module.add_parser(subparser)
-    except:  # noqa E722
+    except:
         path = os.path.dirname(robosat_pink.tools.__file__)
 
         for tool in [name for _, name, _ in pkgutil.iter_modules([path]) if name != "__main__"]:

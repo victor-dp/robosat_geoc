@@ -94,7 +94,7 @@ class SlippyMapTilesConcatenation(torch.utils.data.Dataset):
                     data_band = data[:, :, int(band) - 1] if len(data.shape) == 3 else []
                     data_band = data_band.reshape(mask.shape[0], mask.shape[1], 1)
                     tensor = np.concatenate((tensor, data_band), axis=2) if "tensor" in locals() else data_band  # noqa F821
-            except:  # noqa E722
+            except:
                 sys.exit("Unable to concatenate input Tensor")
 
         if self.joint_transform is not None:

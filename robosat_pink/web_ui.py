@@ -14,7 +14,7 @@ def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
             web_ui = open(template, "r").read()
         else:
             web_ui = open(os.path.join(Path(__file__).parent, "tools", "templates", template), "r").read()
-    except:  # noqa E722
+    except:
         sys.exit("Unable to open Web UI template {}".format(template))
 
     web_ui = re.sub("{{base_url}}", base_url, web_ui)

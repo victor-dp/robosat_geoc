@@ -51,7 +51,7 @@ def main(args):
         raster = rasterio_open(args.raster)
         w, s, e, n = bounds = transform_bounds(raster.crs, "EPSG:4326", *raster.bounds)
         transform, _, _ = calculate_default_transform(raster.crs, "EPSG:3857", raster.width, raster.height, *bounds)
-    except:  # noqa E722
+    except:
         sys.exit("Error: Unable to load raster or deal with it's projection")
 
     tiles = [mercantile.Tile(x=x, y=y, z=z) for x, y, z in mercantile.tiles(w, s, e, n, args.zoom)]

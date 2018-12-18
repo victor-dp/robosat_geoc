@@ -134,7 +134,7 @@ def tile_image(root, x, y, z):
         path = glob(os.path.join(root, z, x, y) + "*")
         assert len(path) == 1
         img = np.array(Image.open(path[0]).convert("RGB"))
-    except:  # noqa E722
+    except:
         return None
 
     return img

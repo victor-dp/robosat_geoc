@@ -19,7 +19,7 @@ class Logs:
                 if not os.path.isdir(os.path.dirname(path)):
                     os.makedirs(os.path.dirname(path), exist_ok=True)
                 self.fp = open(path, mode="a")
-        except:  # noqa E722
+        except:
             sys.exit("Unable to write in logs directory")
 
     """Log a new message to the opened logs file, and optionnaly on stdout or stderr too
@@ -33,5 +33,5 @@ class Logs:
 
             if self.out:
                 print(msg, file=self.out)
-        except:  # noqa E722
+        except:
             sys.exit("Unable to write in logs file")

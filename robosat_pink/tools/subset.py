@@ -59,7 +59,7 @@ def main(args):
                 assert os.path.isfile(src)
                 os.remove(src)
 
-        except:  # noqa E722
+        except:
             sys.exit("Error: Unable to process {}".format(tile))
 
     if args.web_ui:
