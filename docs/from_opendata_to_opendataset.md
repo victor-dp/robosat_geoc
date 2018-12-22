@@ -110,7 +110,7 @@ Predict masks
 To create predict masks from our first model, on the whole coverage:
 
 ```
-rsp predict --config config.toml --checkpoint ~/rsp_dataset/pth/checkpoint-00010-of-00010.pth --web_ui $RSP_URL/masks ~/rsp_dataset/images ~/rsp_dataset/masks
+rsp predict --config config.toml --checkpoint ~/rsp_dataset/pth/checkpoint-00010-of-00010.pth --web_ui ~/rsp_dataset/images ~/rsp_dataset/masks
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/masks/"><img src="img/from_opendata_to_opendataset/masks.png" /></a>
