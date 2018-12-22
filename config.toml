@@ -1,24 +1,29 @@
 # RoboSat.pink Configuration
 
+
 [dataset]
   # The slippy map dataset's base directory.
   path = "~/rsp_dataset"
 
-[classes]
-  # Human representation for classes.
-  titles = ["background", "building"]
 
-  # Color map for visualization and representing classes in masks.
-  # Nota: available colors are either CSS3 colors names or #RRGGBB hexadecimal representation.
-  colors = ["white", "deeppink"]
+# Classes configuration.
+# Nota: available colors are either CSS3 colors names or #RRGGBB hexadecimal representation.
+[[classes]]
+  title = "background"
+  color = "white"
+
+[[classes]]
+  title = "building"
+  color = "deeppink"
 
 
-# Channels configuration let your indicate wich dataset sub-directory and bands to take as input.
+# Indicate which dataset sub-directory and bands to take as input.
 # You could so, add several channels blocks to compose your input Tensor. Orders are meaningful.
 [[channels]]
-  sub = "images"
-  bands = [1,2,3]
-
+  sub   = "images"
+  bands = [1, 2, 3]
+  mean  = [0.485, 0.456, 0.406]
+  std   = [0.229, 0.224, 0.225]
 
 
 [model]
@@ -48,6 +53,6 @@
 
   # Data augmentation, Flip or Rotate probability.
   data_augmentation = 0.75
-  #
+
   # Weight decay l2 penalty for the optimizer.
   decay = 0.0

@@ -38,8 +38,9 @@ def add_parser(subparser):
     parser.add_argument("--checkpoint", type=str, required=False, help="path to a model checkpoint (to retrain)")
     parser.add_argument("--resume", action="store_true", help="resume training (imply to provide a checkpoint)")
     parser.add_argument("--workers", type=int, default=0, help="number of workers pre-processing images")
-    parser.add_argument("--dataset", type=int, help="if set, override dataset path value from config file")
+    parser.add_argument("--dataset", type=str, help="if set, override dataset path value from config file")
     parser.add_argument("--epochs", type=int, help="if set, override epochs value from config file")
+    parser.add_argument("--batch_size", type=int, help="if set, override batch_size value from config file")
     parser.add_argument("--lr", type=float, help="if set, override learning rate value from config file")
     parser.add_argument("out", type=str, help="directory to save checkpoint .pth files and log")
 
@@ -48,9 +49,10 @@ def add_parser(subparser):
 
 def main(args):
     config = load_config(args.config)
-    lr = args.lr if args.lr else config["model"]["lr"]
-    dataset_path = args.dataset if args.dataset else config["dataset"]["path"]
-    num_epochs = args.epochs if args.epochs else config["model"]["epochs"]
+    config["dataset"]["path"] = args.dataset if args.dataset else config["dataset"]["path"]
+    config["model"]["lr"] = args.lr if args.lr else config["model"]["lr"]
+    config["model"]["epochs"] = args.epochs if args.epochs else config["model"]["epochs"]
+    config["model"]["batch_size"] = args.batch_size if args.batch_size else config["model"]["batch_size"]
 
     log = Logs(os.path.join(args.out, "log"))
 
@@ -63,7 +65,7 @@ def main(args):
         device = torch.device("cpu")
         log.log("RoboSat - training on CPU, with {} workers".format(args.workers))
 
-    num_classes = len(config["classes"]["titles"])
+    num_classes = len(config["classes"])
     num_channels = 0
     for channel in config["channels"]:
         num_channels += len(channel["bands"])
@@ -80,7 +82,7 @@ def main(args):
     ).to(device)
 
     net = torch.nn.DataParallel(net)
-    optimizer = Adam(net.parameters(), lr=lr, weight_decay=config["model"]["decay"])
+    optimizer = Adam(net.parameters(), lr=config["model"]["lr"], weight_decay=config["model"]["decay"])
 
     resume = 0
     if args.checkpoint:
@@ -104,13 +106,13 @@ def main(args):
     loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"]))
     criterion = getattr(loss_module, "{}".format(config["model"]["loss"].title()))().to(device)
 
-    train_loader, val_loader = get_dataset_loaders(dataset_path, config, args.workers)
+    train_loader, val_loader = get_dataset_loaders(config["dataset"]["path"], config, args.workers)
 
-    if resume >= num_epochs:
-        sys.exit("Error: Epoch {} set in {} already reached by the checkpoint provided".format(num_epochs, args.config))
+    if resume >= config["model"]["epochs"]:
+        sys.exit("Error: Epoch {} set in {} already reached by the checkpoint provided".format(config["model"]["epochs"], args.config))
 
     log.log("")
-    log.log("--- Input tensor from Dataset: {} ---".format(dataset_path))
+    log.log("--- Input tensor from Dataset: {} ---".format(config["dataset"]["path"]))
     num_channel = 1
     for channel in config["channels"]:
         for band in channel["bands"]:
@@ -125,21 +127,21 @@ def main(args):
     log.log("Batch Size:\t\t {}".format(config["model"]["batch_size"]))
     log.log("Tile Size:\t\t {}".format(config["model"]["tile_size"]))
     log.log("Data Augmentation:\t {}".format(config["model"]["data_augmentation"]))
-    log.log("Learning Rate:\t\t {}".format(lr))
+    log.log("Learning Rate:\t\t {}".format(config["model"]["lr"]))
     log.log("Weight Decay:\t\t {}".format(config["model"]["decay"]))
     log.log("")
 
-    for epoch in range(resume, num_epochs):
+    for epoch in range(resume, config["model"]["epochs"]):
 
         log.log("---")
-        log.log("Epoch: {}/{}".format(epoch + 1, num_epochs))
+        log.log("Epoch: {}/{}".format(epoch + 1, config["model"]["epochs"]))
 
         train_hist = train(train_loader, num_classes, device, net, optimizer, criterion)
         log.log(
             "Train    loss: {:.4f}, mIoU: {:.3f}, {} IoU: {:.3f}, MCC: {:.3f}".format(
                 train_hist["loss"],
                 train_hist["miou"],
-                config["classes"]["titles"][1],
+                config["classes"][1]["title"],
                 train_hist["fg_iou"],
                 train_hist["mcc"],
             )
@@ -148,12 +150,12 @@ def main(args):
         val_hist = validate(val_loader, num_classes, device, net, criterion)
         log.log(
             "Validate loss: {:.4f}, mIoU: {:.3f}, {} IoU: {:.3f}, MCC: {:.3f}".format(
-                val_hist["loss"], val_hist["miou"], config["classes"]["titles"][1], val_hist["fg_iou"], val_hist["mcc"]
+                val_hist["loss"], val_hist["miou"], config["classes"][1]["title"], val_hist["fg_iou"], val_hist["mcc"]
             )
         )
 
         states = {"epoch": epoch + 1, "state_dict": net.state_dict(), "optimizer": optimizer.state_dict()}
-        checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}-of-{:05d}.pth".format(epoch + 1, num_epochs))
+        checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}-of-{:05d}.pth".format(epoch + 1, config["model"]["epochs"]))
         torch.save(states, checkpoint_path)
 
 

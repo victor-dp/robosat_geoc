@@ -1,30 +1,36 @@
-"""Configuration handling.
+""" Dictionary-based configuration with a TOML-based on-disk representation. Cf: https://github.com/toml-lang/toml """
 
-Dictionary-based configuration with a TOML-based on-disk represenation.
-
-See https://github.com/toml-lang/toml
-"""
-
+import sys
 import toml
 
 
+def check_config(config):
+    """Check if config file is consistent. Exit on error if not."""
+
+    if not "dataset" in config.keys() or not "path" in config["dataset"].keys():
+        sys.exit("dataset path is mandatory in config file")
+
+    if not "classes" in config.keys():
+        sys.exit("At least one class is mandatory in config file")
+
+    if not "channels" in config.keys():
+        sys.exit("At least one channel is mandatory in config file")
+
+    for channel in config["channels"]:
+        if not (len(channel["bands"]) == len(channel["mean"]) == len(channel["std"])):
+            sys.exit("Inconsistent channel bands, mean or std lenght in config file")
+
+
 def load_config(path):
-    """Loads a dictionary from configuration file.
+    """Loads a dictionary from configuration file."""
 
-    Args:
-      path: the path to load the configuration from.
+    config = toml.load(path)
+    check_config(config)
 
-    Returns:
-      The configuration dictionary loaded from the file.
-    """
-
-    return toml.load(path)
+    return config
 
 
 def save_config(attrs, path):
-    """Saves a configuration dictionary to a file.
-    Args:
-      path: the path to save the configuration dictionary to.
-    """
+    """Saves a configuration dictionary to a file."""
 
     toml.dump(attrs, path)

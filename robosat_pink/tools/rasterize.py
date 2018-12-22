@@ -82,11 +82,7 @@ def burn(tile, features, tile_size, burn_value=1):
 def main(args):
     config = load_config(args.config)
     tile_size = args.tile_size if args.tile_size else config["model"]["tile_size"]
-
-    classes = config["classes"]["titles"]
-    colors = config["classes"]["colors"]
-    assert len(classes) == len(colors), "classes and colors coincide"
-    assert len(colors) == 2, "only binary models supported right now"
+    colors = [classe["color"] for classe in config["classes"]]
 
     os.makedirs(args.out, exist_ok=True)
 

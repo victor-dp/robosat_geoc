@@ -41,11 +41,7 @@ def add_parser(subparser):
 
 def main(args):
 
-    config = load_config(args.config)
-    classes = config["classes"]["titles"]
-    colors = config["classes"]["colors"]
-    assert len(classes) == len(colors), "classes and colors coincide"
-    assert len(colors) == 2, "only binary models supported right now"
+    colors = [classe["color"] for classe in load_config(args.config)["classes"]]
 
     try:
         raster = rasterio_open(args.raster)

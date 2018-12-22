@@ -48,7 +48,7 @@ def add_parser(subparser):
 
 def main(args):
     config = load_config(args.config)
-    num_classes = len(config["classes"]["titles"])
+    num_classes = len(config["classes"])
     batch_size = args.batch_size if args.batch_size else config["model"]["batch_size"]
     tile_size = args.tile_size if args.tile_size else config["model"]["tile_size"]
 
@@ -92,7 +92,7 @@ def main(args):
     directory = BufferedSlippyMapDirectory(args.tiles, transform=transform, size=tile_size, overlap=args.overlap)
     loader = DataLoader(directory, batch_size=batch_size, num_workers=args.workers)
 
-    palette = make_palette(config["classes"]["colors"][0], config["classes"]["colors"][1])
+    palette = make_palette(config["classes"][0]["color"], config["classes"][1]["color"])
 
     # don't track tensors with autograd during prediction
     with torch.no_grad():

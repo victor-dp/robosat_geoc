@@ -49,8 +49,6 @@ def main(args):
         log = Logs(os.path.join(args.out, "log"), out=sys.stderr)
         log.log("Begin download from {}".format(args.url))
 
-        # tqdm has problems with concurrent.futures.ThreadPoolExecutor; explicitly call `.update`
-        # https://github.com/tqdm/tqdm/issues/97
         progress = tqdm(total=len(tiles), ascii=True, unit="image")
 
         with futures.ThreadPoolExecutor(num_workers) as executor:
@@ -64,6 +62,7 @@ def main(args):
                 path = os.path.join(args.out, z, x, "{}.{}".format(y, args.ext))
 
                 if os.path.isfile(path):
+                    progress.update()
                     return tile, None, True
 
                 if args.type == "XYZ":
@@ -82,6 +81,7 @@ def main(args):
                 try:
                     image = Image.open(res)
                     image.save(path, optimize=True)
+                    progress.update()
                 except OSError:
                     return tile, url, False
 
@@ -92,8 +92,6 @@ def main(args):
 
                 if time_for_req < time_per_worker:
                     time.sleep(time_per_worker - time_for_req)
-
-                progress.update()
 
                 return tile, url, True
 
