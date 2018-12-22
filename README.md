@@ -13,19 +13,20 @@ This repository is a DataPink flavor of RoboSat, including our latests developme
 
 Spirit:
 -------
-- State of art Computer Vision algorithms and methods
+- Cutting edge Computer Vision research papers implementation 
 - Industrial code robustness
 - Several tools, you can combine together (as Lego)
 - Extensible, by design
 - High performances
 - Minimalism as a code aesthetic
 - GeoSpatial standards compliancy
-- OSM and MapBox ecosystem friendly 
+- OSM and MapBox ecosystems friendly
 
 
 Aims:
 -----
 - DataSet Quality Analysis
+- Change Detection highlighter
 - Features extraction and completion
 
 
