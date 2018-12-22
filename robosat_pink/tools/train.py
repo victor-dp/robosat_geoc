@@ -109,7 +109,11 @@ def main(args):
     train_loader, val_loader = get_dataset_loaders(config["dataset"]["path"], config, args.workers)
 
     if resume >= config["model"]["epochs"]:
-        sys.exit("Error: Epoch {} set in {} already reached by the checkpoint provided".format(config["model"]["epochs"], args.config))
+        sys.exit(
+            "Error: Epoch {} set in {} already reached by the checkpoint provided".format(
+                config["model"]["epochs"], args.config
+            )
+        )
 
     log.log("")
     log.log("--- Input tensor from Dataset: {} ---".format(config["dataset"]["path"]))
@@ -155,7 +159,9 @@ def main(args):
         )
 
         states = {"epoch": epoch + 1, "state_dict": net.state_dict(), "optimizer": optimizer.state_dict()}
-        checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}-of-{:05d}.pth".format(epoch + 1, config["model"]["epochs"]))
+        checkpoint_path = os.path.join(
+            args.out, "checkpoint-{:05d}-of-{:05d}.pth".format(epoch + 1, config["model"]["epochs"])
+        )
         torch.save(states, checkpoint_path)
 
 
