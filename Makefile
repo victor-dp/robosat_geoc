@@ -34,9 +34,9 @@ it: clean
 	rsp subset --web_ui --dir it/images --cover it/validation/cover --out it/validation/images
 	rsp subset --web_ui --dir it/labels --cover it/validation/cover --out it/validation/labels
 
-	rsp train --config config.toml --workers 4 --epochs 5 --dataset it it/pth
-	rsp train --config config.toml --workers 4 --resume --checkpoint it/pth/checkpoint-00005-of-00005.pth --epochs 10 --dataset it it/pth
-	rsp predict --config config.toml --workers 4 --batch_size 16 --checkpoint it/pth/checkpoint-00010-of-00010.pth --web_ui it/images it/masks
+	rsp train --config config.toml --workers 0 --epochs 5 --dataset it it/pth
+	rsp train --config config.toml --workers 0 --resume --checkpoint it/pth/checkpoint-00005-of-00005.pth --epochs 10 --dataset it it/pth
+	rsp predict --config config.toml --workers 0 --batch_size 16 --checkpoint it/pth/checkpoint-00010-of-00010.pth --web_ui it/images it/masks
 
 	rsp compare --images it/images it/labels it/masks --mode stack --labels it/labels --masks it/masks --config config.toml --web_ui it/compare
 
