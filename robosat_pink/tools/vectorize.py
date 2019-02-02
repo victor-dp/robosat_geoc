@@ -1,5 +1,4 @@
 import sys
-import argparse
 from tqdm import tqdm
 
 import numpy as np
@@ -12,6 +11,7 @@ import rasterio.transform
 
 from robosat_pink.config import load_config
 from robosat_pink.tiles import tiles_from_slippy_map
+
 
 def add_parser(subparser):
     parser = subparser.add_parser("vectorize", help="extracts simplified GeoJSON features from segmentation masks")
@@ -45,4 +45,4 @@ def main(args):
                 out.write('{}{{"type":"Feature",{},{}}}'.format("," if not first else "", geom, prop))
                 first = False
 
-        out.write(']}')
+        out.write("]}")

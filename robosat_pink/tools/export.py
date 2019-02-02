@@ -21,7 +21,6 @@ def add_parser(subparser):
     parser.add_argument("--config", type=str, required=True, help="path to configuration file")
     parser.add_argument("--export_channels", type=int, help="export channels to use (keep the first ones)")
     parser.add_argument("--type", type=str, choices=["pth"], default="pth", help="output type")
-    parser.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
     parser.add_argument("--checkpoint", type=str, required=True, help="model checkpoint to load")
     parser.add_argument("out", type=str, help="path to save export model to")
 
@@ -30,7 +29,6 @@ def add_parser(subparser):
 
 def main(args):
     config = load_config(args.config)
-    tile_size = args.tile_size if args.tile_size else config["model"]["tile_size"]
 
     num_classes = len(config["classes"])
     num_channels = 0
