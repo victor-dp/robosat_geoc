@@ -21,6 +21,7 @@ Spirit:
 - Minimalism as a code aesthetic
 - GeoSpatial standards compliancy
 - OSM and MapBox ecosystems friendly
+- PyTorch based
 
 
 Aims:
