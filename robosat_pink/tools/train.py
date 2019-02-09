@@ -247,7 +247,11 @@ def validate(loader, num_classes, device, net, criterion):
 
 def get_dataset_loaders(path, config, workers):
 
-    mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]  # Values computed on ImageNet DataSet
+    std = []
+    mean = []
+    for channel in config["channels"]:
+        std.extend(channel["std"])
+        mean.extend(channel["mean"])
 
     transform = JointCompose(
         [

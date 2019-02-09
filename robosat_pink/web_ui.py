@@ -4,7 +4,7 @@ import sys
 import json
 from pathlib import Path
 from mercantile import feature
-from robosat_pink.tiles import pixel_to_location
+from robosat_pink.tiles import tile_pixel_to_location
 
 
 def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
@@ -26,7 +26,7 @@ def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
         tile = list(coverage_tiles)[0]
         x, y, z = map(int, [tile.x, tile.y, tile.z])
         web_ui = re.sub("{{zoom}}", str(z), web_ui)
-        web_ui = re.sub("{{center}}", str(list(pixel_to_location(tile, 0.5, 0.5))[::-1]), web_ui)
+        web_ui = re.sub("{{center}}", str(list(tile_pixel_to_location(tile, 0.5, 0.5))[::-1]), web_ui)
 
     with open(os.path.join(out, "index.html"), "w", encoding="utf-8") as fp:
         fp.write(web_ui)

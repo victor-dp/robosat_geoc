@@ -16,7 +16,7 @@ from tqdm import tqdm
 from PIL import Image
 
 import robosat_pink.models
-from robosat_pink.datasets import BufferedSlippyMapDirectory
+from robosat_pink.datasets import BufferedSlippyMapTiles
 from robosat_pink.tiles import tiles_from_slippy_map
 from robosat_pink.config import load_config
 from robosat_pink.colors import make_palette
@@ -68,12 +68,16 @@ def main(args):
     if config["model"]["name"] not in [model for model in models]:
         sys.exit("Unknown model, thoses available are {}".format([model for model in models]))
 
+    std = []
+    mean = []
     num_channels = 0
     for channel in config["channels"]:
+        std.extend(channel["std"])
+        mean.extend(channel["mean"])
         num_channels += len(channel["bands"])
 
-    pretrained = config["model"]["pretrained"]
     encoder = config["model"]["encoder"]
+    pretrained = config["model"]["pretrained"]
 
     model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
 
@@ -86,10 +90,8 @@ def main(args):
     net.load_state_dict(chkpt["state_dict"])
     net.eval()
 
-    mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]  # from ImageNet
     transform = Compose([ImageToTensor(), Normalize(mean=mean, std=std)])
-
-    directory = BufferedSlippyMapDirectory(args.tiles, transform=transform, size=tile_size, overlap=args.overlap)
+    directory = BufferedSlippyMapTiles(args.tiles, transform=transform, size=tile_size, overlap=args.overlap)
     loader = DataLoader(directory, batch_size=batch_size, num_workers=args.workers)
 
     palette = make_palette(config["classes"][0]["color"], config["classes"][1]["color"])

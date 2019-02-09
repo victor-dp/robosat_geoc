@@ -1,119 +1,59 @@
 """Slippy Map Tiles.
-
-The Slippy Map tile spec works with a directory structure of `z/x/y.png` where
-- `z` is the zoom level
-- `x` is the left / right index
-- `y` is the top / bottom index
-
-See: https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+   See: https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
 """
 
-import csv
 import io
 import os
-from glob import glob
+import re
+import glob
 
 import cv2
-from PIL import Image
 import numpy as np
 
+import csv
 import mercantile
 
 
-def pixel_to_location(tile, dx, dy):
-    """Converts a pixel in a tile to a coordinate.
+def tile_pixel_to_location(tile, dx, dy):
+    """Converts a pixel in a tile to lon/lat coordinates."""
 
-    Args:
-      tile: the mercantile tile to calculate the location in.
-      dx: the relative x offset in range [0, 1].
-      dy: the relative y offset in range [0, 1].
+    assert 0 <= dx <= 1 and 0 <= dy <= 1, "x and y offsets must be in [0, 1]"
 
-    Returns:
-      The coordinate for the pixel in the tile.
-    """
-
-    assert 0 <= dx <= 1, "x offset is in [0, 1]"
-    assert 0 <= dy <= 1, "y offset is in [0, 1]"
-
-    west, south, east, north = mercantile.bounds(tile)
+    w, s, e, n = mercantile.bounds(tile)
 
     def lerp(a, b, c):
         return a + c * (b - a)
 
-    lon = lerp(west, east, dx)
-    lat = lerp(south, north, dy)
-
-    return lon, lat
-
-
-def fetch_image(session, url, timeout=10):
-    """Fetches the image representation for a tile.
-
-    Args:
-      session: the HTTP session to fetch the image from.
-      url: the tile imagery's url to fetch the image from.
-      timeout: the HTTP timeout in seconds.
-
-    Returns:
-     The satellite imagery as bytes or None in case of error.
-    """
-
-    try:
-        resp = session.get(url, timeout=timeout)
-        resp.raise_for_status()
-        return io.BytesIO(resp.content)
-    except Exception:
-        return None
+    return lerp(w, e, dx), lerp(s, n, dy)  # lon, lat
 
 
 def tiles_from_slippy_map(root):
-    """Loads files from an on-disk slippy map directory structure.
-
-    Args:
-      root: the base directory with layout `z/x/y.*`.
-
-    Yields:
-      The mercantile tiles and file paths from the slippy map directory.
-    """
-
-    # The Python string functions (.isdigit, .isdecimal, etc.) handle
-    # unicode codepoints; we only care about digits convertible to int
-    def isdigit(v):
-        try:
-            _ = int(v)  # noqa: F841
-            return True
-        except ValueError:
-            return False
+    """Loads files from an on-disk slippy map dir."""
 
     root = os.path.expanduser(root)
-    for z in os.listdir(root):
-        if not isdigit(z):
+    paths = glob.glob(os.path.join(root, "[0-9]*/[0-9]*/[0-9]*.*"))
+
+    for path in paths:
+
+        tile = re.match(os.path.join(root, "(?P<z>[0-9]+)/(?P<x>[0-9]+)/(?P<y>[0-9]+).+"), path)
+        if not tile:
             continue
 
-        for x in os.listdir(os.path.join(root, z)):
-            if not isdigit(x):
-                continue
+        yield mercantile.Tile(int(tile["x"]), int(tile["y"]), int(tile["z"])), path
 
-            for name in os.listdir(os.path.join(root, z, x)):
-                y = os.path.splitext(name)[0]
 
-                if not isdigit(y):
-                    continue
+def tile_from_slippy_map(root, x, y, z):
+    """Retrieve a single tile from a slippy map dir."""
 
-                tile = mercantile.Tile(x=int(x), y=int(y), z=int(z))
-                path = os.path.join(root, z, x, name)
-                yield tile, path
+    path = glob.glob(os.path.join(os.path.expanduser(root), z, x, y + ".*"))
+    if not path:
+        return None
+
+    return mercantile.Tile(x, y, z), path[0]
 
 
 def tiles_from_csv(path):
-    """Read tiles from a line-delimited csv file.
-
-    Args:
-      file: the path to read the csv file from.
-
-    Yields:
-      The mercantile tiles from the csv file.
-    """
+    """Retrieve tiles from a line-delimited csv file."""
 
     path = os.path.expanduser(path)
     with open(path) as fp:
@@ -126,57 +66,44 @@ def tiles_from_csv(path):
             yield mercantile.Tile(*map(int, row))
 
 
-def tile_image(root, x, y, z):
-    """Retrieves H,W,C numpy array, from a tile store and X,Y,Z coordinates, or `None`"""
+def tile_image(path):
+    """Return a multiband image numpy array, from a file path."""
+
+    path = os.path.expanduser(path)
+    image = cv2.imread(path, cv2.IMREAD_ANYCOLOR)
+    if len(image.shape) == 3 and image.shape[2] >= 3:  # multibands BGR2RGB
+        b = image[:, :, 0]
+        image[:, :, 0] = image[:, :, 2]
+        image[:, :, 2] = b
+
+    return image
+
+
+def tile_image_fetch(session, url, timeout=10):
+    """Fetch a tile image using HTTP. Need requests.Session."""
 
     try:
-        root = os.path.expanduser(root)
-        path = glob(os.path.join(root, z, x, y) + "*")
-        assert len(path) == 1
-        img = np.array(Image.open(path[0]).convert("RGB"))
-    except:
+        resp = session.get(url, timeout=timeout)
+        resp.raise_for_status()
+        return io.BytesIO(resp.content)
+
+    except Exception:
         return None
 
-    return img
 
-
-def adjacent_tile_image(tile, dx, dy, tiles):
-    """Retrieves an adjacent tile image from a tile store.
-
-    Args:
-      tile: the original tile to get an adjacent tile image for.
-      dx: the offset in tile x direction.
-      dy: the offset in tile y direction.
-      tiles: the tile store to get tiles from; must support `__getitem__` with tiles.
-
-    Returns:
-      The adjacent tile's image or `None` if it does not exist.
-    """
-
-    x, y, z = map(int, [tile.x, tile.y, tile.z])
-    adjacent = mercantile.Tile(x=x + dx, y=y + dy, z=z)
+def tile_image_adjacent(tile, dx, dy, tiles):
+    """Retrieves an adjacent tile image if exists from a tile store, or None."""
 
     try:
-        path = tiles[adjacent]
+        path = tiles[mercantile.Tile(x=int(tile.x) + dx, y=int(tile.y) + dy, z=int(tile.z))]
     except KeyError:
         return None
 
-    return cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2RGB)
+    return tile_image(path)
 
 
-def buffer_tile_image(tile, tiles, overlap, tile_size):
-    """Buffers a tile image adding borders on all sides based on adjacent tiles.
-
-    Args:
-      tile: the tile to buffer.
-      tiles: available tiles; must be a mapping of tiles to their filesystem paths.
-      overlap: the tile border to add on every side; in pixel.
-      tile_size: the tile size.
-
-    Returns:
-      The H,W,C numpy composite image containing the original tile plus tile overlap on all sides.
-      It's size is `tile_size` + 2 * `overlap` pixel for each side.
-    """
+def tile_image_buffer(tile, tiles, overlap, tile_size):
+    """Buffers a tile image adding borders on all sides based on adjacent tiles."""
 
     assert 0 <= overlap <= tile_size, "Overlap value can't be either negative or bigger than tile_size"
 
@@ -184,21 +111,20 @@ def buffer_tile_image(tile, tiles, overlap, tile_size):
     x, y, z = map(int, [tile.x, tile.y, tile.z])
 
     # 3x3 matrix (upper, center, bottom) x (left, center, right)
-    ul = adjacent_tile_image(tile, -1, -1, tiles)
-    uc = adjacent_tile_image(tile, +0, -1, tiles)
-    ur = adjacent_tile_image(tile, +1, -1, tiles)
-    cl = adjacent_tile_image(tile, -1, +0, tiles)
-    cc = adjacent_tile_image(tile, +0, +0, tiles)
-    cr = adjacent_tile_image(tile, +1, +0, tiles)
-    bl = adjacent_tile_image(tile, -1, +1, tiles)
-    bc = adjacent_tile_image(tile, +0, +1, tiles)
-    br = adjacent_tile_image(tile, +1, +1, tiles)
+    ul = tile_image_adjacent(tile, -1, -1, tiles)
+    uc = tile_image_adjacent(tile, +0, -1, tiles)
+    ur = tile_image_adjacent(tile, +1, -1, tiles)
+    cl = tile_image_adjacent(tile, -1, +0, tiles)
+    cc = tile_image_adjacent(tile, +0, +0, tiles)
+    cr = tile_image_adjacent(tile, +1, +0, tiles)
+    bl = tile_image_adjacent(tile, -1, +1, tiles)
+    bc = tile_image_adjacent(tile, +0, +1, tiles)
+    br = tile_image_adjacent(tile, +1, +1, tiles)
 
     ts = tile_size
     o = overlap
     oo = overlap * 2
 
-    # Todo: instead of nodata we should probably mirror the center image
     img = np.zeros((ts + oo, ts + oo, 3)).astype(np.uint8)
 
     # fmt:off

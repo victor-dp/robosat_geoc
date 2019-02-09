@@ -31,7 +31,7 @@ class TestSlippyMapTiles(unittest.TestCase):
 class TestSlippyMapTilesConcatenation(unittest.TestCase):
     def test_len(self):
         path   = "tests/fixtures"
-        target = "tests/fixtures/labels/"
+        target = "tests/fixtures/labels"
         channels = [{"sub": "images", "bands": [1, 2, 3]}]
 
         transform = JointCompose([JointTransform(ImageToTensor(), MaskToTensor())])
@@ -41,7 +41,7 @@ class TestSlippyMapTilesConcatenation(unittest.TestCase):
 
     def test_getitem(self):
         path   = "tests/fixtures"
-        target = "tests/fixtures/labels/"
+        target = "tests/fixtures/labels"
         channels = [{"sub": "images", "bands": [1, 2, 3]}]
 
         transform = JointCompose([JointTransform(ImageToTensor(), MaskToTensor())])
