@@ -16,7 +16,7 @@ from tqdm import tqdm
 from PIL import Image
 
 import robosat_pink.models
-from robosat_pink.datasets import BufferedSlippyMapTiles
+from robosat_pink.datasets import DatasetTilesBuffer
 from robosat_pink.tiles import tiles_from_slippy_map
 from robosat_pink.config import load_config
 from robosat_pink.colors import make_palette
@@ -91,8 +91,8 @@ def main(args):
     net.eval()
 
     transform = Compose([ImageToTensor(), Normalize(mean=mean, std=std)])
-    directory = BufferedSlippyMapTiles(args.tiles, transform=transform, size=tile_size, overlap=args.overlap)
-    loader = DataLoader(directory, batch_size=batch_size, num_workers=args.workers)
+    dataset = DatasetTilesBuffer(args.tiles, transform=transform, size=tile_size, overlap=args.overlap)
+    loader = DataLoader(dataset, batch_size=batch_size, num_workers=args.workers)
 
     palette = make_palette(config["classes"][0]["color"], config["classes"][1]["color"])
 
@@ -109,7 +109,7 @@ def main(args):
                 x, y, z = list(map(int, tile))
 
                 # we predicted on buffered tiles; now get back probs for original image
-                prob = directory.unbuffer(prob)
+                prob = dataset.unbuffer(prob)
 
                 assert prob.shape[0] == 2, "single channel requires binary model"
                 assert np.allclose(np.sum(prob, axis=0), 1.0), "single channel requires probabilities to sum up to one"

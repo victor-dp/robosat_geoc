@@ -1,16 +1,12 @@
-"""Log facilitator
-"""
+"""Log facilitator."""
 
 import os
 import sys
 
 
 class Logs:
-
-    """Create a logs instance on a logs file
-    """
-
     def __init__(self, path, out=sys.stdout):
+        """Create a logs instance on a logs file."""
 
         self.fp = None
         self.out = out
@@ -22,10 +18,8 @@ class Logs:
         except:
             sys.exit("Unable to write in logs directory")
 
-    """Log a new message to the opened logs file, and optionnaly on stdout or stderr too
-    """
-
     def log(self, msg):
+        """Log a new message to the opened logs file, and optionnaly on stdout or stderr too."""
         try:
             if self.fp:
                 self.fp.write(msg + os.linesep)

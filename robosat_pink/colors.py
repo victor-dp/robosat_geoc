@@ -1,16 +1,11 @@
-"""Color handling, color maps, color palettes.
-"""
+"""Color handling, color maps, color palettes."""
 
 import colorsys
 import webcolors
 
 
 def make_palette(*colors):
-    """Builds a PIL-compatible color palette from CSS3 color names, or hex values patterns as #RRGGBB
-
-    Args:
-      colors: variable number of color names.
-    """
+    """Builds a PIL color palette from CSS3 color names, or hex values patterns as #RRGGBB."""
 
     assert 0 < len(colors) <= 256
 
@@ -21,18 +16,7 @@ def make_palette(*colors):
 
 
 def continuous_palette_for_color(color, bins=256):
-    """Creates a continuous color palette based on a single color.
-
-    Args:
-      color: the CSS3 color name or it's hex values as #RRGGBB, to create a continuous palette for.
-      bins: the number of colors to create in the continuous palette.
-
-    Returns:
-      The continuous rgb color palette with 3*bins values represented as [r0,g0,b0,r1,g1,b1,..]
-    """
-
-    # A quick and dirty way to create a continuous color palette is to convert from the RGB color
-    # space into the HSV color space and then only adapt the color's saturation (S component).
+    """Creates a continuous PIL color palette based on a single color (CSS3 color name or #RRGGBB), and a bins number."""
 
     hexs = webcolors.CSS3_NAMES_TO_HEX[color] if color[0] != "#" else color
     r, g, b = [(int(h[1:3], 16), int(h[3:5], 16), int(h[5:7], 16)) for h in hexs]
@@ -49,7 +33,7 @@ def continuous_palette_for_color(color, bins=256):
 
 
 def complementary_palette(palette):
-    """Creates a PIL complementary colors palette based on an initial PIL palette"""
+    """Creates a PIL complementary colors palette based on an initial PIL palette."""
 
     comp_palette = []
     colors = [palette[i : i + 3] for i in range(0, len(palette), 3)]

@@ -66,7 +66,7 @@ def tiles_from_csv(path):
             yield mercantile.Tile(*map(int, row))
 
 
-def tile_image(path):
+def tile_image_from_file(path):
     """Return a multiband image numpy array, from a file path."""
 
     path = os.path.expanduser(path)
@@ -79,7 +79,7 @@ def tile_image(path):
     return image
 
 
-def tile_image_fetch(session, url, timeout=10):
+def tile_image_from_url(session, url, timeout=10):
     """Fetch a tile image using HTTP. Need requests.Session."""
 
     try:
@@ -99,7 +99,7 @@ def tile_image_adjacent(tile, dx, dy, tiles):
     except KeyError:
         return None
 
-    return tile_image(path)
+    return tile_image_from_file(path)
 
 
 def tile_image_buffer(tile, tiles, overlap, tile_size):

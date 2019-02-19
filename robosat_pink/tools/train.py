@@ -21,7 +21,7 @@ from robosat_pink.transforms import (
     ImageToTensor,
     MaskToTensor,
 )
-from robosat_pink.datasets import SlippyMapTilesConcatenation
+from robosat_pink.datasets import DatasetTilesConcat
 from robosat_pink.metrics import Metrics
 from robosat_pink.config import load_config
 from robosat_pink.logs import Logs
@@ -262,14 +262,14 @@ def get_dataset_loaders(path, config, workers):
         ]
     )
 
-    train_dataset = SlippyMapTilesConcatenation(
+    dataset_train = DatasetTilesConcat(
         os.path.join(path, "training"),
         config["channels"],
         os.path.join(path, "training", "labels"),
         joint_transform=transform,
     )
 
-    val_dataset = SlippyMapTilesConcatenation(
+    dataset_val = DatasetTilesConcat(
         os.path.join(path, "validation"),
         config["channels"],
         os.path.join(path, "validation", "labels"),
@@ -277,7 +277,7 @@ def get_dataset_loaders(path, config, workers):
     )
 
     batch_size = config["model"]["batch_size"]
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=workers)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, drop_last=True, num_workers=workers)
+    train_loader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=workers)
+    val_loader = DataLoader(dataset_val, batch_size=batch_size, shuffle=False, drop_last=True, num_workers=workers)
 
     return train_loader, val_loader

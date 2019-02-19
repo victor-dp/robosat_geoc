@@ -11,7 +11,7 @@ import numpy as np
 
 from mercantile import feature
 
-from robosat_pink.tiles import tiles_from_slippy_map, tile_from_slippy_map, tile_image
+from robosat_pink.tiles import tiles_from_slippy_map, tile_from_slippy_map, tile_image_from_file
 from robosat_pink.config import load_config
 from robosat_pink.metrics import Metrics
 from robosat_pink.web_ui import web_ui
@@ -109,7 +109,7 @@ def main(args):
         if args.mode == "side":
 
             for i, root in enumerate(args.images):
-                img = tile_image(tile_from_slippy_map(root, x, y, z)[1])
+                img = tile_image_from_file(tile_from_slippy_map(root, x, y, z)[1])
 
                 if i == 0:
                     side = np.zeros((img.shape[0], img.shape[1] * len(args.images), 3))
@@ -130,7 +130,7 @@ def main(args):
         elif args.mode == "stack":
 
             for i, root in enumerate(args.images):
-                img = tile_image(tile_from_slippy_map(root, x, y, z)[1])
+                img = tile_image_from_file(tile_from_slippy_map(root, x, y, z)[1])
 
                 if i == 0:
                     image_shape = img.shape[0:2]

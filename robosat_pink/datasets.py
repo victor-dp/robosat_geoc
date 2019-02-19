@@ -1,9 +1,4 @@
-"""PyTorch-compatible datasets.
-
-Guaranteed to implement `__len__`, and `__getitem__`.
-
-See: https://pytorch.org/docs/stable/data.html
-"""
+"""PyTorch-compatible datasets. Cf: https://pytorch.org/docs/stable/data.html """
 
 import os
 import sys
@@ -14,11 +9,11 @@ from PIL import Image
 import torch
 import torch.utils.data
 
-from robosat_pink.tiles import tiles_from_slippy_map, tile_image_buffer, tile_image
+from robosat_pink.tiles import tiles_from_slippy_map, tile_image_buffer, tile_image_from_file
 
 
-class SlippyMapTiles(torch.utils.data.Dataset):
-    """Dataset for images stored in slippy map format. """
+class DatasetTiles(torch.utils.data.Dataset):
+    """Dataset for images stored in slippy map format."""
 
     def __init__(self, root, mode, transform=None):
         super().__init__()
@@ -40,7 +35,7 @@ class SlippyMapTiles(torch.utils.data.Dataset):
             image = np.array(Image.open(path).convert("P"))
 
         elif self.mode == "image":
-            image = tile_image(path)
+            image = tile_image_from_file(path)
 
         if self.transform is not None:
             image = self.transform(image)
@@ -48,23 +43,21 @@ class SlippyMapTiles(torch.utils.data.Dataset):
         return image, tile
 
 
-class SlippyMapTilesConcatenation(torch.utils.data.Dataset):
-    """Dataset to concate multiple input images stored in slippy map format. """
+class DatasetTilesConcat(torch.utils.data.Dataset):
+    """Dataset to concate multiple input images stored in slippy map format."""
 
     def __init__(self, path, channels, target, joint_transform=None):
         super().__init__()
 
-        assert len(channels), "Channels configuration empty"
+        assert len(channels)
         self.channels = channels
         self.inputs = dict()
 
         for channel in channels:
             for band in channel["bands"]:
-                self.inputs[channel["sub"]] = SlippyMapTiles(os.path.join(path, channel["sub"]), mode="image")
+                self.inputs[channel["sub"]] = DatasetTiles(os.path.join(path, channel["sub"]), mode="image")
 
-        self.target = SlippyMapTiles(target, mode="mask")
-
-        # No transformations in the `SlippyMapTiles` instead joint transformations in getitem
+        self.target = DatasetTiles(target, mode="mask")
         self.joint_transform = joint_transform
 
     def __len__(self):
@@ -92,23 +85,23 @@ class SlippyMapTilesConcatenation(torch.utils.data.Dataset):
         return tensor, mask, tile
 
 
-class BufferedSlippyMapTiles(torch.utils.data.Dataset):
+class DatasetTilesBuffer(torch.utils.data.Dataset):
     """Dataset for buffered slippy map tiles with overlap.
 
-       Note: The overlap must not span multiple tiles.
-             Use `unbuffer` to get back the original tile.
+       Notes: - The overlap must not span multiple tiles.
+              - Use `unbuffer` to get back the original tile.
     """
 
     def __init__(self, root, transform=None, size=512, overlap=32):
 
         super().__init__()
 
-        assert overlap >= 0
         assert size >= 256
+        assert overlap >= 0
 
-        self.transform = transform
         self.size = size
         self.overlap = overlap
+        self.transform = transform
         self.tiles = list(tiles_from_slippy_map(root))
 
     def __len__(self):

@@ -1,22 +1,22 @@
 import unittest
 
 import torch
-from robosat_pink.transforms import JointCompose, JointTransform, ImageToTensor, MaskToTensor
 import mercantile
 
-from robosat_pink.datasets import SlippyMapTiles, SlippyMapTilesConcatenation
+from robosat_pink.datasets import DatasetTiles, DatasetTilesConcat
+from robosat_pink.transforms import JointCompose, JointTransform, ImageToTensor, MaskToTensor
 
 
-class TestSlippyMapTiles(unittest.TestCase):
+class TestDatasetTiles(unittest.TestCase):
 
     images = "tests/fixtures/images/"
 
     def test_len(self):
-        dataset = SlippyMapTiles(TestSlippyMapTiles.images, "image")
+        dataset = DatasetTiles(TestDatasetTiles.images, "image")
         self.assertEqual(len(dataset), 3)
 
     def test_getitem(self):
-        dataset = SlippyMapTiles(TestSlippyMapTiles.images, "image")
+        dataset = DatasetTiles(TestDatasetTiles.images, "image")
         image, tile = dataset[0]
 
         assert tile == mercantile.Tile(69105, 105093, 18)
@@ -28,14 +28,14 @@ class TestSlippyMapTiles(unittest.TestCase):
         pass
 
 
-class TestSlippyMapTilesConcatenation(unittest.TestCase):
+class TestDatasetTilesConcat(unittest.TestCase):
     def test_len(self):
         path   = "tests/fixtures"
         target = "tests/fixtures/labels"
         channels = [{"sub": "images", "bands": [1, 2, 3]}]
 
         transform = JointCompose([JointTransform(ImageToTensor(), MaskToTensor())])
-        dataset = SlippyMapTilesConcatenation(path, channels, target, transform)
+        dataset = DatasetTilesConcat(path, channels, target, transform)
 
         self.assertEqual(len(dataset), 3)
 
@@ -45,7 +45,7 @@ class TestSlippyMapTilesConcatenation(unittest.TestCase):
         channels = [{"sub": "images", "bands": [1, 2, 3]}]
 
         transform = JointCompose([JointTransform(ImageToTensor(), MaskToTensor())])
-        dataset = SlippyMapTilesConcatenation(path, channels, target, transform)
+        dataset = DatasetTilesConcat(path, channels, target, transform)
 
         images, mask, tiles = dataset[0]
         self.assertEqual(tiles, mercantile.Tile(69105, 105093, 18))

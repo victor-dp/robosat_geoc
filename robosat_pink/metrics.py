@@ -13,17 +13,10 @@ class Metrics:
         self.tp = 0
 
     def add(self, label, predicted, is_prob=True):
-        """Adds an observation to the tracker.
+        """Adds an label/predicted tuple to the tracker."""
 
-        Args:
-          label: the ground truth labels.
-          predicted: the predicted prob or mask.
-          is_prob: as predicted could be either a prob or a mask.
-        """
-
-        if is_prob:
+        if is_prob:  # prob to mask
             predicted = torch.argmax(predicted, 0)
-
         confusion = predicted.view(-1).float() / label.view(-1).float()
 
         self.tn += torch.sum(torch.isnan(confusion)).item()

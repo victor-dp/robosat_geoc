@@ -9,7 +9,7 @@ from PIL import Image
 from tqdm import tqdm
 from mercantile import xy_bounds
 
-from robosat_pink.tiles import tiles_from_csv, tile_image_fetch
+from robosat_pink.tiles import tiles_from_csv, tile_image_from_url
 from robosat_pink.web_ui import web_ui
 from robosat_pink.logs import Logs
 
@@ -74,7 +74,7 @@ def main(args):
                     xmin, ymin, xmax, ymax = xy_bounds(tile)
                     url = args.url.format(xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
 
-                res = tile_image_fetch(session, url, args.timeout)
+                res = tile_image_from_url(session, url, args.timeout)
                 if not res:
                     return tile, url, False
 
