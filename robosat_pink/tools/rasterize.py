@@ -1,8 +1,10 @@
 import argparse
 import collections
+import struct
 import json
-import os
 import sys
+import os
+import io
 
 import numpy as np
 from PIL import Image
@@ -21,34 +23,34 @@ from robosat_pink.tiles import tiles_from_csv
 from robosat_pink.web_ui import web_ui
 from robosat_pink.logs import Logs
 
+import psycopg2
+
 
 def add_parser(subparser):
     parser = subparser.add_parser(
         "rasterize",
-        help="rasterize GeoJSON features to raster labels",
+        help="rasterize either GeoJSON or PostGIS features to raster labels",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
     parser.add_argument("--config", type=str, required=True, help="path to configuration file")
-    parser.add_argument("--zoom", type=int, required=True, help="zoom level of tiles")
+    parser.add_argument("--postgis", type=str, help="PostGIS SQL SELECT query to retrieve features")
+    parser.add_argument("--geojson", type=str, nargs="+", help="path to GeoJSON features files")
+    parser.add_argument("--zoom", type=int, required="--geojson" in sys.argv, help="zoom level of tiles (for GeoJSON)")
     parser.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
     parser.add_argument("--web_ui", action="store_true", help="activate web ui output")
     parser.add_argument("--web_ui_base_url", type=str, help="web ui alternate base url")
     parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
-    parser.add_argument("features", type=str, nargs="+", help="path to GeoJSON features file")
     parser.add_argument("cover", type=str, help="path to csv tiles cover file")
     parser.add_argument("out", type=str, help="directory to write converted images")
 
     parser.set_defaults(func=main)
 
 
-def feature_to_mercator(feature):
-    """Convert polygon feature coords to 3857.
-
-    Args:
-      feature: geojson feature to convert to mercator geometry.
+def geojson_to_mercator(feature):
+    """Convert GeoJSON Polygon feature coords to Mercator (i.e EPSG:3857).
+       Inspired by: https://gist.github.com/dnomadb/5cbc116aacc352c7126e779c29ab7abe
     """
-    # Ref: https://gist.github.com/dnomadb/5cbc116aacc352c7126e779c29ab7abe
 
     # FIXME: We assume that GeoJSON input coordinates can't be anything else than EPSG:4326
     if feature["geometry"]["type"] == "Polygon":
@@ -58,20 +60,10 @@ def feature_to_mercator(feature):
         yield {"coordinates": list(xys), "type": "Polygon"}
 
 
-def burn(tile, features, tile_size, burn_value=1):
-    """Burn tile with features.
+def geojson_tile_burn(tile, features, tile_size, burn_value=1):
+    """Burn tile with GeoJSON features."""
 
-    Args:
-      tile: the mercantile tile to burn.
-      features: the geojson features to burn.
-      tile_size: the size of burned image.
-      burn_value: the value you want in the output raster where a shape exists
-
-    Returns:
-      image: rasterized file of size with features burned.
-    """
-
-    shapes = ((geometry, burn_value) for feature in features for geometry in feature_to_mercator(feature))
+    shapes = ((geometry, burn_value) for feature in features for geometry in geojson_to_mercator(feature))
 
     bounds = mercantile.xy_bounds(tile)
     transform = from_bounds(*bounds, tile_size, tile_size)
@@ -79,21 +71,71 @@ def burn(tile, features, tile_size, burn_value=1):
     return rasterize(shapes, out_shape=(tile_size, tile_size), transform=transform)
 
 
+def wkb_to_numpy(wkb):
+    """Convert a PostGIS WKB raster to a NumPy array.
+       Inspired by: https://github.com/nathancahill/wkb-raster
+
+       PostGIS WKB RFC: http://trac.osgeo.org/postgis/browser/trunk/raster/doc/RFC2-WellKnownBinaryFormat
+    """
+
+    out = None
+
+    if not wkb:
+        return None
+
+    endian = ">" if struct.unpack("<b", wkb.read(1)) == 0 else "<"  # raster Endiannes
+    (_, bands, _, _, _, _, _, _, srid, width, height) = struct.unpack(
+        endian + "HHddddddIHH", wkb.read(60)
+    )  # raster Metadata
+
+    for band in range(bands):
+
+        bits = int(struct.unpack(endian + "b", wkb.read(1))[0])  # raster header band attributes
+        if bool(bits & 128):
+            sys.exit("OffLine PostGIS WKB Data not supported.")
+
+        size = [1, 1, 1, 1, 1, 2, 2, 4, 4, 4, 8][bits & 15]
+        dtype = ["b1", "u1", "u1", "i1", "u1", "i2", "u2", "i4", "u4", "f4", "f8"][bits & 15]
+
+        wkb.read(size)  # Skip raster NoData value
+
+        if band == 0:
+            out = np.zeros((height, width, bands), dtype=np.dtype(dtype))
+            pixtype = bits & 15
+        elif pixtype != bits & 15:
+            sys.exit("Mixed PostGIS WBK Data type not supported.")
+
+        out[:, :, band] = np.ndarray((height, width), buffer=wkb.read(width * height * size), dtype=np.dtype(dtype))
+
+    return out
+
+
+def write_tile(root, tile, colors, out):
+    """ """
+    os.makedirs(os.path.join(root, str(tile.z), str(tile.x)), exist_ok=True)
+
+    out_path = os.path.join(root, str(tile.z), str(tile.x))
+    os.makedirs(out_path, exist_ok=True)
+
+    out = Image.fromarray(out, mode="P")
+    out.putpalette(complementary_palette(make_palette(colors[0], colors[1])))
+    out.save(os.path.join(out_path, "{}.png".format(tile.y)), optimize=True)
+
+
 def main(args):
+
+    if (args.geojson and args.postgis) or (not args.geojson and not args.postgis):
+        sys.exit("Input features to rasterize must be either GeoJSON or PostGIS")
+
     config = load_config(args.config)
     tile_size = args.tile_size if args.tile_size else config["model"]["tile_size"]
     colors = [classe["color"] for classe in config["classes"]]
+    burn_value = 1
 
     os.makedirs(args.out, exist_ok=True)
-
-    # We can only rasterize all tiles at a single zoom.
-    assert all(tile.z == args.zoom for tile in tiles_from_csv(args.cover))
-
-    # Find all tiles the features cover and make a map object for quick lookup.
-    feature_map = collections.defaultdict(list)
     log = Logs(os.path.join(args.out, "log"), out=sys.stderr)
 
-    def parse_polygon(feature_map, polygon, i):
+    def geojson_parse_polygon(feature_map, polygon, i):
 
         try:
             for i, ring in enumerate(polygon["coordinates"]):  # GeoJSON coordinates could be N dimensionals
@@ -107,53 +149,104 @@ def main(args):
 
         return feature_map
 
-    def parse_geometry(feature_map, geometry, i):
+    def geojson_parse_geometry(feature_map, geometry, i):
 
         if geometry["type"] == "Polygon":
-            feature_map = parse_polygon(feature_map, geometry, i)
+            feature_map = geojson_parse_polygon(feature_map, geometry, i)
 
         elif geometry["type"] == "MultiPolygon":
             for polygon in geometry["coordinates"]:
-                feature_map = parse_polygon(feature_map, {"type": "Polygon", "coordinates": polygon}, i)
+                feature_map = geojson_parse_polygon(feature_map, {"type": "Polygon", "coordinates": polygon}, i)
         else:
             log.log("Notice: {} is a non surfacic geometry type, skipping feature {}".format(geometry["type"], i))
 
         return feature_map
 
-    for feature in args.features:
-        with open(feature) as f:
-            fc = json.load(f)
-            for i, feature in enumerate(tqdm(fc["features"], ascii=True, unit="feature")):
+    if args.geojson:
 
-                if feature["geometry"]["type"] == "GeometryCollection":
-                    for geometry in feature["geometry"]["geometries"]:
-                        feature_map = parse_geometry(feature_map, geometry, i)
-                else:
-                    feature_map = parse_geometry(feature_map, feature["geometry"], i)
+        if not all(tile.z == args.zoom for tile in tiles_from_csv(args.cover)):
+            sys.exit("With GeoJson input, zoom level and cover tiles z values have to be the same.")
 
-    # Burn features to tiles and write to a slippy map directory.
-    for tile in tqdm(list(tiles_from_csv(args.cover)), ascii=True, unit="tile"):
-        if tile in feature_map:
-            out = burn(tile, feature_map[tile], tile_size)
-        else:
-            out = np.zeros(shape=(tile_size, tile_size), dtype=np.uint8)
+        feature_map = collections.defaultdict(list)
 
-        out_dir = os.path.join(args.out, str(tile.z), str(tile.x))
-        os.makedirs(out_dir, exist_ok=True)
+        # Compute a spatial index like
+        for geojson_file in args.geojson:
+            with open(geojson_file) as geojson:
+                feature_collection = json.load(geojson)
+                for i, feature in enumerate(tqdm(feature_collection["features"], ascii=True, unit="feature")):
 
-        out_path = os.path.join(out_dir, "{}.png".format(tile.y))
+                    if feature["geometry"]["type"] == "GeometryCollection":
+                        for geometry in feature["geometry"]["geometries"]:
+                            feature_map = geojson_parse_geometry(feature_map, geometry, i)
+                    else:
+                        feature_map = geojson_parse_geometry(feature_map, feature["geometry"], i)
 
-        if os.path.exists(out_path):
-            prev = np.array(Image.open(out_path))
-            out = np.maximum(out, prev)
+        # Rasterize tiles
+        for tile in tqdm(list(tiles_from_csv(args.cover)), ascii=True, unit="tile"):
+            if tile in feature_map:
+                out = geojson_tile_burn(tile, feature_map[tile], tile_size, burn_value)
+            else:
+                out = np.zeros(shape=(tile_size, tile_size), dtype=np.uint8)
 
-        out = Image.fromarray(out, mode="P")
+            write_tile(args.out, tile, colors, out)
 
-        out_path = os.path.join(args.out, str(tile.z), str(tile.x))
-        os.makedirs(out_path, exist_ok=True)
+    if args.postgis:
 
-        out.putpalette(complementary_palette(make_palette(colors[0], colors[1])))
-        out.save(os.path.join(out_path, "{}.png".format(tile.y)), optimize=True)
+        try:
+            pg_conn = psycopg2.connect(config["dataset"]["pg_dsn"])
+            pg = pg_conn.cursor()
+        except Exception:
+            sys.exit("Unable to connect PostgreSQL: {}".format(config["dataset"]["pg_dsn"]))
+
+        try:
+            pg.execute("SELECT ST_Srid(geom) AS srid FROM ({} LIMIT 1) AS sub".format(args.postgis))
+            srid = pg.fetchone()[0]
+        except Exception:
+            sys.exit("Unable to retrieve geometry SRID.")
+
+        for tile in tqdm(list(tiles_from_csv(args.cover)), ascii=True, unit="tile"):
+
+            s, w, e, n = mercantile.bounds(tile)
+            raster = np.zeros((tile_size, tile_size))
+
+            query = """
+WITH
+     bbox      AS (SELECT ST_Transform(ST_MakeEnvelope({},{},{},{}, 4326), {}  ) AS bbox),
+     bbox_merc AS (SELECT ST_Transform(ST_MakeEnvelope({},{},{},{}, 4326), 3857) AS bbox),
+
+     rast_a    AS (SELECT ST_AddBand(
+                           ST_SetSRID(
+                             ST_MakeEmptyRaster({}, {}, ST_Xmin(bbox), ST_Ymax(bbox), (ST_YMax(bbox) - ST_YMin(bbox)) / {}),
+                           3857),
+                          '8BUI'::text, 0) AS rast
+                   FROM bbox_merc),
+
+     features  AS (SELECT ST_Union(ST_Transform(ST_Force2D(geom), 3857)) AS geom
+                   FROM ({}) AS sub, bbox
+                   WHERE ST_Intersects(geom, bbox)),
+
+     rast_b    AS (SELECT ST_AsRaster(geom, rast, '8BUI', {}) AS rast
+                   FROM features, rast_a
+                   WHERE NOT ST_IsEmpty(geom))
+
+SELECT ST_AsBinary(ST_MapAlgebra(rast_a.rast, rast_b.rast, '{}', NULL, 'FIRST')) AS wkb FROM rast_a, rast_b
+
+""".format(
+                s, w, e, n, srid, s, w, e, n, tile_size, tile_size, tile_size, args.postgis, burn_value, burn_value
+            )
+
+            try:
+                pg.execute(query)
+                row = pg.fetchone()
+                if row:
+                    raster = np.squeeze(wkb_to_numpy(io.BytesIO(row[0])), axis=2)
+
+            except Exception:
+                log.log("Warning: Invalid geometries, skipping {}".format(tile))
+                pg_conn = psycopg2.connect(config["dataset"]["pg_dsn"])
+                pg = pg_conn.cursor()
+
+            write_tile(args.out, tile, colors, raster)
 
     if args.web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template

@@ -1,9 +1,11 @@
 # RoboSat.pink Configuration
 
-
 [dataset]
-  # The slippy map dataset's base directory.
+  # The datasets base directory.
   path = "~/rsp_dataset"
+
+  # Optional PostgreSQL Database connection, using psycopg2 syntax (could be use by rasterize tool).
+  pg_dsn = "host=127.0.0.1 dbname=rsp user=postgres"
 
 
 # Classes configuration.

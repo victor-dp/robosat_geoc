@@ -2,7 +2,7 @@ check:
 	pytest tests
 	@echo ""
 	@echo "==="
-	black -l 125 --diff robosat_pink/*py robosat_pink/*/*.py
+	black -l 125 --check robosat_pink/*py robosat_pink/*/*.py
 	@echo "==="
 	@echo ""
 	flake8 --max-line-length 125 --ignore=E203,E241,E226,E272,E261,E221,W503,E722
@@ -20,7 +20,7 @@ it: clean
 
 	wget -nc -O it/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&BBOX=4.79,45.69,4.84,45.74&outputFormat=application/json; subtype=geojson' | true
 
-	rsp rasterize --config config.toml --zoom 18 --web_ui it/lyon_roofprint.json it/cover it/labels
+	rsp rasterize --config config.toml --zoom 18 --geojson it/lyon_roofprint.json --web_ui it/cover it/labels
 
 	rm -rf it/training it/validation
 	mkdir it/training it/validation
@@ -41,6 +41,8 @@ it: clean
 	rsp compare --images it/images it/labels it/masks --mode stack --labels it/labels --masks it/masks --config config.toml --web_ui it/compare
 
 	rsp compare --mode list --labels it/labels --maximum_qod 70 --minimum_fg 5 --masks it/masks --config config.toml --geojson it/tiles.json
+
+	rsp vectorize --type building --config config.toml it/masks it/vector.json
 
 
 
