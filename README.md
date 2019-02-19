@@ -71,8 +71,8 @@ Related resources:
 
 - <a href="./docs/from_opendata_to_opendataset.md">RoboSat.pink tutorial: from OpenData to OpenDataSet</a>
 - <a href="./docs/extensibility_by_design.md">RoboSat.pink documentation: Extensibility by Design</a>
-- <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">Robosat slides @PyParis 2018</a>
-- <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">Robosat slides @FOSDEM 2019</a>
+- <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">RoboSat.pink slides @PyParis 2018</a>
+- <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">RoboSat.pink slides @FOSDEM 2019</a>
 - <a href="https://github.com/mapbox/robosat">Historical MapBox RoboSat github directory</a>
 - <a href="https://github.com/chrieke/awesome-satellite-imagery-datasets">Christoph Rieke's Awesome Satellite Imagery Datasets</a>
 - <a href="https://github.com/mrgloom/awesome-semantic-segmentation">Mr Gloom's Awesome Semantic Segmentation</a>
