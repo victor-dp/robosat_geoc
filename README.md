@@ -35,7 +35,7 @@ Install:
 -------
 
 **1) Prerequisites:**
-   - Python >= 3.6 and PyTorch >= 0.4 installed, with related Nvidia GPU drivers, CUDA and CUDNN libs.
+   - Python >= 3.6 and PyTorch >= 1.0 installed, with related Nvidia GPU drivers, CUDA and CUDNN libs.
    - At least one GPU, with RAM GPU >= 6Go (default batch_size settings is targeted to 11Go).
    - Libs with headers: libjpeg, libwebp, libbz2, zlib, libboost. And Qt dependancies: libsm and libxrender.
      On a recent Ubuntu-server, could be done with:
@@ -61,7 +61,9 @@ Install:
 WorkFlows:
 --------
 <img alt="Data Preparation" src="docs/img/readme/data_preparation.png" />
+
 <img alt="Training" src="docs/img/readme/training.png" />
+
 
 
 Related resources:
@@ -70,16 +72,14 @@ Related resources:
 - <a href="./docs/from_opendata_to_opendataset.md">RoboSat.pink tutorial: from OpenData to OpenDataSet</a>
 - <a href="./docs/extensibility_by_design.md">RoboSat.pink documentation: Extensibility by Design</a>
 - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">Robosat slides @PyParis 2018</a>
-- <a href="https://github.com/mapbox/robosat">MapBox RoboSat github directory</a>
+- <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">Robosat slides @FOSDEM 2019</a>
+- <a href="https://github.com/mapbox/robosat">Historical MapBox RoboSat github directory</a>
 - <a href="https://github.com/chrieke/awesome-satellite-imagery-datasets">Christoph Rieke's Awesome Satellite Imagery Datasets</a>
 - <a href="https://github.com/mrgloom/awesome-semantic-segmentation">Mr Gloom's Awesome Semantic Segmentation</a>
 
 Bibliography:
 -------------
 
-- <a href="http://www.cs.umanitoba.ca/~ywang/papers/isvc16.pdf">Optimizing IoU in Deep
-Neural Networks for Image Segmentation</a>
-- <a href="http://www.cs.toronto.edu/~wenjie/papers/iccv17/mattyus_etal_iccv17.pdf">DeepRoadMapper: Extracting Road Topology from Aerial Images</a>
 - <a href="https://arxiv.org/abs/1705.08790">The Lovász-Softmax loss: A tractable surrogate for the optimization of the IoU measure in neural networks</a>
 - <a href="https://arxiv.org/abs/1505.04597">U-Net: Convolutional Networks for Biomedical Image Segmentation</a>
 - <a href="https://arxiv.org/abs/1512.03385">Deep Residual Learning for Image Recognition</a>
@@ -88,7 +88,6 @@ Convolutional Neural Networks</a>
 - <a href="https://arxiv.org/abs/1806.00844">TernausNetV2: Fully Convolutional Network for Instance Segmentation</a>
 - <a href="https://hal.archives-ouvertes.fr/hal-01523573/document">Joint Learning from Earth Observation and
 OpenStreetMap Data to Get Faster Better Semantic Maps</a>
-- <a href="https://arxiv.org/abs/1712.02616">In-Place Activated BatchNorm for Memory-Optimized Training of DNNs</a>
 
 
 Arch:
