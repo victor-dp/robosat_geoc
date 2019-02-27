@@ -42,7 +42,7 @@ Install:
    - Libs with headers: libjpeg, libwebp, libbz2, zlib, libboost. And Qt dependancies: libsm and libxrender.
      On a recent Ubuntu-server (e.g 18.04), all this could be done with:
  ```
-     apt-get install build-essential libboost-python-dev zlib1g-dev libbz2-dev libjpeg-turbo8-dev libwebp-dev libsm6 libxrender1 python3-pip
+     sudo apt-get install build-essential libboost-python-dev zlib1g-dev libbz2-dev libjpeg-turbo8-dev libwebp-dev libsm6 libxrender1 python3-pip
  ```
 
  **2) Python libs Install:**
