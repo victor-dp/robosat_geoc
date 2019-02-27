@@ -35,7 +35,9 @@ Install:
 -------
 
 **1) Prerequisites:**
-   - At least one GPU, with related Nvidia GPU drivers and RAM GPU >= 6Go (default batch_size settings is targeted to 11Go).
+   - At least one GPU, with related Nvidia GPU drivers and RAM GPU >= 6Go
+     - Use ```nvidia-smi``` to give a check about this step
+     - Nota: default batch_size settings in config.toml file is targeted to 11Go RAM.
    - Python >= 3.6 and pip installed
    - Libs with headers: libjpeg, libwebp, libbz2, zlib, libboost. And Qt dependancies: libsm and libxrender.
      On a recent Ubuntu-server (e.g 18.04), all this could be done with:
