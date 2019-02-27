@@ -16,3 +16,5 @@ toml
 pytest
 webcolors
 psycopg2-binary
+black
+flake8
