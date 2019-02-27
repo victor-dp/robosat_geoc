@@ -35,12 +35,12 @@ Install:
 -------
 
 **1) Prerequisites:**
-   - Python >= 3.6 and PyTorch >= 1.0 installed, with related Nvidia GPU drivers, CUDA and CUDNN libs.
-   - At least one GPU, with RAM GPU >= 6Go (default batch_size settings is targeted to 11Go).
+   - At least one GPU, with related Nvidia GPU drivers and RAM GPU >= 6Go (default batch_size settings is targeted to 11Go).
+   - Python >= 3.6 and pip installed
    - Libs with headers: libjpeg, libwebp, libbz2, zlib, libboost. And Qt dependancies: libsm and libxrender.
-     On a recent Ubuntu-server, could be done with:
+     On a recent Ubuntu-server (e.g 18.04), all this could be done with:
  ```
-     apt-get install build-essential libboost-python-dev zlib1g-dev libbz2-dev libjpeg-turbo8-dev libwebp-dev libsm6 libxrender1
+     apt-get install build-essential libboost-python-dev zlib1g-dev libbz2-dev libjpeg-turbo8-dev libwebp-dev libsm6 libxrender1 python3-pip
  ```
 
  **2) Python libs Install:**
