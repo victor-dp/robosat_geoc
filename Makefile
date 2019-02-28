@@ -47,4 +47,10 @@ it: clean
 
 
 clean:
-	rm -rf it
+	rm -rf it dist RoboSat.pink.egg-info
+
+
+pypi:
+	rm -rf dist RoboSat.pink.egg-info
+	python3 setup.py sdist
+	twine upload dist/* -r pypi
