@@ -1,0 +1,5 @@
+include VERSION LICENCE
+include requirements.txt
+include robosat_pink/tools/templates/compare.html
+include robosat_pink/tools/templates/leaflet.html
+recursive-include data *

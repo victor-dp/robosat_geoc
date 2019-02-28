@@ -111,3 +111,9 @@ Contributions and Services:
 - Expertise and training on RoboSat.pink are also provided by <a href="http://datapink.com">DataPink</a>.
 
 - And if you want to support the whole project, because it means for your own business, funding is also welcome.
+
+
+Authors:
+--------
+- Daniel J. Hofmann <https://github.com/daniel-j-h>
+- Olivier Courtin <https://github.com/ocourtin>
