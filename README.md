@@ -58,9 +58,9 @@ Install:
 
 WorkFlows:
 --------
-<img alt="Data Preparation" src="docs/img/readme/data_preparation.png" />
+<img alt="Data Preparation" src="https://github.com/datapink/robosat.pink/tree/master/docs/img/readme/data_preparation.png" />
 
-<img alt="Training" src="docs/img/readme/training.png" />
+<img alt="Training" src="https://github.com/datapink/robosat.pink/tree/master/docs/img/readme/training.png" />
 
 
 
@@ -90,7 +90,7 @@ OpenStreetMap Data to Get Faster Better Semantic Maps</a>
 
 Arch:
 ----
-<img alt="Stacks" src="docs/img/readme/stacks.png" />
+<img alt="Stacks" src="https://github.com/datapink/robosat.pink/tree/master/docs/img/readme/stacks.png" />
 
 
 
