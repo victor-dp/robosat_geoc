@@ -47,14 +47,10 @@ Install:
 
  **2) Python libs Install:**
 ```
-     python3 -m pip install -r requirements.txt
+     pip install RoboSat.pink
 ```
-  NOTA: if you want to significantly increase performances switch from Pillow to <a href="https://github.com/uploadcare/pillow-simd">Pillow-simd</a>.
+  NOTA: if you want to significantly increase performances switch then from Pillow to <a href="https://github.com/uploadcare/pillow-simd">Pillow-simd</a>.
 
-
- **3) Deploy:**
-  - Move the `rsp` command to a bin directory covered by your `PATH` (or update your `PATH`)
-  - Move the robosat_pink dir to somewhere covered by your `PYTHONPATH` (or update your `PYTHONPATH`)
 
 
 
