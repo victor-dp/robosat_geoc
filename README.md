@@ -58,10 +58,10 @@ Launch ```nvidia-smi``` to check this step.
 
 **3) RoboSat.pink Install:**
 ```
-     python3 -m pip install RoboSat.pink
+python3 -m pip install RoboSat.pink
 ```
 
-Launch ```rsp -h``` to check this step.
+Launch ```rsp -h``` to check this final step.
 
 
 
