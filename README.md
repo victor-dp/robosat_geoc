@@ -9,7 +9,6 @@
 
 
 
-This repository is a DataPink flavor of RoboSat, including our latests developments.
 
 Spirit:
 -------
@@ -34,25 +33,36 @@ Aims:
 Install:
 -------
 
-**1) Prerequisites:**
-   - At least one GPU, with related Nvidia GPU drivers and RAM GPU >= 6Go
-     - Use ```nvidia-smi``` to give a check about this step
-     - Nota: default batch_size settings in config.toml file is targeted to 11Go RAM.
+**1) Librairies prerequisites:**
    - Python >= 3.6 and pip installed
-   - Libs with headers: libjpeg, libwebp, libbz2, zlib, libboost. And Qt dependancies: libsm and libxrender.
-     On a recent Ubuntu-server (e.g 18.04), all this could be done with:
- ```
-     sudo apt-get install build-essential libboost-python-dev zlib1g-dev libbz2-dev libjpeg-turbo8-dev libwebp-dev libsm6 libxrender1 python3-pip
- ```
+   - Libs with headers: libjpeg, libwebp, libbz2, zlib, libboost. 
+   - Qt dependancies: libsm and libxrender.
 
- **2) Python libs Install:**
+On a recent Ubuntu-server (e.g 18.04), could be done with:
 ```
-     pip install RoboSat.pink
+sudo apt update
+sudo apt-get install build-essential libboost-python-dev zlib1g-dev libbz2-dev libjpeg-turbo8-dev libwebp-dev libsm6 libxrender1 python3-pip
 ```
-  NOTA: if you want to significantly increase performances switch then from Pillow to <a href="https://github.com/uploadcare/pillow-simd">Pillow-simd</a>.
+
+ **2) GPU and driver**
+ - At least one Nvidia GPU
+ - GPU RAM should be >= 6Go. Default `batch_size` configuration is targeted to 11Go. 
+
+GTX series Driver installation:
+```
+wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
+sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
+```
+ 
+Launch ```nvidia-smi``` to check this step.
 
 
+**3) RoboSat.pink Install:**
+```
+     python3 -m pip install RoboSat.pink
+```
 
+Launch ```rsp -h``` to check this step.
 
 
 
@@ -71,7 +81,7 @@ Related resources:
 - <a href="./docs/extensibility_by_design.md">RoboSat.pink documentation: Extensibility by Design</a>
 - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">RoboSat.pink slides @PyParis 2018</a>
 - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">RoboSat.pink slides @FOSDEM 2019</a>
-- <a href="https://github.com/mapbox/robosat">Historical MapBox RoboSat github directory</a>
+- <a href="https://github.com/mapbox/robosat">Historical MapBox RoboSat github directory (not active anymore)</a>
 - <a href="https://github.com/chrieke/awesome-satellite-imagery-datasets">Christoph Rieke's Awesome Satellite Imagery Datasets</a>
 - <a href="https://github.com/mrgloom/awesome-semantic-segmentation">Mr Gloom's Awesome Semantic Segmentation</a>
 
