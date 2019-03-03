@@ -31,20 +31,9 @@ Aims:
 
 
 Install:
--------
+--------
 
-**1) Librairies prerequisites:**
-   - Python >= 3.6 and related pip installed
-   - Libs with headers: libjpeg, libwebp, libbz2, zlib, libboost. 
-   - Qt dependancies: libsm and libxrender.
-
-On a recent Ubuntu-server (e.g 18.04), could be done with:
-```
-sudo apt update
-sudo apt-get install build-essential libboost-python-dev zlib1g-dev libbz2-dev libjpeg-turbo8-dev libwebp-dev libsm6 libxrender1 python3-pip
-```
-
- **2) GPU and driver**
+ **1) GPU and driver**
  - At least one Nvidia GPU, with GPU RAM >= 6Go. 
 
 GTX series Driver installation:
@@ -55,6 +44,17 @@ sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
  
 Launch ```nvidia-smi``` to check this step.
 
+
+**2) Librairies prerequisites:**
+   - Python >= 3.6 and related pip installed
+   - Libs with headers: libjpeg, libwebp, libbz2, zlib, libboost. 
+   - Qt dependancies: libsm and libxrender.
+
+On a recent Ubuntu-server (e.g 18.04), could be done with:
+```
+sudo apt update
+sudo apt-get install -y build-essential libboost-python-dev zlib1g-dev libbz2-dev libjpeg-turbo8-dev libwebp-dev libsm6 libxrender1 python3-pip
+```
 
 **3) RoboSat.pink Install:**
 ```
