@@ -34,7 +34,7 @@ Install:
 -------
 
 **1) Librairies prerequisites:**
-   - Python >= 3.6 and pip installed
+   - Python >= 3.6 and related pip installed
    - Libs with headers: libjpeg, libwebp, libbz2, zlib, libboost. 
    - Qt dependancies: libsm and libxrender.
 
@@ -45,8 +45,7 @@ sudo apt-get install build-essential libboost-python-dev zlib1g-dev libbz2-dev l
 ```
 
  **2) GPU and driver**
- - At least one Nvidia GPU
- - GPU RAM should be >= 6Go. Default `batch_size` configuration is targeted to 11Go. 
+ - At least one Nvidia GPU, with GPU RAM >= 6Go. 
 
 GTX series Driver installation:
 ```
