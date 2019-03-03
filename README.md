@@ -36,7 +36,7 @@ Install:
  **1) GPU and driver**
  - At least one Nvidia GPU, with GPU RAM >= 6Go. 
 
-GTX series Driver installation:
+GTX or RTX series Driver installation:
 ```
 wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
 sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
