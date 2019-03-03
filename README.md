@@ -34,13 +34,12 @@ Install:
 --------
 
  **1) GPU and driver**
- - At least one Nvidia GPU, with GPU RAM >= 6Go. 
-
-GTX or RTX series Driver installation:
-```
-wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
-sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
-```
+ - At least one Nvidia GPU, with GPU RAM >= 6Go
+ - Related driver installation (tested with GTX and RTX series): 
+     ```
+     wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
+     sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
+     ```
  
 Launch ```nvidia-smi``` to check this step.
 
@@ -61,7 +60,7 @@ sudo apt-get install -y build-essential libboost-python-dev zlib1g-dev libbz2-de
 python3 -m pip install RoboSat.pink
 ```
 
-Launch ```rsp -h``` to check this final step.
+Launch ```rsp -h``` to check that everything went smoothly.
 
 
 
