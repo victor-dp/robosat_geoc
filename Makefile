@@ -51,17 +51,9 @@ it_post:
 
 
 install:
-	sudo apt install -y osmium-tools
 	sudo pip3 install pytest twine black flake8
 
-distclean:
+pypi:
 	rm -rf dist RoboSat.pink.egg-info
-
-pypi: distclean
 	python3 setup.py sdist
 	twine upload dist/* -r pypi
-
-testpypi: distclean
-	python3 setup.py sdist
-	twine upload dist/* -r testpypi
-	@echo "pip3 install -i https://test.pypi.org/simple/ RoboSat.pink"
