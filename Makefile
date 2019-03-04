@@ -19,11 +19,16 @@ black:
 it: it_preparation it_train it_post
 
 it_preparation:
+	rm -rf it
 	rsp cover --zoom 18 --type bbox 4.8,45.7,4.83,45.73  it/cover
 	rsp download --rate 20 --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' --web_ui it/cover it/images
 	rsp download --rate 20 --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' --web_ui it/cover it/images
 	wget -nc -O it/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&BBOX=4.79,45.69,4.84,45.74&outputFormat=application/json; subtype=geojson' | true
 	rsp rasterize --config config.toml --zoom 18 --geojson it/lyon_roofprint.json --web_ui it/cover it/labels
+	wget -O it/ra.pbf http://download.geofabrik.de/europe/france/rhone-alpes-latest.osm.pbf
+	osmium extract -b 4.8,45.7,4.83,45.73 -s smart -o it/lyon.pbf it/ra.pbf
+	rsp extract --type building it/lyon.pbf it/osm_lyon_footprint.json
+	rsp rasterize --config config.toml --zoom 18 --geojson it/lyon_roofprint.json --web_ui it/cover it/labels_osm
 	rm -rf it/training it/validation
 	mkdir it/training it/validation
 	cat it/cover | sort -R > it/cover.shuffled
@@ -46,19 +51,17 @@ it_post:
 
 
 install:
+	sudo apt install -y osmium-tools
 	sudo pip3 install pytest twine black flake8
 
-clean: pyclean
-	rm -rf it
-
-pyclean:
+distclean:
 	rm -rf dist RoboSat.pink.egg-info
 
-pypi: pyclean
+pypi: distclean
 	python3 setup.py sdist
 	twine upload dist/* -r pypi
 
-testpypi: pyclean
+testpypi: distclean
 	python3 setup.py sdist
 	twine upload dist/* -r testpypi
 	@echo "pip3 install -i https://test.pypi.org/simple/ RoboSat.pink"
