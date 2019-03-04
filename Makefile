@@ -1,5 +1,6 @@
 all:
 	@echo "This Makefile purpose is for RoboSat.pink devs and maintainers."
+	@echo "For INSTALL concern give a look on README.md"
 
 check:
 	pytest tests
@@ -15,7 +16,7 @@ black:
 	black -l 125 *.py robosat_pink/*.py robosat_pink/*/*.py
 
 
-it: it_clean it_preparation it_train it_post
+it: it_preparation it_train it_post
 
 it_preparation:
 	rsp cover --zoom 18 --type bbox 4.8,45.7,4.83,45.73  it/cover
@@ -43,22 +44,21 @@ it_post:
 	rsp compare --mode list --labels it/labels --maximum_qod 70 --minimum_fg 5 --masks it/masks --config config.toml --geojson it/tiles.json
 	rsp vectorize --type building --config config.toml it/masks it/vector.json
 
+
 install:
 	sudo pip3 install pytest twine black flake8
 
-distclean: clean it_clean
-
-clean:
-	rm -rf dist RoboSat.pink.egg-info
-
-it_clean:
+clean: pyclean
 	rm -rf it
 
-pypi: clean
+pyclean:
+	rm -rf dist RoboSat.pink.egg-info
+
+pypi: pyclean
 	python3 setup.py sdist
 	twine upload dist/* -r pypi
 
-testpypi: clean
+testpypi: pyclean
 	python3 setup.py sdist
 	twine upload dist/* -r testpypi
 	@echo "pip3 install -i https://test.pypi.org/simple/ RoboSat.pink"
