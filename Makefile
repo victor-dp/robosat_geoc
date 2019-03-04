@@ -43,11 +43,12 @@ it_post:
 	rsp compare --mode list --labels it/labels --maximum_qod 70 --minimum_fg 5 --masks it/masks --config config.toml --geojson it/tiles.json
 	rsp vectorize --type building --config config.toml it/masks it/vector.json
 
-
 install:
 	sudo pip3 install pytest twine black flake8
 
-distclean:
+distclean: clean it_clean
+
+clean:
 	rm -rf dist RoboSat.pink.egg-info
 
 it_clean:
