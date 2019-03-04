@@ -1,6 +1,6 @@
 numpy
 pillow-simd
-opencv-contrib-python
+opencv-python
 torch>=1.0.1
 torchvision>=0.2.2
 tqdm==4.19.9
