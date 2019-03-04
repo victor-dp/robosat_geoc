@@ -4,8 +4,9 @@ import time
 import argparse
 import concurrent.futures as futures
 
+import cv2
+import numpy as np
 import requests
-from PIL import Image
 from tqdm import tqdm
 from mercantile import xy_bounds
 
@@ -79,8 +80,7 @@ def main(args):
                     return tile, url, False
 
                 try:
-                    image = Image.open(res)
-                    image.save(path, optimize=True)
+                    cv2.imwrite(path, cv2.imdecode(np.fromstring(res.read(), np.uint8), cv2.IMREAD_COLOR))
                     progress.update()
                 except OSError:
                     return tile, url, False
