@@ -11,7 +11,7 @@ import robosat_pink.tools
 
 
 def main():
-    parser = argparse.ArgumentParser(prog="./rsp")
+    parser = argparse.ArgumentParser(prog="rsp")
     subparser = parser.add_subparsers(title="RoboSat.pink tools", metavar="")
 
     try:
