@@ -49,14 +49,11 @@ it_post:
 	rsp compare --mode list --labels it/labels --maximum_qod 70 --minimum_fg 5 --masks it/masks --config config.toml --geojson it/tiles.json
 	rsp vectorize --type building --config config.toml it/masks it/vector.json
 
-rsp:
-	echo 'export PYTHONPATH=$$PWD' > rsp-dev
-	echo 'python3 -m robosat_pink.tools "$$@"' >> rsp-dev
-	chmod +x rsp-dev
-
 install:
-	pip3 install pytest twine black flake8
 	pip3 install -e .
+
+install-dev:
+	pip3 install pytest twine black flake8
 
 pypi:
 	rm -rf dist RoboSat.pink.egg-info
