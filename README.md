@@ -40,8 +40,7 @@ pip3 install RoboSat.pink
 
 Out of the box Ubuntu-server 18.04 full install:
 ```
-sudo apt update
-sudo apt install -y build-essential python3-pip
+sudo sh -c "apt update && apt install -y build-essential python3-pip"
 sudo pip3 install RoboSat.pink
 wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
 sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
@@ -56,13 +55,16 @@ WorkFlows:
 
 
 
+RoboSat.pink Tutorials and Presentations:
+-----------------------------------------
+- <a href="./docs/from_opendata_to_opendataset.md">From OpenData to OpenDataSet</a>
+- <a href="./docs/extensibility_by_design.md">Using it as a FrameWork</a>
+- <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">Slides @PyParis 2018</a>
+- <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">Slides @FOSDEM 2019</a>
+
+
 Related resources:
 -----------------
-
-- <a href="./docs/from_opendata_to_opendataset.md">RoboSat.pink tutorial: from OpenData to OpenDataSet</a>
-- <a href="./docs/extensibility_by_design.md">RoboSat.pink documentation: Extensibility by Design</a>
-- <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">RoboSat.pink slides @PyParis 2018</a>
-- <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">RoboSat.pink slides @FOSDEM 2019</a>
 - <a href="https://github.com/mapbox/robosat">Historical MapBox RoboSat github directory (not active anymore)</a>
 - <a href="https://github.com/chrieke/awesome-satellite-imagery-datasets">Christoph Rieke's Awesome Satellite Imagery Datasets</a>
 - <a href="https://github.com/mrgloom/awesome-semantic-segmentation">Mr Gloom's Awesome Semantic Segmentation</a>
