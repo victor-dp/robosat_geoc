@@ -33,38 +33,19 @@ Aims:
 Install:
 --------
 
+```
+pip3 install RoboSat.pink
+```
 
 
-**1) Librairies prerequisites:**
-   - gcc and Linux headers
-   - Python >= 3.6 and related pip installed
-   - Libs with headers: libjpeg, libwebp, libbz2, zlib, libsm and libxrender.
-   - Osmium tools
-
-On a recent Ubuntu-server (e.g 18.04), could be done with:
+Out of the box Ubuntu-server 18.04 full install:
 ```
 sudo apt update
-sudo apt-get install -y build-essential zlib1g-dev libjpeg-turbo8-dev libwebp-dev libsm6 libxrender1 python3-pip osmium-tool
+sudo apt-get install -y build-essential python3-pip osmium-tool
+sudo pip3 install RoboSat.pink
+wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
+sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ```
-
-
-**2) RoboSat.pink Install:**
-```
-python3 -m pip install RoboSat.pink
-export PATH=$PATH:$HOME/.local/bin
-```
-Launch ```rsp -h``` to check that everything went smoothly.
-
-
-**3) Not mandatory but strongly recommanded: NVIDIA GPU(s) and related driver**
- - Tested with GTX and RTX series: 
- ```
- wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
- sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
- ```
-     
-Launch ```nvidia-smi``` to check this step.
-
 
 
 WorkFlows:

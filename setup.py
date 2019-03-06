@@ -20,17 +20,7 @@ with open(path.join(here, "README.md"), encoding="utf-8") as f:
 
 
 with open(path.join(here, "requirements.txt")) as f:
-
-    def is_installed(package):
-        try:
-            get_distribution(package)
-            return True
-        except:
-            return False
-
     install_requires = f.read().splitlines()
-    if is_installed("pillow") and not is_installed("pillow-simd"):
-        install_requires = [require.replace("pillow-simd", "pillow") for require in install_requires]
 
 setup(
     name="RoboSat.pink",
