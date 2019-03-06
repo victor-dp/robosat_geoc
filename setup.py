@@ -7,7 +7,6 @@ Semantic Segmentation ecosystem for GeoSpatial Imagery
 """
 
 from setuptools import setup, find_packages
-from pkg_resources import get_distribution
 from os import path
 
 here = path.dirname(__file__)
@@ -37,7 +36,7 @@ setup(
     install_requires=install_requires,
     entry_points={"console_scripts": ["rsp = robosat_pink.tools.__main__:main"]},
     include_package_data=True,
-    python_requires='~=3.6',
+    python_requires="~=3.6",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: Console",
