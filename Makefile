@@ -53,8 +53,8 @@ install:
 	pip3 install -e .
 
 install-dev:
-	sudo apt -y install osmium-tool
-	pip3 install pytest twine black flake8
+	sudo apt install -y osmium-tool
+	sudo pip3 install pytest twine black flake8
 
 pypi:
 	rm -rf dist RoboSat.pink.egg-info
