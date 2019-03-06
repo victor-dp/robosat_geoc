@@ -41,7 +41,7 @@ pip3 install RoboSat.pink
 Out of the box Ubuntu-server 18.04 full install:
 ```
 sudo apt update
-sudo apt-get install -y build-essential python3-pip osmium-tool
+sudo apt install -y build-essential python3-pip
 sudo pip3 install RoboSat.pink
 wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
 sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
