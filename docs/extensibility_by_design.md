@@ -1,43 +1,39 @@
-# Extensibility by Design
+# How to extend RoboSat.pink: 
 
-RoboSat.pink extensibility allows to easily custom or enhance only the needed components, and keep everything else as-is.
- 
-
-Tools:
-------
-
-- To deactivate a tool, just remove the execution right on the related tool file: `chmod -x tools/tool_to_deactivate.py`
-
-- To add a new tool, create a new file, in `robosat_pink/tools` directory, with execution rights and at least thoses two functions:
-  - `add_parser(subparser)`
-  - `main(args)`
-
- 
-
-Models:
-------
-- Semantic Segmentation model name can be choose, among availables ones, in the config file.
-
-- To create a new one:
-  - In `robosat_pink/models` dir, create a new file: `your_model_name.py`.
-  - The file must contains at least one `Model_name` class.
-  - These class must itself contains at least `__init__` and `forward` methods.
-
-
-Losses:
--------
-
-- Loss name can be choose, among availables ones, in the config file.
-
-- To create a new one:
-  - In `robosat_pink/losses` dir, create a new file: `your_loss_name.py`.
-  - The file must contains at least one `Loss_name` class.
-  - These class must itself contains at least `__init__` and `forward` methods.
-  - NOTA: If your loss computation is not auto-differentiable by PyTorch, a related `backward` method, will be needed too.
+RoboSat.pink extensibility allows to custom or enhance only the components you need, and keep everything else as-is.
 
 
 Web UI Templates:
 -----------------
-
-- Several RoboSat.pink tools could generate, on demand, a Web UI, with `--web_ui` parameter.
+- Several RoboSat.pink tools can generate, on demand, a Web UI, with `--web_ui` parameter.
 - To switch to your own template, just use `--web_ui_template` extra parameter.
+
+
+Add a new tool:
+----------------
+- Retrieve RoboSat.pink sources: `git clone https://github.com/datapink/robosat.pink.git`
+- Create a new file, in `robosat.pink/robosat_pink/tools` directory, with at least:
+  - `add_parser(subparser)`
+  - `main(args)`
+- Then in `robosat.pink` launch `make install`
+ 
+
+Models:
+------
+- Retrieve RoboSat.pink sources: `git clone https://github.com/datapink/robosat.pink.git`
+- In `robosat.pink/robosat_pink/models` dir, create a new file: `your_model_name.py`.
+- The file must contains at least one `Model_name` class.
+- These class must itself contains at least `__init__` and `forward` methods.
+- Then in `robosat.pink` launch `make install`
+- Update config file value: `["model"]["name"]`
+
+
+Add a new Loss function:
+------------------------
+- Retrieve RoboSat.pink sources: `git clone https://github.com/datapink/robosat.pink.git`
+- In `robosat.pink/robosat_pink/losses` dir, create a new file: `your_loss_name.py`.
+- The file must contains at least one `Loss_name` class.
+- These class must itself contains at least `__init__` and `forward` methods.
+- If your loss computation is not auto-differentiable by PyTorch, a related `backward` method, will be needed too.
+- Then in `robosat.pink` launch `make install`
+- Update config file value: `["model"]["loss"]`
