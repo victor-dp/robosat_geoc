@@ -22,7 +22,7 @@ Main Features:
 - Build-in cutting edge Computer Vision model and loss implementations (and allows to replace by your owns)
 - Support either RGB or multibands imagery (as multispectral or hyperspectral)
 - Allows Data Fusion (from imagery or rasterized vectors)
-- Web-UI tools to easily display, filter or select results
+- Web-UI tools to easily display, hilight or select results
 
 
 Tutorials:
@@ -69,7 +69,7 @@ dataset
     ├── images
     └── labels
 ```
-- Tiles images formats could be either: JPEG, WEBP, GeoTIFF 8bits, PNG.
+- Tiles images formats could be either: JPEG, WEBP, GeoTIFF, PNG.
 - Tiles labels are expected to be PNG with single band and indexed palette.
 - Tools producing XYZ tiles directory as output, also allows to easily generate a web map client, for visual inspection.
 - Following schema, show several paths to create your own training dataset from several kinds of input data. 
@@ -88,8 +88,8 @@ NOTA: several inputs connected to a single arrow point means a logical OR (e.g. 
 
 
 
-Stacks:
--------
+Architecture:
+------------
 
 <img alt="Stacks" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/stacks.png" />
 RoboSat.pink use cherry-picked Open Source libs among Deep Learning, Computer Vision and GIS stacks.
