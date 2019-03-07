@@ -37,6 +37,17 @@ WorkFlows:
 
 
 
+Tutorials:
+----------
+- <a href="./docs/from_opendata_to_opendataset.md">From OpenData to OpenDataSet</a>
+- <a href="./docs/extensibility_by_design.md">Using it as a FrameWork</a>
+
+Presentations:
+--------------
+  - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">@PyParis 2018</a>
+  - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">@FOSDEM 2019</a>
+
+
 Install:
 --------
 
@@ -53,26 +64,10 @@ wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_
 sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ```
 
+
 Arch:
 ----
 <img alt="Stacks" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/stacks.png" />
-
-
-
-
-
-
-Tutorials:
-----------
-- <a href="./docs/from_opendata_to_opendataset.md">From OpenData to OpenDataSet</a>
-- <a href="./docs/extensibility_by_design.md">Using it as a FrameWork</a>
-
-Presentations:
---------------
-  - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">@PyParis 2018</a>
-  - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">@FOSDEM 2019</a>
-
-
 
 
 
@@ -82,6 +77,7 @@ Related resources:
 - <a href="https://github.com/mapbox/robosat">Historical MapBox RoboSat github directory (not active anymore)</a>
 - <a href="https://github.com/chrieke/awesome-satellite-imagery-datasets">Christoph Rieke's Awesome Satellite Imagery Datasets</a>
 - <a href="https://github.com/mrgloom/awesome-semantic-segmentation">Mr Gloom's Awesome Semantic Segmentation</a>
+
 
 Bibliography:
 -------------
