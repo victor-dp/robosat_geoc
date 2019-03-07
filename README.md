@@ -19,22 +19,16 @@ Main Features:
 --------------
 - Provides several command line tools, you can combine together to build your own workflow
 - Follows geospatial standards to ease interoperability and data preparation 
-- Build-in cutting edge Computer Vision model and loss implementations (and allows to extend with your owns)
+- Build-in cutting edge Computer Vision model and loss implementations (and allows to replace by your owns)
 - Support either RGB or multibands imagery (as multispectral or hyperspectral)
-- Allows data fusion (from imagery or rasterized vectors)
+- Allows Data Fusion (from imagery or rasterized vectors)
 - Web-UI tools to easily display, filter or select results
-
-
-
-
-
-
 
 
 Tutorials:
 ----------
-- <a href="./docs/from_opendata_to_opendataset.md">How To use plain OpenData to create a decent OpenDataSet.</a>
-- <a href="./docs/extensibility_by_design.md">How to extend RoboSat.pink.</a>
+- <a href="./docs/from_opendata_to_opendataset.md">How to use plain OpenData to create a decent OpenDataSet</a>
+- <a href="./docs/extensibility_by_design.md">How to extend RoboSat.pink</a>
 
 Presentations:
 --------------
@@ -75,11 +69,16 @@ dataset
     ├── images
     └── labels
 ```
+- Tiles images formats could be either: JPEG, WEBP, GeoTIFF 8bits, PNG.
+- Tiles labels are expected to be PNG with single band and indexed palette.
+- Tools producing XYZ tiles directory as output, also allows to easily generate a web map client, for visual inspection.
 - Following schema, show several paths to create your own training dataset from several kinds of input data. 
-- And for information, several inputs connected to a single arrow point means a logical OR (e.g. WMS or XYZ or TMS).
+
 
 
 <img alt="Data Preparation" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/data_preparation.png" />
+
+NOTA: several inputs connected to a single arrow point means a logical OR (e.g. WMS or XYZ or TMS).
 
 
 ### Training ###
