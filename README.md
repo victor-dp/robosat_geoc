@@ -61,15 +61,32 @@ sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 
 WorkFlows:
 --------
+
+### Few Concepts ###
+
+- Spatial dataset have to be tiled, as XYZ format (the same as OpenStreetMap and GoogleMap tiles).
+- A Training dataset is composed by two distincts directories: 
+  - ```training``` containing inputs and labels tiles used to train the model
+  - ```validation``` containing inputs and labels tiles used to check training and hyperparameters settings
+- A tiles list (aka cover), is a csv file containing a list of tiles, stored on a disk directory (XYZ dir).
+- Following schemas, show all possible interactions. And an arrow sharing very same box anchor means a logical OR.
+
+
+### Data Preparation ###
+
+
 <img alt="Data Preparation" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/data_preparation.png" />
+
+
+### Training ###
 
 <img alt="Training" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/training.png" />
 
 
 
 
-Arch:
-----
+Stacks:
+-------
 <img alt="Stacks" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/stacks.png" />
 
 
