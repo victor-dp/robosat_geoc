@@ -33,8 +33,8 @@ Main Features:
 
 Tutorials:
 ----------
-- <a href="./docs/from_opendata_to_opendataset.md">From OpenData to OpenDataSet</a>
-- <a href="./docs/extensibility_by_design.md">Using it as a FrameWork</a>
+- <a href="./docs/from_opendata_to_opendataset.md">How To use plain OpenData to create a decent OpenDataSet.</a>
+- <a href="./docs/extensibility_by_design.md">How to extend RoboSat.pink.</a>
 
 Presentations:
 --------------
@@ -65,7 +65,7 @@ WorkFlows:
 ### Data Preparation ###
 
 - Training and validation datasets have to be tiled, using <a href="https://en.wikipedia.org/wiki/Tiled_web_map">XYZ tiles format</a>.
-- A Dataset directory structure, must contains at least:
+- A Dataset directory, so containing XYZ tiles, must be split as:
 ```
 dataset
 ├── training
@@ -76,7 +76,7 @@ dataset
     └── labels
 ```
 - Following schema, show several paths to create your own training dataset from several kinds of input data. 
-- And for information, an arrow sharing a same box anchor means a logical OR (e.g. WMS or XYZ or TMS) .
+- And for information, several inputs connected to a single arrow point means a logical OR (e.g. WMS or XYZ or TMS).
 
 
 <img alt="Data Preparation" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/data_preparation.png" />
@@ -92,9 +92,8 @@ dataset
 Stacks:
 -------
 
-RoboSat.pink use cherry-picked Open Source libs among Deep Learning, Computer Vision and GIS stacks.
-
 <img alt="Stacks" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/stacks.png" />
+RoboSat.pink use cherry-picked Open Source libs among Deep Learning, Computer Vision and GIS stacks.
 
 
 
