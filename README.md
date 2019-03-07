@@ -19,10 +19,22 @@ Main Features:
 --------------
 - Provides several command line tools, you can combine together to build your own workflow
 - Follows geospatial standards to ease interoperability and data preparation 
-- Build-in cutting edge Computer Vision model and loss implementations (and allows to extend with your own)
+- Build-in cutting edge Computer Vision model and loss implementations (and allows to extend with your owns)
 - Support either RGB or multibands imagery (as multispectral or hyperspectral)
 - Allows data fusion (from imagery or rasterized vectors)
 - Web-UI tools to easily display, filter or select results
+
+
+
+
+
+WorkFlows:
+--------
+<img alt="Data Preparation" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/data_preparation.png" />
+
+<img alt="Training" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/training.png" />
+
+
 
 
 Install:
@@ -41,22 +53,28 @@ wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_
 sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ```
 
-
-WorkFlows:
---------
-<img alt="Data Preparation" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/data_preparation.png" />
-
-<img alt="Training" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/training.png" />
+Arch:
+----
+<img alt="Stacks" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/stacks.png" />
 
 
 
-Tutorials and Presentations:
------------------------------------------
+
+
+
+Tutorials:
+----------
 - <a href="./docs/from_opendata_to_opendataset.md">From OpenData to OpenDataSet</a>
 - <a href="./docs/extensibility_by_design.md">Using it as a FrameWork</a>
-- Slides:
+
+Presentations:
+--------------
   - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">@PyParis 2018</a>
   - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">@FOSDEM 2019</a>
+
+
+
+
 
 
 Related resources:
@@ -77,10 +95,6 @@ Convolutional Neural Networks</a>
 - <a href="https://hal.archives-ouvertes.fr/hal-01523573/document">Joint Learning from Earth Observation and
 OpenStreetMap Data to Get Faster Better Semantic Maps</a>
 
-
-Arch:
-----
-<img alt="Stacks" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/stacks.png" />
 
 
 
