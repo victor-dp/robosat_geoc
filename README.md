@@ -64,8 +64,8 @@ WorkFlows:
 
 ### Data Preparation ###
 
-- All spatial dataset have to be tiled, as XYZ format (the same as OpenStreetMap and GoogleMap tiles).
-- A Training dataset must contains at least:
+- Training and validation datasets have to be tiled, using <a href="https://en.wikipedia.org/wiki/Tiled_web_map">XYZ tiles format</a>.
+- A Dataset directory structure, must contains at least:
 ```
 dataset
 ├── training
@@ -75,8 +75,8 @@ dataset
     ├── images
     └── labels
 ```
-- A tiles list (aka cover), is a csv file containing a list of tiles, stored on a disk directory (XYZ dir).
-- Following schema, show all possible interactions. And an arrow sharing very same box anchor means a logical OR.
+- Following schema, show several paths to create your own training dataset from several kinds of input data. 
+- And for information, an arrow sharing a same box anchor means a logical OR.
 
 
 <img alt="Data Preparation" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/data_preparation.png" />
@@ -91,6 +91,9 @@ dataset
 
 Stacks:
 -------
+
+RoboSat.pink use cherry-picked Open Source libs among Deep Learning, Computer Vision and GIS stacks.
+
 <img alt="Stacks" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/stacks.png" />
 
 
