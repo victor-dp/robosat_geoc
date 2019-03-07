@@ -76,7 +76,7 @@ dataset
     └── labels
 ```
 - Following schema, show several paths to create your own training dataset from several kinds of input data. 
-- And for information, an arrow sharing a same box anchor means a logical OR.
+- And for information, an arrow sharing a same box anchor means a logical OR (e.g. WMS or XYZ or TMS) .
 
 
 <img alt="Data Preparation" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/data_preparation.png" />
