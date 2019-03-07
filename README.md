@@ -3,31 +3,26 @@
 
 
 <p align=center>
-  <img src="https://pbs.twimg.com/media/DpjonykWwAANpPr.jpg" alt="RoboSat pipeline extracting buildings from Imagery and Fusion" />
+  <img src="https://pbs.twimg.com/media/DpjonykWwAANpPr.jpg" alt="RoboSat.pink buildings segmentation from Imagery" />
 </p>
 
 
 
-
-
-Spirit:
--------
-- Cutting edge Computer Vision research papers implementation 
-- Industrial code robustness
-- Several tools, you can combine together (as Lego)
-- Extensible, by design
-- High performances
-- Minimalism as a code aesthetic
-- GeoSpatial standards compliancy
-- OSM and MapBox ecosystems friendly
-- PyTorch based
-
-
-Aims:
------
+Purposes:
+---------
 - DataSet Quality Analysis
 - Change Detection highlighter
 - Features extraction and completion
+
+
+Main Features:
+--------------
+- Provides several command line tools, you can combine together to build your own workflow
+- Follows geospatial standards to ease interoperability and data preparation 
+- Build-in cutting edge Computer Vision model and loss implementations (and allows to extend with your own)
+- Support either RGB or multibands imagery (as multispectral or hyperspectral)
+- Allows data fusion (from imagery or rasterized vectors)
+- Web-UI tools to easily display, filter or select results
 
 
 Install:
@@ -59,8 +54,9 @@ RoboSat.pink Tutorials and Presentations:
 -----------------------------------------
 - <a href="./docs/from_opendata_to_opendataset.md">From OpenData to OpenDataSet</a>
 - <a href="./docs/extensibility_by_design.md">Using it as a FrameWork</a>
-- <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">Slides @PyParis 2018</a>
-- <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">Slides @FOSDEM 2019</a>
+- Slides:
+  - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">@PyParis 2018</a>
+  - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">@FOSDEM 2019</a>
 
 
 Related resources:
