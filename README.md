@@ -50,7 +50,7 @@ WorkFlows:
 
 
 
-RoboSat.pink Tutorials and Presentations:
+Tutorials and Presentations:
 -----------------------------------------
 - <a href="./docs/from_opendata_to_opendataset.md">From OpenData to OpenDataSet</a>
 - <a href="./docs/extensibility_by_design.md">Using it as a FrameWork</a>
