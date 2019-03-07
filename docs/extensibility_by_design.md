@@ -5,18 +5,18 @@ RoboSat.pink extensibility allows to custom or enhance only the components you n
 
 ## Alternate Web UI Templates ##
 - Several RoboSat.pink tools can generate, on demand, a Web UI, with `--web_ui` parameter.
-- To switch to your own template, just use `--web_ui_template` extra parameter.
+- To switch to your own HTML template, just use `--web_ui_template` extra parameter.
 
 
-## Add a tool ###
+## Add a Tool ###
 - Retrieve RoboSat.pink sources: `git clone https://github.com/datapink/robosat.pink.git`
-- Create a new file, in `robosat.pink/robosat_pink/tools` directory, with at least:
+- Create a new file, in `robosat.pink/robosat_pink/tools` directory, containing at least:
   - `add_parser(subparser)`
   - `main(args)`
 - Then in `robosat.pink` launch `make install`
  
 
-## Add a model ##
+## Add a Model ##
 - Retrieve RoboSat.pink sources: `git clone https://github.com/datapink/robosat.pink.git`
 - In `robosat.pink/robosat_pink/models` dir, create a new file: `your_model_name.py`.
 - The file must contains at least one `Model_name` class.
