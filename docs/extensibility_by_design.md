@@ -5,26 +5,28 @@ RoboSat.pink extensibility allows to custom or enhance only the components you n
 
 
 
-## Use an alternate Model ##
+## Use an alternate Neural Network Model ##
 - In your extension directory (or an empty dir) create a sub dir `models`, and inside it a file: `your_model_name.py`
 - The file must contains at least a `Model_name` class, with `__init__` and `forward` methods.
 - Either update config file value: `["model"]["name"]` or use `rsp train` with related `--model` parameter
-- And call `rsp train` with `--ext_path` pointing to your extension directory.
+- Call both `rsp train` and `rsp predict` with `--ext_path` pointing to your extension directory.
 
 
 ## Use an alternate Loss function ##
+Loss function define how your Neural Network learns, from training dataset.
+To write your own:
 - In your extension directory (or an empty dir) create a sub dir `losses`, and inside it a file: `your_loss_name.py`
 - This file must contains at least a `Loss_name` class, with `__init__` and `forward` methods.
 - If your loss computation is not auto-differentiable by PyTorch, a related `backward` method, will be needed too.
 - Either update config file value: `["model"]["loss"]` or use `rsp train` with related `--loss` parameter
-- And call `rsp train` with `--ext_path` pointing to your extension directory.
+- Call `rsp train` with `--ext_path` pointing to your extension directory.
 
 
 ## Use an alternate OSM type extractor ##
+To allows `rsp extract` to handle new OSM types:
 - In your extension directory (or an empty dir) create a sub dir `osm`, and inside it a file: `your_type_name.py`
 - This file must contains at least a `type_nameHandler` class, with `__init__`, `ways` and `save` methods.
-- And call `rsp extract` with `--ext_path` pointing to your extension directory, and the new `--type` value.
-
+- Call `rsp extract` with `--ext_path` pointing to your extension directory, and the new `--type` value.
 
 A simple OSM leisure:park extractor example:
 
@@ -63,7 +65,7 @@ class ParkHandler(osmium.SimpleHandler):
 
 
 
-## Use an alternate Web UI Templates ##
+## Use an alternate Web UI Templates, to display tiles results ##
 - RoboSat.pink tools outputing XYZ tiles, can generate, on demand, a Web UI. Just add with `--web_ui` parameter.
 - To switch to your own HTML template, add `--web_ui_template` followed by your template path.
 
