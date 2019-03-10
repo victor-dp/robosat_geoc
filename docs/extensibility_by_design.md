@@ -4,15 +4,15 @@ RoboSat.pink extensibility design allows you to custom it easily to your specifi
 
 
 ## Use an alternate Neural Network Model ##
+To allows `rsp train` and `rsp predict` to use a model of your own:
 - In your extension directory (or an empty dir) create a sub dir `models`, and inside it a file: `your_model_name.py`
 - The file must contains at least a `Model_name` class, with `__init__` and `forward` methods.
 - Either update config file value: `["model"]["name"]` or use `rsp train` with related `--model` parameter
-- Call both `rsp train` and `rsp predict` with `--ext_path` pointing to your extension directory.
+- Call either `rsp train` or `rsp predict` with `--ext_path` pointing to your extension directory.
 
 
 ## Use an alternate Loss function ##
-Loss function define how your Neural Network learns, from training dataset.
-To write your own:
+To allows `rsp train` to use a Loss function of your own:
 - In your extension directory (or an empty dir) create a sub dir `losses`, and inside it a file: `your_loss_name.py`
 - This file must contains at least a `Loss_name` class, with `__init__` and `forward` methods.
 - If your loss computation is not auto-differentiable by PyTorch, a related `backward` method, will be needed too.
@@ -63,9 +63,9 @@ class ParkHandler(osmium.SimpleHandler):
 
 
 
-## Use an alternate Web UI Templates, to display tiles results ##
-RoboSat.pink tools outputing XYZ tiles, can generate, on demand, a Web UI. Cf `--web_ui` parameter.
-To switch to your own HTML template, add `--web_ui_template` followed by your own template path.
+## Use an alternate Web UI Templates ##
+RoboSat.pink tools outputing XYZ tiles, can generate, on demand, a Web UI, with `--web_ui` parameter.
+To switch to your own HTML template, just add `--web_ui_template` followed by your own template path.
 
 Special values are substitued, if presents, in a template:
  - `{{base_url}}` XYZ directory base url, containing tiles. 
