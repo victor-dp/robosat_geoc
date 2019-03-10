@@ -1,8 +1,6 @@
 # How to extend RoboSat.pink: 
 
-RoboSat.pink extensibility allows to custom or enhance only the components you need, and keep everything else as-is.
-
-
+RoboSat.pink extensibility design allows you to custom it easily to your specifics needs.
 
 
 ## Use an alternate Neural Network Model ##
@@ -66,10 +64,10 @@ class ParkHandler(osmium.SimpleHandler):
 
 
 ## Use an alternate Web UI Templates, to display tiles results ##
-- RoboSat.pink tools outputing XYZ tiles, can generate, on demand, a Web UI. Just add with `--web_ui` parameter.
-- To switch to your own HTML template, add `--web_ui_template` followed by your template path.
+RoboSat.pink tools outputing XYZ tiles, can generate, on demand, a Web UI. Cf `--web_ui` parameter.
+To switch to your own HTML template, add `--web_ui_template` followed by your own template path.
 
-Special values substitued, if present, in a template:
+Special values are substitued, if presents, in a template:
  - `{{base_url}}` XYZ directory base url, containing tiles. 
  - `{{ext}}` file extension to tiles image.
  - `{{zoom}}` z level from tiles coverage.
