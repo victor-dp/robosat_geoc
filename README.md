@@ -23,11 +23,12 @@ Main Features:
 - Support either RGB or multibands imagery (as multispectral or hyperspectral)
 - Allows Data Fusion (from imagery or rasterized vectors)
 - Web-UI tools to easily display, hilight or select results
+- High performances, and multi GPUs support
 
 
 Tutorials:
 ----------
-- <a href="./docs/from_opendata_to_opendataset.md">How to use plain OpenData to create a decent OpenDataSet</a>
+- <a href="./docs/from_opendata_to_opendataset.md">How to use plain OpenData to create a decent training OpenDataSet</a>
 - <a href="./docs/extensibility_by_design.md">How to extend RoboSat.pink</a>
 
 Presentations:
