@@ -1,8 +1,8 @@
 import os
 import sys
-import argparse
 
 import pkgutil
+from pathlib import Path
 from importlib import import_module
 
 import numpy as np
@@ -15,7 +15,6 @@ from torchvision.transforms import Compose, Normalize
 from tqdm import tqdm
 from PIL import Image
 
-import robosat_pink.models
 from robosat_pink.datasets import DatasetTilesBuffer
 from robosat_pink.tiles import tiles_from_slippy_map
 from robosat_pink.config import load_config
@@ -24,24 +23,30 @@ from robosat_pink.transforms import ImageToTensor
 from robosat_pink.web_ui import web_ui
 
 
-def add_parser(subparser):
+def add_parser(subparser, formatter_class):
     parser = subparser.add_parser(
-        "predict",
-        help="from a trained model and predict inputs, predicts masks",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        "predict", help="Predict masks, from given inputs and an already trained model", formatter_class=formatter_class
     )
 
-    parser.add_argument("--checkpoint", type=str, required=True, help="model checkpoint to load")
-    parser.add_argument("--workers", type=int, default=0, help="number of workers pre-processing images")
-    parser.add_argument("--overlap", type=int, default=64, help="tile pixel overlap to predict on")
-    parser.add_argument("--config", type=str, required=True, help="path to configuration file")
-    parser.add_argument("--batch_size", type=int, help="if set, override batch_size value from config file")
-    parser.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
-    parser.add_argument("--web_ui", action="store_true", help="activate web ui output")
-    parser.add_argument("--web_ui_base_url", type=str, help="web ui alternate base url")
-    parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
-    parser.add_argument("tiles", type=str, help="directory to read slippy map image tiles from")
-    parser.add_argument("probs", type=str, help="directory to save slippy map probability masks to")
+    inp = parser.add_argument_group("Inputs")
+    inp.add_argument("tiles", type=str, help="tiles directory path [required]")
+    inp.add_argument("--checkpoint", type=str, required=True, help="path to trained model to use [required]")
+    inp.add_argument("--config", type=str, required=True, help="path to configuration file [required]")
+    inp.add_argument("--tile_overlap", type=int, default=64, help="tile pixels overlap [default: 64]")
+    inp.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
+    inp.add_argument("--ext_path", type=str, help="path to user's extension modules dir. Allow to use alternate models.")
+
+    out = parser.add_argument_group("Outputs")
+    out.add_argument("probs", type=str, help="output directory path [required]")
+
+    perf = parser.add_argument_group("Performances")
+    perf.add_argument("--workers", type=int, default=0, help="number of workers to load images [default: 0]")
+    perf.add_argument("--batch_size", type=int, help="if set, override batch_size value from config file")
+
+    ui = parser.add_argument_group("Web UI")
+    ui.add_argument("--web_ui", action="store_true", help="activate Web UI output")
+    ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
+    ui.add_argument("--web_ui_template", type=str, help="alternate Web UI template path")
 
     parser.set_defaults(func=main)
 
@@ -64,9 +69,14 @@ def main(args):
     # https://github.com/pytorch/pytorch/issues/7178
     chkpt = torch.load(args.checkpoint, map_location=map_location)
 
-    models = [name for _, name, _ in pkgutil.iter_modules([os.path.dirname(robosat_pink.models.__file__)])]
-    if config["model"]["name"] not in [model for model in models]:
-        sys.exit("Unknown model, thoses available are {}".format([model for model in models]))
+    module_search_paths = [args.ext_path] if args.ext_path else []
+    module_search_paths.append(Path(__file__).parent.parent)
+    sys.path.append(args.ext_path)
+
+    models = [name for path in module_search_paths for _, name, _ in pkgutil.iter_modules([os.path.join(path, "models")])]
+    if config["model"]["name"] not in models:
+        sys.exit("Unknown model, thoses available are {}".format(models))
+    model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
 
     std = []
     mean = []
@@ -79,19 +89,15 @@ def main(args):
     encoder = config["model"]["encoder"]
     pretrained = config["model"]["pretrained"]
 
-    model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
-
     net = getattr(model_module, "{}".format(config["model"]["name"].title()))(
         num_classes=num_classes, num_channels=num_channels, encoder=encoder, pretrained=pretrained
     ).to(device)
-
     net = torch.nn.DataParallel(net)
-
     net.load_state_dict(chkpt["state_dict"])
     net.eval()
 
     transform = Compose([ImageToTensor(), Normalize(mean=mean, std=std)])
-    dataset = DatasetTilesBuffer(args.tiles, transform=transform, size=tile_size, overlap=args.overlap)
+    dataset = DatasetTilesBuffer(args.tiles, transform=transform, size=tile_size, overlap=args.tile_overlap)
     loader = DataLoader(dataset, batch_size=batch_size, num_workers=args.workers)
 
     palette = make_palette(config["classes"][0]["color"], config["classes"][1]["color"])

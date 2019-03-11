@@ -1,6 +1,5 @@
 import os
 import sys
-import argparse
 import csv
 import json
 
@@ -11,18 +10,20 @@ from supermercado import burntiles
 from robosat_pink.datasets import tiles_from_slippy_map
 
 
-def add_parser(subparser):
+def add_parser(subparser, formatter_class):
     parser = subparser.add_parser(
-        "cover",
-        help="generates tiles covering, in csv format: X,Y,Z",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        "cover", help="Generate a tiles covering, in csv format: X,Y,Z", formatter_class=formatter_class
     )
 
-    parser.add_argument("--zoom", type=int, help="zoom level of tiles")
-    parser.add_argument("--type", type=str, default="geojson", choices=["geojson", "bbox", "dir"], help="input type")
-    help = "input value, upon type either: a geojson file path, a lat/lon bbox in ESPG:4326, or a slippymap dir path"
-    parser.add_argument("input", type=str, help=help)
-    parser.add_argument("out", type=str, help="path to csv file to generate")
+    inp = parser.add_argument_group("Inputs")
+    help = "input type [default: geojson]"
+    inp.add_argument("--type", type=str, default="geojson", choices=["geojson", "bbox", "dir"], help=help)
+    help = "upon input type: a geojson file path, a lat/lon bbox or a XYZ tiles dir path [required]"
+    inp.add_argument("input", type=str, help=help)
+
+    out = parser.add_argument_group("Outputs")
+    out.add_argument("--zoom", type=int, help="zoom level of tiles [required for geojson or bbox modes]")
+    out.add_argument("out", type=str, help="cover csv file output path [required]")
 
     parser.set_defaults(func=main)
 
@@ -30,7 +31,7 @@ def add_parser(subparser):
 def main(args):
 
     if not args.zoom and args.type in ["geojson", "bbox"]:
-        sys.exit("Zoom parameter is mandatory")
+        sys.exit("Zoom parameter is required")
 
     cover = []
 

@@ -1,6 +1,5 @@
 import os
 import sys
-import argparse
 import shutil
 
 from glob import glob
@@ -10,24 +9,31 @@ from robosat_pink.tiles import tiles_from_csv
 from robosat_pink.web_ui import web_ui
 
 
-def add_parser(subparser):
+def add_parser(subparser, formatter_class):
     parser = subparser.add_parser(
-        "subset",
-        help="filter images in a slippy map dir using a csv tiles cover",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        "subset", help="Filter images in a slippy map dir using a csv tiles cover", formatter_class=formatter_class
     )
-    parser.add_argument("--mode", type=str, default="copy", choices={"copy", "move", "delete"}, help="filtering mode")
-    parser.add_argument("--web_ui", action="store_true", help="activate web ui output")
-    parser.add_argument("--web_ui_base_url", type=str, help="web ui alternate base url")
-    parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
-    parser.add_argument("--dir", type=str, required=True, help="directory to read slippy map tiles from for filtering")
-    parser.add_argument("--cover", type=str, required=True, help="csv cover to filter tiles by")
-    parser.add_argument("--out", type=str, help="directory to save filtered tiles to (on copy or move mode)")
+    inp = parser.add_argument_group("Inputs")
+    choices = {"copy", "move", "delete"}
+    inp.add_argument("--mode", type=str, default="copy", choices=choices, help="subset mode [default: copy]")
+    inp.add_argument("--dir", type=str, required=True, help="path to inputs XYZ tiles dir [mandatory]")
+    inp.add_argument("--cover", type=str, required=True, help="path to csv cover file to subset tiles by [mandatory]")
+
+    out = parser.add_argument_group("Output")
+    out.add_argument("--out", type=str, help="output directory path [mandatory for copy or move mode]")
+
+    ui = parser.add_argument_group("Web UI")
+    ui.add_argument("--web_ui", action="store_true", help="activate Web UI output")
+    ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
+    ui.add_argument("--web_ui_template", type=str, help="alternate Web UI template path")
 
     parser.set_defaults(func=main)
 
 
 def main(args):
+    if not args.out and args.mode in ["copy", "move"]:
+        sys.exit("Zoom parameter is required")
+
     tiles = set(tiles_from_csv(args.cover))
     extension = ""
 
@@ -40,13 +46,11 @@ def main(args):
         src = paths[0]
 
         try:
-            if args.mode in ["copy", "move"]:
-                assert args.out
-                if not os.path.isdir(os.path.join(args.out, str(tile.z), str(tile.x))):
-                    os.makedirs(os.path.join(args.out, str(tile.z), str(tile.x)), exist_ok=True)
+            if not os.path.isdir(os.path.join(args.out, str(tile.z), str(tile.x))):
+                os.makedirs(os.path.join(args.out, str(tile.z), str(tile.x)), exist_ok=True)
 
-                extension = os.path.splitext(src)[1][1:]
-                dst = os.path.join(args.out, str(tile.z), str(tile.x), "{}.{}".format(tile.y, extension))
+            extension = os.path.splitext(src)[1][1:]
+            dst = os.path.join(args.out, str(tile.z), str(tile.x), "{}.{}".format(tile.y, extension))
 
             if args.mode == "move":
                 assert os.path.isfile(src)

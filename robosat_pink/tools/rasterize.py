@@ -1,10 +1,9 @@
-import argparse
-import collections
-import struct
-import json
-import sys
-import os
 import io
+import os
+import sys
+import json
+import struct
+import collections
 
 import numpy as np
 from PIL import Image
@@ -26,23 +25,27 @@ from robosat_pink.logs import Logs
 import psycopg2
 
 
-def add_parser(subparser):
+def add_parser(subparser, formatter_class):
     parser = subparser.add_parser(
         "rasterize",
-        help="rasterize either GeoJSON or PostGIS features to raster labels",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        help="Rasterize vector geospatial features (GeoJSON or PostGIS), to raster tiles",
+        formatter_class=formatter_class,
     )
 
-    parser.add_argument("--config", type=str, required=True, help="path to configuration file")
-    parser.add_argument("--postgis", type=str, help="PostGIS SQL SELECT query to retrieve features")
-    parser.add_argument("--geojson", type=str, nargs="+", help="path to GeoJSON features files")
-    parser.add_argument("--zoom", type=int, required="--geojson" in sys.argv, help="zoom level of tiles (for GeoJSON)")
-    parser.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
-    parser.add_argument("--web_ui", action="store_true", help="activate web ui output")
-    parser.add_argument("--web_ui_base_url", type=str, help="web ui alternate base url")
-    parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
-    parser.add_argument("cover", type=str, help="path to csv tiles cover file")
-    parser.add_argument("out", type=str, help="directory to write converted images")
+    inp = parser.add_argument_group("Inputs")
+    inp.add_argument("cover", type=str, help="path to csv tiles cover file [mandatory]")
+    inp.add_argument("--config", type=str, required=True, help="path to configuration file [mandatory]")
+    inp.add_argument("--postgis", type=str, help="PostGIS SQL SELECT query to retrieve features")
+    inp.add_argument("--geojson", type=str, nargs="+", help="path to GeoJSON features files")
+
+    out = parser.add_argument_group("Outputs")
+    out.add_argument("out", type=str, help="output directory path [mandatory]")
+    out.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
+
+    ui = parser.add_argument_group("Web UI")
+    ui.add_argument("--web_ui", action="store_true", help="activate Web UI output")
+    ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
+    ui.add_argument("--web_ui_template", type=str, help="alternate Web UI template path")
 
     parser.set_defaults(func=main)
 
@@ -84,13 +87,11 @@ def wkb_to_numpy(wkb):
         return None
 
     endian = ">" if struct.unpack("<b", wkb.read(1)) == 0 else "<"  # raster Endiannes
-    (_, bands, _, _, _, _, _, _, srid, width, height) = struct.unpack(
-        endian + "HHddddddIHH", wkb.read(60)
-    )  # raster Metadata
+    (_, bands, _, _, _, _, _, _, srid, width, height) = struct.unpack(endian + "HHddddddIHH", wkb.read(60))  # MetaData
 
     for band in range(bands):
 
-        bits = int(struct.unpack(endian + "b", wkb.read(1))[0])  # raster header band attributes
+        bits = int(struct.unpack(endian + "b", wkb.read(1))[0])  # header band attributes
         if bool(bits & 128):
             sys.exit("OffLine PostGIS WKB Data not supported.")
 
@@ -112,7 +113,6 @@ def wkb_to_numpy(wkb):
 
 def write_tile(root, tile, colors, out):
     """ """
-    os.makedirs(os.path.join(root, str(tile.z), str(tile.x)), exist_ok=True)
 
     out_path = os.path.join(root, str(tile.z), str(tile.x))
     os.makedirs(out_path, exist_ok=True)
@@ -135,13 +135,13 @@ def main(args):
     os.makedirs(args.out, exist_ok=True)
     log = Logs(os.path.join(args.out, "log"), out=sys.stderr)
 
-    def geojson_parse_polygon(feature_map, polygon, i):
+    def geojson_parse_polygon(zoom, feature_map, polygon, i):
 
         try:
             for i, ring in enumerate(polygon["coordinates"]):  # GeoJSON coordinates could be N dimensionals
                 polygon["coordinates"][i] = [[x, y] for point in ring for x, y in zip([point[0]], [point[1]])]
 
-            for tile in burntiles.burn([{"type": "feature", "geometry": polygon}], zoom=args.zoom):
+            for tile in burntiles.burn([{"type": "feature", "geometry": polygon}], zoom=zoom):
                 feature_map[mercantile.Tile(*tile)].append({"type": "feature", "geometry": polygon})
 
         except ValueError:
@@ -149,14 +149,14 @@ def main(args):
 
         return feature_map
 
-    def geojson_parse_geometry(feature_map, geometry, i):
+    def geojson_parse_geometry(zoom, feature_map, geometry, i):
 
         if geometry["type"] == "Polygon":
-            feature_map = geojson_parse_polygon(feature_map, geometry, i)
+            feature_map = geojson_parse_polygon(zoom, feature_map, geometry, i)
 
         elif geometry["type"] == "MultiPolygon":
             for polygon in geometry["coordinates"]:
-                feature_map = geojson_parse_polygon(feature_map, {"type": "Polygon", "coordinates": polygon}, i)
+                feature_map = geojson_parse_polygon(zoom, feature_map, {"type": "Polygon", "coordinates": polygon}, i)
         else:
             log.log("Notice: {} is a non surfacic geometry type, skipping feature {}".format(geometry["type"], i))
 
@@ -164,8 +164,11 @@ def main(args):
 
     if args.geojson:
 
-        if not all(tile.z == args.zoom for tile in tiles_from_csv(args.cover)):
-            sys.exit("With GeoJson input, zoom level and cover tiles z values have to be the same.")
+        tiles = [tile for tile in tiles_from_csv(args.cover)]
+        zoom = tiles[0].z
+
+        if [tile for tile in tiles if tile.z != zoom]:
+            sys.exit("With GeoJson input, all tiles z values have to be the same, in the csv cover file.")
 
         feature_map = collections.defaultdict(list)
 
@@ -177,9 +180,9 @@ def main(args):
 
                     if feature["geometry"]["type"] == "GeometryCollection":
                         for geometry in feature["geometry"]["geometries"]:
-                            feature_map = geojson_parse_geometry(feature_map, geometry, i)
+                            feature_map = geojson_parse_geometry(zoom, feature_map, geometry, i)
                     else:
-                        feature_map = geojson_parse_geometry(feature_map, feature["geometry"], i)
+                        feature_map = geojson_parse_geometry(zoom, feature_map, feature["geometry"], i)
 
         # Rasterize tiles
         for tile in tqdm(list(tiles_from_csv(args.cover)), ascii=True, unit="tile"):

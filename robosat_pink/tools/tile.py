@@ -1,7 +1,6 @@
 import os
 import sys
 import math
-import argparse
 from tqdm import tqdm
 
 import numpy as np
@@ -20,28 +19,34 @@ from robosat_pink.colors import make_palette
 from robosat_pink.web_ui import web_ui
 
 
-def add_parser(subparser):
-    parser = subparser.add_parser(
-        "tile", help="tile a raster image or label", formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
+def add_parser(subparser, formatter_class):
+    parser = subparser.add_parser("tile", help="Tile a raster", formatter_class=formatter_class)
 
-    parser.add_argument("--size", type=int, default=512, help="size of tiles side in pixels")
-    parser.add_argument("--zoom", type=int, required=True, help="zoom level of tiles")
-    parser.add_argument("--type", type=str, choices=["image", "label"], default="image", help="image or label tiling")
-    parser.add_argument("--config", type=str, required=True, help="path to configuration file")
-    parser.add_argument("--no_data", type=int, help="color considered as no data [0-255]. Skip related tile")
-    parser.add_argument("--web_ui", action="store_true", help="activate web ui output")
-    parser.add_argument("--web_ui_base_url", type=str, help="web ui alternate base url")
-    parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
-    parser.add_argument("raster", type=str, help="path to the raster to tile")
-    parser.add_argument("out", type=str, help="directory to write tiles")
+    inp = parser.add_argument_group("Inputs")
+    inp.add_argument("raster", type=str, help="path to the raster to tile [required]")
+    inp.add_argument("--config", type=str, required=True, help="path to the configuration file [required]")
+    inp.add_argument("--no_data", type=int, help="color considered as no data [0-255]. If set, skip related tile")
+
+    out = parser.add_argument_group("Output")
+    choices = ["image", "label"]
+    out.add_argument("out", type=str, help="output directory path [required]")
+    out.add_argument("--type", type=str, choices=choices, default="image", help="image or label tiling [default: image]")
+    out.add_argument("--zoom", type=int, required=True, help="zoom level of tiles [required]")
+    out.add_argument("--tile_size", type=int, default=512, help="if set, override tiles side in pixels, from config file")
+
+    ui = parser.add_argument_group("Web UI")
+    ui.add_argument("--web_ui", action="store_true", help="activate Web UI output")
+    ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
+    ui.add_argument("--web_ui_template", type=str, help="alternate Web UI template path")
 
     parser.set_defaults(func=main)
 
 
 def main(args):
 
-    colors = [classe["color"] for classe in load_config(args.config)["classes"]]
+    config = load_config(args.config)
+    tile_size = args.tile_size if args.tile_size else config["model"]["tile_size"]
+    colors = [classe["color"] for classe in config["classes"]]
 
     try:
         raster = rasterio_open(args.raster)
@@ -67,7 +72,7 @@ def main(args):
             width=math.ceil((e - w) / transform.a),
             height=math.ceil((s - n) / transform.e),
         )
-        data = warp_vrt.read(out_shape=(len(raster.indexes), args.size, args.size), window=warp_vrt.window(w, s, e, n))
+        data = warp_vrt.read(out_shape=(len(raster.indexes), tile_size, tile_size), window=warp_vrt.window(w, s, e, n))
 
         # If no_data is set, remove all tiles with at least one whole border filled only with no_data (on all bands)
         if type(args.no_data) is not None and (

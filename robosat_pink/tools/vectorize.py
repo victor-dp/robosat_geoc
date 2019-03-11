@@ -13,13 +13,18 @@ from robosat_pink.config import load_config
 from robosat_pink.tiles import tiles_from_slippy_map
 
 
-def add_parser(subparser):
-    parser = subparser.add_parser("vectorize", help="extracts simplified GeoJSON features from segmentation masks")
+def add_parser(subparser, formatter_class):
+    parser = subparser.add_parser(
+        "vectorize", help="Extract simplified GeoJSON features from segmentation masks", formatter_class=formatter_class
+    )
 
-    parser.add_argument("--type", type=str, required=True, help="type of feature to extract (i.e class title)")
-    parser.add_argument("--config", type=str, required=True, help="path to configuration file")
-    parser.add_argument("masks", type=str, help="slippy map directory with segmentation masks")
-    parser.add_argument("out", type=str, help="path to GeoJSON file to store features in")
+    inp = parser.add_argument_group("Inputs")
+    inp.add_argument("masks", type=str, help="input masks directory path [required]")
+    inp.add_argument("--type", type=str, required=True, help="type of features to extract (i.e class title) [required]")
+    inp.add_argument("--config", type=str, required=True, help="path to configuration file [required]")
+
+    out = parser.add_argument_group("Outputs")
+    out.add_argument("out", type=str, help="path to GeoJSON file to store features in [required]")
 
     parser.set_defaults(func=main)
 

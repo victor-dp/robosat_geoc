@@ -1,6 +1,5 @@
 import os
 import sys
-import argparse
 
 import torch
 import torch.backends.cudnn
@@ -11,6 +10,7 @@ from torchvision.transforms import Normalize
 from tqdm import tqdm
 
 import pkgutil
+from pathlib import Path
 from importlib import import_module
 
 from robosat_pink.transforms import (
@@ -25,24 +25,30 @@ from robosat_pink.datasets import DatasetTilesConcat
 from robosat_pink.metrics import Metrics
 from robosat_pink.config import load_config
 from robosat_pink.logs import Logs
-import robosat_pink.losses
-import robosat_pink.models
 
 
-def add_parser(subparser):
-    parser = subparser.add_parser(
-        "train", help="trains a model on a dataset", formatter_class=argparse.ArgumentDefaultsHelpFormatter
-    )
+def add_parser(subparser, formatter_class):
+    parser = subparser.add_parser("train", help="Trains a model on a dataset", formatter_class=formatter_class)
 
-    parser.add_argument("--config", type=str, required=True, help="path to configuration file")
-    parser.add_argument("--checkpoint", type=str, required=False, help="path to a model checkpoint (to retrain)")
-    parser.add_argument("--resume", action="store_true", help="resume training (imply to provide a checkpoint)")
-    parser.add_argument("--workers", type=int, default=0, help="number of workers pre-processing images")
-    parser.add_argument("--dataset", type=str, help="if set, override dataset path value from config file")
-    parser.add_argument("--epochs", type=int, help="if set, override epochs value from config file")
-    parser.add_argument("--batch_size", type=int, help="if set, override batch_size value from config file")
-    parser.add_argument("--lr", type=float, help="if set, override learning rate value from config file")
-    parser.add_argument("out", type=str, help="directory to save checkpoint .pth files and log")
+    hp = parser.add_argument_group("Hyper Parameters")
+    hp.add_argument("--config", type=str, required=True, help="path to configuration file [required]")
+    hp.add_argument("--dataset", type=str, help="if set, override dataset path value from config file")
+    hp.add_argument("--epochs", type=int, help="if set, override epochs value from config file")
+    hp.add_argument("--batch_size", type=int, help="if set, override batch_size value from config file")
+    hp.add_argument("--model", type=str, help="if set, override model name from config file")
+    hp.add_argument("--loss", type=str, help="if set, override model loss from config file")
+    hp.add_argument("--lr", type=float, help="if set, override learning rate value from config file")
+
+    out = parser.add_argument_group("Output")
+    out.add_argument("out", type=str, help="output directory path to save checkpoint .pth files and logs [required]")
+
+    mod = parser.add_argument_group("Model Training")
+    mod.add_argument("--resume", action="store_true", help="resume model training, if set imply to provide a checkpoint")
+    mod.add_argument("--checkpoint", type=str, help="path to a model checkpoint. To fine tune, or resume training if setted")
+    mod.add_argument("--ext_path", type=str, help="path to user's extension modules dir. To use alternate models or losses")
+
+    perf = parser.add_argument_group("Performances")
+    perf.add_argument("--workers", type=int, default=0, help="number pre-processing images workers [default: 0]")
 
     parser.set_defaults(func=main)
 
@@ -53,6 +59,22 @@ def main(args):
     config["model"]["lr"] = args.lr if args.lr else config["model"]["lr"]
     config["model"]["epochs"] = args.epochs if args.epochs else config["model"]["epochs"]
     config["model"]["batch_size"] = args.batch_size if args.batch_size else config["model"]["batch_size"]
+    config["model"]["name"] = args.model if args.model else config["model"]["name"]
+    config["model"]["loss"] = args.loss if args.loss else config["model"]["loss"]
+
+    module_search_paths = [args.ext_path] if args.ext_path else []
+    module_search_paths.append(Path(__file__).parent.parent)
+    sys.path.append(args.ext_path)
+
+    losses = [name for path in module_search_paths for _, name, _ in pkgutil.iter_modules([os.path.join(path, "losses")])]
+    if config["model"]["loss"] not in losses:
+        sys.exit("Unknown loss, thoses available are {}".format(losses))
+    loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"]))
+
+    models = [name for path in module_search_paths for _, name, _ in pkgutil.iter_modules([os.path.join(path, "models")])]
+    if config["model"]["name"] not in models:
+        sys.exit("Unknown model, thoses available are {}".format(models))
+    model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
 
     log = Logs(os.path.join(args.out, "log"))
 
@@ -72,11 +94,6 @@ def main(args):
     pretrained = config["model"]["pretrained"]
     encoder = config["model"]["encoder"]
 
-    models = [name for _, name, _ in pkgutil.iter_modules([os.path.dirname(robosat_pink.models.__file__)])]
-    if config["model"]["name"] not in [model for model in models]:
-        sys.exit("Unknown model, thoses available are {}".format([model for model in models]))
-
-    model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
     net = getattr(model_module, "{}".format(config["model"]["name"].title()))(
         num_classes=num_classes, num_channels=num_channels, encoder=encoder, pretrained=pretrained
     ).to(device)
@@ -99,11 +116,6 @@ def main(args):
             optimizer.load_state_dict(chkpt["optimizer"])
             resume = chkpt["epoch"]
 
-    losses = [name for _, name, _ in pkgutil.iter_modules([os.path.dirname(robosat_pink.losses.__file__)])]
-    if config["model"]["loss"] not in [loss for loss in losses]:
-        sys.exit("Unknown loss, thoses available are {}".format([loss for loss in losses]))
-
-    loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"]))
     criterion = getattr(loss_module, "{}".format(config["model"]["loss"].title()))().to(device)
 
     train_loader, val_loader = get_dataset_loaders(config["dataset"]["path"], config, args.workers)

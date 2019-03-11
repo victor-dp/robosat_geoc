@@ -3,11 +3,11 @@ import sys
 import math
 import json
 import torch
-import argparse
 
 from PIL import Image
 from tqdm import tqdm
 import numpy as np
+import cv2
 
 from mercantile import feature
 
@@ -17,28 +17,38 @@ from robosat_pink.metrics import Metrics
 from robosat_pink.web_ui import web_ui
 
 
-def add_parser(subparser):
+def add_parser(subparser, formatter_class):
     parser = subparser.add_parser(
         "compare",
-        help="Compute composite images and/or metrics to compare several slippy map dirs.",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        help="Compute composite images and/or metrics to compare several XYZ dirs.",
+        formatter_class=formatter_class,
     )
-    parser.add_argument("--mode", type=str, default="side", choices=["side", "stack", "list"], help="compare mode")
-    parser.add_argument("--images", type=str, nargs="+", help="slippy map images dirs to render (stack or side mode)")
-    parser.add_argument("--ext", type=str, default="webp", help="file format to save images in (stack or side mode)")
-    parser.add_argument("--labels", type=str, help="directory to read slippy map labels from (needed for QoD metric)")
-    parser.add_argument("--masks", type=str, help="directory to read slippy map masks from (needed for QoD metric)")
-    parser.add_argument("--config", type=str, help="path to configuration file (needed for QoD metric)")
-    parser.add_argument("--minimum_fg", type=float, default=0.0, help="skip tile if label foreground below, [0-100]")
-    parser.add_argument("--maximum_fg", type=float, default=100.0, help="skip tile if label foreground above, [0-100]")
-    parser.add_argument("--minimum_qod", type=float, default=0.0, help="skip tile if QoD metric below, [0-100]")
-    parser.add_argument("--maximum_qod", type=float, default=100.0, help="skip tile if QoD metric above, [0-100]")
-    parser.add_argument("--vertical", action="store_true", help="render vertical image aggregate, for side mode")
-    parser.add_argument("--geojson", action="store_true", help="output geojson based, for list mode")
-    parser.add_argument("--web_ui", action="store_true", help="activate web ui output")
-    parser.add_argument("--web_ui_base_url", type=str, help="web ui alternate base url")
-    parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
-    parser.add_argument("out", type=str, help="directory or path (upon mode) to save output to")
+
+    inp = parser.add_argument_group("Inputs")
+    inp.add_argument(
+        "--mode", type=str, default="side", choices=["side", "stack", "list"], help="compare mode [default: side]"
+    )
+    inp.add_argument("--config", type=str, help="path to configuration file [required for QoD filtering]")
+    inp.add_argument("--labels", type=str, help="path to tiles labels directory [required for QoD filtering]")
+    inp.add_argument("--masks", type=str, help="path to tiles masks directory [required for QoD filtering)")
+    inp.add_argument("--images", type=str, nargs="+", help="path to images directories [required for stack or side modes]")
+
+    qod = parser.add_argument_group("QoD Filtering")
+    qod.add_argument("--minimum_fg", type=float, default=0.0, help="skip tile if label foreground below. [default: 0]")
+    qod.add_argument("--maximum_fg", type=float, default=100.0, help="skip tile if label foreground above [default: 100]")
+    qod.add_argument("--minimum_qod", type=float, default=0.0, help="skip tile if QoD metric below [default: 0]")
+    qod.add_argument("--maximum_qod", type=float, default=100.0, help="skip tile if QoD metric above [default: 100]")
+
+    out = parser.add_argument_group("Outputs")
+    out.add_argument("--vertical", action="store_true", help="output vertical image aggregate [optionnal for side mode]")
+    out.add_argument("--geojson", action="store_true", help="output results as GeoJSON [optionnal for list mode]")
+    out.add_argument("--ext", type=str, default="webp", help="output images file format [default: webp]")
+    out.add_argument("out", type=str, help="output path")
+
+    ui = parser.add_argument_group("Web UI")
+    ui.add_argument("--web_ui", action="store_true", help="activate Web UI output")
+    ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
+    ui.add_argument("--web_ui_template", type=str, help="alternate Web UI template path")
 
     parser.set_defaults(func=main)
 
@@ -124,8 +134,7 @@ def main(args):
                     side[:, i * image_shape[0] : (i + 1) * image_shape[0], :] = img
 
             os.makedirs(os.path.join(args.out, z, x), exist_ok=True)
-            side = Image.fromarray(np.uint8(side))
-            side.save(os.path.join(args.out, z, x, "{}.{}".format(y, args.ext)), optimize=True)
+            cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.ext), np.uint8(side))
 
         elif args.mode == "stack":
 
@@ -140,8 +149,7 @@ def main(args):
                     stack = stack + (img / len(args.images))
 
             os.makedirs(os.path.join(args.out, str(z), str(x)), exist_ok=True)
-            stack = Image.fromarray(np.uint8(stack))
-            stack.save(os.path.join(args.out, str(z), str(x), "{}.{}".format(y, args.ext)), optimize=True)
+            cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.ext), np.uint8(stack))
 
         elif args.mode == "list":
             if args.geojson:

@@ -1,7 +1,6 @@
 import os
 import sys
 import time
-import argparse
 import concurrent.futures as futures
 
 import cv2
@@ -15,25 +14,30 @@ from robosat_pink.web_ui import web_ui
 from robosat_pink.logs import Logs
 
 
-def add_parser(subparser):
+def add_parser(subparser, formatter_class):
     parser = subparser.add_parser(
-        "download",
-        help="downloads images from a remote server (XYZ, WMS, or TMS)",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        "download", help="Downloads tiles from a remote server (XYZ, WMS, or TMS)", formatter_class=formatter_class
     )
 
-    parser.add_argument(
-        "url", type=str, help="endpoint with {z}/{x}/{y} or {xmin},{ymin},{xmax},{ymax} variables to fetch image tiles"
-    )
-    parser.add_argument("--ext", type=str, default="webp", help="file format to save images in")
-    parser.add_argument("--rate", type=int, default=10, help="rate limit in max. requests per second")
-    parser.add_argument("--type", type=str, default="XYZ", choices=["XYZ", "WMS", "TMS"], help="service type to use")
-    parser.add_argument("--timeout", type=int, default=10, help="server request timeout (in seconds)")
-    parser.add_argument("--web_ui", action="store_true", help="activate web ui output")
-    parser.add_argument("--web_ui_base_url", type=str, help="web ui alternate base url")
-    parser.add_argument("--web_ui_template", type=str, help="path to an alternate web ui template")
-    parser.add_argument("tiles", type=str, help="path to .csv tiles file")
-    parser.add_argument("out", type=str, help="path to slippy map directory for storing tiles")
+    ws = parser.add_argument_group("Web Server")
+    ws.add_argument("url", type=str, help="url server endpoint to fetch image tiles [required]")
+    ws.add_argument("--type", type=str, default="XYZ", choices=["XYZ", "WMS", "TMS"], help="service type [default: XYZ]")
+    ws.add_argument("--rate", type=int, default=10, help="download rate limit in max requests/seconds [default: 10]")
+    ws.add_argument("--timeout", type=int, default=10, help="download request timeout (in seconds) [default: 10]")
+
+    cover = parser.add_argument_group("Coverage to download")
+    cover.add_argument("tiles", type=str, help="path to .csv tiles list [required]")
+
+    out = parser.add_argument_group("Output")
+    out.add_argument("--ext", type=str, default="webp", help="file format to save images in [default: webp]")
+    out.add_argument("out", type=str, help="output directory path [required]")
+
+    ui = parser.add_argument_group("Web UI")
+    ui.add_argument("--web_ui", action="store_true", help="activate Web UI output")
+    ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
+    ui.add_argument("--web_ui_template", type=str, help="alternate Web UI template path")
+
+    # epilog = "with {z}/{x}/{y} or {xmin},{ymin},{xmax},{ymax} "
 
     parser.set_defaults(func=main)
 
