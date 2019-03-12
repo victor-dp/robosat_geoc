@@ -19,12 +19,13 @@ black:
 	black -l 125 *.py robosat_pink/*.py robosat_pink/*/*.py
 
 doc:
+	@echo "# RoboSat.pink tools documentation" > docs/tools.md
 	@for tool in `ls robosat_pink/tools/[^_]*py | sed -e 's#.*/##g' -e 's#.py##'`; do \
 		echo "Doc generation: $$tool"; 						  \
-		echo "# rsp $$tool"  > docs/tools/$$tool.md; 				  \
-		echo '```'          >> docs/tools/$$tool.md; 				  \
-		rsp $$tool -h       >> docs/tools/$$tool.md; 				  \
-		echo '```'          >> docs/tools/$$tool.md; 				  \
+		echo "## rsp $$tool" >> docs/tools.md; 				  	  \
+		echo '```'           >> docs/tools.md; 				  	  \
+		rsp $$tool -h        >> docs/tools.md; 				  	  \
+		echo '```'           >> docs/tools.md; 				  	  \
 	done
 
 it: it_preparation it_train it_post
