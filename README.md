@@ -1,11 +1,11 @@
-<h1 align='center'>RoboSat.pink</h1>
-<h2 align='center'>Semantic Segmentation ecosystem for GeoSpatial Imagery</h2>
-
+<h1 align='center'>RoboSat.pink/h1>
+<p align='center'><a href='https://twitter.com/RobosatP'>@RoboSatP</a></p>
 
 <p align=center>
   <img src="https://pbs.twimg.com/media/DpjonykWwAANpPr.jpg" alt="RoboSat.pink buildings segmentation from Imagery" />
 </p>
 
+<p align='center'><a href='https://twitter.com/RobosatP'>@RoboSatP</a></p>
 
 
 Purposes:
@@ -23,7 +23,7 @@ Main Features:
 - Support either RGB or multibands imagery (as multispectral or hyperspectral)
 - Allows Data Fusion (from imagery or rasterized vectors)
 - Web-UI tools to easily display, hilight or select results
-- High performances, and multi GPUs support
+- High performances, PyTorch based, and native multi GPUs support
 
 
 
