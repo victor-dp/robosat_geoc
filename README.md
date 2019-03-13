@@ -1,4 +1,4 @@
-<h1 align='center'>RoboSat.pink/h1>
+<h1 align='center'>RoboSat.pink</h1>
 <h2 align='center'>Semantic Segmentation for GeoSpatial imagery</h2>
 
 <p align=center>
