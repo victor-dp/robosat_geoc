@@ -1,5 +1,5 @@
 <h1 align='center'>RoboSat.pink/h1>
-<p align='center'><a href='https://twitter.com/RobosatP'>@RoboSatP</a></p>
+<h2 align='center'>Semantic Segmentation for GeoSpatial imagery</h2>
 
 <p align=center>
   <img src="https://pbs.twimg.com/media/DpjonykWwAANpPr.jpg" alt="RoboSat.pink buildings segmentation from Imagery" />
