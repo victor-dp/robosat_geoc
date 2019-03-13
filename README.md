@@ -5,7 +5,6 @@
   <img src="https://pbs.twimg.com/media/DpjonykWwAANpPr.jpg" alt="RoboSat.pink buildings segmentation from Imagery" />
 </p>
 
-<p align='center'><a href='https://twitter.com/RobosatP'>@RoboSatP</a></p>
 
 
 Purposes:
@@ -42,6 +41,11 @@ Documentation:
 - <a href="./docs/tools.md#rsp-train">`rsp train`</a> Trains a model on a dataset
 - <a href="./docs/tools.md#rsp-vectorize">`rsp vectorize`</a> Extract simplified GeoJSON features from segmentation masks
 
+
+News:
+-------------
+- <a href='https://twitter.com/RobosatP'>@RoboSatP</a>
+
 Tutorials:
 ----------
 - <a href="./docs/from_opendata_to_opendataset.md">How to use plain OpenData to create a decent training OpenDataSet</a>
@@ -51,7 +55,6 @@ Presentations:
 --------------
   - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">@PyParis 2018</a>
   - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">@FOSDEM 2019</a>
-
 
 Install:
 --------
