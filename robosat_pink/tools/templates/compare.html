@@ -30,7 +30,7 @@ function load_json(url, callback)
   x.send(null);
 }
 function display_img(xyz)
-{ document.getElementById("main").innerHTML = "<img id='image' src='" + xyz.path() + ".{{ext}}' />";
+{ document.getElementById("main").innerHTML = "<img id='image' src='{{base_url}}/" + xyz.path() + ".{{ext}}' />";
   var style  = "position:absolute; width:auto; height:auto; margin:auto; top:0; bottom:0; left:0; right:0; "
              + "vertical-align:middle; max-width:100%; max-height:100%";
   document.getElementById("image").style = style;
