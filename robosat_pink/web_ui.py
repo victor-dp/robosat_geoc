@@ -10,8 +10,8 @@ from robosat_pink.tiles import tile_pixel_to_location
 def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
 
     try:
-        if os.path.isfile(template):
-            web_ui = open(template, "r").read()
+        if os.path.isfile(os.path.expanduser(template)):
+            web_ui = open(os.path.expanduser(template), "r").read()
         else:
             web_ui = open(os.path.join(Path(__file__).parent, "tools", "templates", template), "r").read()
     except:
