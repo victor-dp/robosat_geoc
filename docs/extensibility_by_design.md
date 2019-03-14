@@ -48,10 +48,10 @@ your_extension_dir
 ```
 
 
-- The `yourtypename.py` file must contains at least a `type_nameHandler` class, with `__init__`, `ways` and `save` methods.
+- The `yourtypename.py` file must contains at least a `yourtypenameHandler` class, with `__init__`, `ways` and `save` methods.
 - Call `rsp extract` with `--ext_path` pointing to your extension directory, and ad hoc `--type` value. 
 
-A simple `OSM leisure:park` extractor example:
+A simple OSM `leisure:park` extractor example:
 
 ```
 import osmium
