@@ -12,7 +12,7 @@ def add_parser(subparser, formatter_class):
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("pbf", type=str, help="path to .osm.pbf file [required]")
     inp.add_argument("--type", type=str, required=True, help="type of feature to extract [required]")
-    inp.add_argument("--ext_path", type=str, help="path to user's extension modules dir. Allow to use alternate types.")
+    inp.add_argument("--ext_path", type=str, help="path to user's extension dir. Allow to use alternate OSM types.")
 
     out = parser.add_argument_group("Output")
     out.add_argument("out", type=str, help="path to GeoJSON file to store features in [required]")

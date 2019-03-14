@@ -32,10 +32,10 @@ def add_parser(subparser, formatter_class):
     inp.add_argument("--config", type=str, required=True, help="path to configuration file [required]")
     inp.add_argument("--tile_overlap", type=int, default=64, help="tile pixels overlap [default: 64]")
     inp.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
-    inp.add_argument("--ext_path", type=str, help="path to user's extension modules dir. Allow to use alternate models.")
+    inp.add_argument("--ext_path", type=str, help="path to user's extension dir. Allow to use alternate models.")
 
     out = parser.add_argument_group("Outputs")
-    out.add_argument("probs", type=str, help="output directory path [required]")
+    out.add_argument("out", type=str, help="output directory path [required]")
 
     perf = parser.add_argument_group("Performances")
     perf.add_argument("--workers", type=int, default=0, help="number of workers to load images [default: 0]")
@@ -122,8 +122,8 @@ def main(args):
                 out = Image.fromarray(image, mode="P")
                 out.putpalette(palette)
 
-                os.makedirs(os.path.join(args.probs, str(z), str(x)), exist_ok=True)
-                path = os.path.join(args.probs, str(z), str(x), str(y) + ".png")
+                os.makedirs(os.path.join(args.out, str(z), str(x)), exist_ok=True)
+                path = os.path.join(args.out, str(z), str(x), str(y) + ".png")
 
                 out.save(path, optimize=True)
 
@@ -131,4 +131,4 @@ def main(args):
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
         tiles = [tile for tile, _ in tiles_from_slippy_map(args.tiles)]
-        web_ui(args.probs, base_url, tiles, tiles, "png", template)
+        web_ui(args.out, base_url, tiles, tiles, "png", template)

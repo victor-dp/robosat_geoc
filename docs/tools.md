@@ -92,7 +92,7 @@ optional arguments:
 Inputs:
  pbf                  path to .osm.pbf file [required]
  --type TYPE          type of feature to extract [required]
- --ext_path EXT_PATH  path to user's extension modules dir. Allow to use alternate types.
+ --ext_path EXT_PATH  path to user's extension dir. Allow to use alternate OSM types.
 
 Output:
  out                  path to GeoJSON file to store features in [required]
@@ -105,7 +105,7 @@ usage: rsp predict [-h] --checkpoint CHECKPOINT --config CONFIG
                    [--batch_size BATCH_SIZE] [--web_ui]
                    [--web_ui_base_url WEB_UI_BASE_URL]
                    [--web_ui_template WEB_UI_TEMPLATE]
-                   tiles probs
+                   tiles out
 
 optional arguments:
  -h, --help                         show this help message and exit
@@ -116,10 +116,10 @@ Inputs:
  --config CONFIG                    path to configuration file [required]
  --tile_overlap TILE_OVERLAP        tile pixels overlap [default: 64]
  --tile_size TILE_SIZE              if set, override tile size value from config file
- --ext_path EXT_PATH                path to user's extension modules dir. Allow to use alternate models.
+ --ext_path EXT_PATH                path to user's extension dir. Allow to use alternate models.
 
 Outputs:
- probs                              output directory path [required]
+ out                                output directory path [required]
 
 Performances:
  --workers WORKERS                  number of workers to load images [default: 0]
@@ -158,7 +158,7 @@ Web UI:
 ```
 ## rsp subset
 ```
-usage: rsp subset [-h] [--mode {move,delete,copy}] --dir DIR --cover COVER
+usage: rsp subset [-h] [--mode {delete,move,copy}] --dir DIR --cover COVER
                   [--out OUT] [--web_ui] [--web_ui_base_url WEB_UI_BASE_URL]
                   [--web_ui_template WEB_UI_TEMPLATE]
 
@@ -166,7 +166,7 @@ optional arguments:
  -h, --help                         show this help message and exit
 
 Inputs:
- --mode {move,delete,copy}          subset mode [default: copy]
+ --mode {delete,move,copy}          subset mode [default: copy]
  --dir DIR                          path to inputs XYZ tiles dir [mandatory]
  --cover COVER                      path to csv cover file to subset tiles by [mandatory]
 
@@ -231,7 +231,7 @@ Output:
 Model Training:
  --resume                 resume model training, if set imply to provide a checkpoint
  --checkpoint CHECKPOINT  path to a model checkpoint. To fine tune, or resume training if setted
- --ext_path EXT_PATH      path to user's extension modules dir. To use alternate models or losses
+ --ext_path EXT_PATH      path to user's extension dir. To use alternate models or losses
 
 Performances:
  --workers WORKERS        number pre-processing images workers [default: 0]

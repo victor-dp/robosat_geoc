@@ -43,7 +43,7 @@ def add_parser(subparser, formatter_class):
     mod = parser.add_argument_group("Model Training")
     mod.add_argument("--resume", action="store_true", help="resume model training, if set imply to provide a checkpoint")
     mod.add_argument("--checkpoint", type=str, help="path to a model checkpoint. To fine tune, or resume training if setted")
-    mod.add_argument("--ext_path", type=str, help="path to user's extension modules dir. To use alternate models or losses")
+    mod.add_argument("--ext_path", type=str, help="path to user's extension dir. To use alternate models or losses")
 
     perf = parser.add_argument_group("Performances")
     perf.add_argument("--workers", type=int, default=0, help="number pre-processing images workers [default: 0]")
