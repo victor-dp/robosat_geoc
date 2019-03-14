@@ -39,11 +39,19 @@ A minimal Leaflet based template example:
 
 ## Use an alternate OSM type extractor ##
 To allows `rsp extract` to handle new OSM types:
-- In your extension directory (or an empty dir) create a sub dir `osm`, and inside it a file: `your_type_name.py`
-- This file must contains at least a `type_nameHandler` class, with `__init__`, `ways` and `save` methods.
-- Call `rsp extract` with `--ext_path` pointing to your extension directory, and the new `--type` value.
+- Your extension directory must looks like:
+```
+your_extension_dir
+└── robosat_pink
+    └── osm
+         └──yourtypename.py 
+```
 
-A simple OSM leisure:park extractor example:
+
+- The `yourtypename.py` file must contains at least a `type_nameHandler` class, with `__init__`, `ways` and `save` methods.
+- Call `rsp extract` with `--ext_path` pointing to your extension directory, and ad hoc `--type` value. 
+
+A simple `OSM leisure:park` extractor example:
 
 ```
 import osmium
