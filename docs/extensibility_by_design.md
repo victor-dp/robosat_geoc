@@ -39,7 +39,7 @@ A minimal Leaflet based template example:
 
 ## Use an alternate OSM type extractor ##
 To allows `rsp extract` to handle new OSM types:
-- Your extension directory must looks like:
+- Your extension directory must at least contains:
 ```
 your_extension_dir
 └── robosat_pink
@@ -89,7 +89,7 @@ class ParkHandler(osmium.SimpleHandler):
 
 ## Use an alternate Loss function ##
 To allows `rsp train` to use a loss function of your own:
-- Your extension directory must looks like:
+- Your extension directory must at least contains:
 ```
 your_extension_dir
 └── robosat_pink
@@ -129,7 +129,13 @@ class Miou(torch.nn.Module):
 
 ## Use an alternate Neural Network Model ##
 To allows `rsp train` and `rsp predict` to use a model of your own:
-- In your extension directory (or an empty dir) create a sub dir `models`, and inside it a file: `your_model_name.py`
-- The file must contains at least a `Model_name` class, with `__init__` and `forward` methods.
+- Your extension directory must at least contains:
+```
+your_extension_dir
+└── robosat_pink
+    └── models
+         └──yourmodelname.py 
+```
+- The `yourmodelname.py` must contains at least a `Model_name` class, with `__init__` and `forward` methods.
 - Either update config file value: `["model"]["name"]` or use `rsp train` with related `--model` parameter
 - Call `rsp train` then `rsp predict` with `--ext_path` pointing to your extension directory.
