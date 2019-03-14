@@ -29,7 +29,7 @@ def add_parser(subparser, formatter_class):
     cover.add_argument("tiles", type=str, help="path to .csv tiles list [required]")
 
     out = parser.add_argument_group("Output")
-    out.add_argument("--ext", type=str, default="webp", help="file format to save images in [default: webp]")
+    out.add_argument("--format", type=str, default="webp", help="file format to save images in [default: webp]")
     out.add_argument("out", type=str, help="output directory path [required]")
 
     ui = parser.add_argument_group("Web UI")
@@ -64,7 +64,7 @@ def main(args):
                 x, y, z = map(str, [tile.x, tile.y, tile.z])
 
                 os.makedirs(os.path.join(args.out, z, x), exist_ok=True)
-                path = os.path.join(args.out, z, x, "{}.{}".format(y, args.ext))
+                path = os.path.join(args.out, z, x, "{}.{}".format(y, args.format))
 
                 if os.path.isfile(path):
                     progress.update()
@@ -115,4 +115,4 @@ def main(args):
     if args.web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
-        web_ui(args.out, base_url, tiles, tiles, args.ext, template)
+        web_ui(args.out, base_url, tiles, tiles, args.format, template)

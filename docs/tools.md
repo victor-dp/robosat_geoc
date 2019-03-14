@@ -6,7 +6,8 @@ usage: rsp compare [-h] [--mode {side,stack,list}] [--config CONFIG]
                    [--images IMAGES [IMAGES ...]] [--minimum_fg MINIMUM_FG]
                    [--maximum_fg MAXIMUM_FG] [--minimum_qod MINIMUM_QOD]
                    [--maximum_qod MAXIMUM_QOD] [--vertical] [--geojson]
-                   [--ext EXT] [--web_ui] [--web_ui_base_url WEB_UI_BASE_URL]
+                   [--format FORMAT] [--web_ui]
+                   [--web_ui_base_url WEB_UI_BASE_URL]
                    [--web_ui_template WEB_UI_TEMPLATE]
                    out
 
@@ -29,7 +30,7 @@ QoD Filtering:
 Outputs:
  --vertical                         output vertical image aggregate [optionnal for side mode]
  --geojson                          output results as GeoJSON [optionnal for list mode]
- --ext EXT                          output images file format [default: webp]
+ --format FORMAT                    output images file format [default: webp]
  out                                output path
 
 Web UI:
@@ -55,7 +56,7 @@ Outputs:
 ## rsp download
 ```
 usage: rsp download [-h] [--type {XYZ,WMS,TMS}] [--rate RATE]
-                    [--timeout TIMEOUT] [--ext EXT] [--web_ui]
+                    [--timeout TIMEOUT] [--format FORMAT] [--web_ui]
                     [--web_ui_base_url WEB_UI_BASE_URL]
                     [--web_ui_template WEB_UI_TEMPLATE]
                     url tiles out
@@ -73,7 +74,7 @@ Coverage to download:
  tiles                              path to .csv tiles list [required]
 
 Output:
- --ext EXT                          file format to save images in [default: webp]
+ --format FORMAT                    file format to save images in [default: webp]
  out                                output directory path [required]
 
 Web UI:
@@ -157,7 +158,7 @@ Web UI:
 ```
 ## rsp subset
 ```
-usage: rsp subset [-h] [--mode {copy,delete,move}] --dir DIR --cover COVER
+usage: rsp subset [-h] [--mode {move,delete,copy}] --dir DIR --cover COVER
                   [--out OUT] [--web_ui] [--web_ui_base_url WEB_UI_BASE_URL]
                   [--web_ui_template WEB_UI_TEMPLATE]
 
@@ -165,7 +166,7 @@ optional arguments:
  -h, --help                         show this help message and exit
 
 Inputs:
- --mode {copy,delete,move}          subset mode [default: copy]
+ --mode {move,delete,copy}          subset mode [default: copy]
  --dir DIR                          path to inputs XYZ tiles dir [mandatory]
  --cover COVER                      path to csv cover file to subset tiles by [mandatory]
 

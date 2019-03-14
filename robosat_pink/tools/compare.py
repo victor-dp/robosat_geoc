@@ -42,7 +42,7 @@ def add_parser(subparser, formatter_class):
     out = parser.add_argument_group("Outputs")
     out.add_argument("--vertical", action="store_true", help="output vertical image aggregate [optionnal for side mode]")
     out.add_argument("--geojson", action="store_true", help="output results as GeoJSON [optionnal for list mode]")
-    out.add_argument("--ext", type=str, default="webp", help="output images file format [default: webp]")
+    out.add_argument("--format", type=str, default="webp", help="output images file format [default: webp]")
     out.add_argument("out", type=str, help="output path")
 
     ui = parser.add_argument_group("Web UI")
@@ -134,7 +134,7 @@ def main(args):
                     side[:, i * image_shape[0] : (i + 1) * image_shape[0], :] = img
 
             os.makedirs(os.path.join(args.out, z, x), exist_ok=True)
-            cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.ext), np.uint8(side))
+            cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.format), np.uint8(side))
 
         elif args.mode == "stack":
 
@@ -149,7 +149,7 @@ def main(args):
                     stack = stack + (img / len(args.images))
 
             os.makedirs(os.path.join(args.out, str(z), str(x)), exist_ok=True)
-            cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.ext), np.uint8(stack))
+            cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.format), np.uint8(stack))
 
         elif args.mode == "list":
             if args.geojson:
@@ -169,9 +169,9 @@ def main(args):
 
     if args.mode == "side" and args.web_ui:
         template = "compare.html" if not args.web_ui_template else args.web_ui_template
-        web_ui(args.out, base_url, None, tiles_compare, args.ext, template)
+        web_ui(args.out, base_url, None, tiles_compare, args.format, template)
 
     if args.mode == "stack" and args.web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         tiles = [tile for tile, _ in tiles_from_slippy_map(args.images[0])]
-        web_ui(args.out, base_url, tiles, tiles_compare, args.ext, template)
+        web_ui(args.out, base_url, tiles, tiles_compare, args.format, template)
