@@ -59,7 +59,8 @@ Prepare DataSet
 Now to transform the vector roofprints and raster labels:
 
 ```
-rsp rasterize --config config.toml --web_ui ~/rsp_dataset/lyon_roofprint.json ~/rsp_dataset/cover ~/rsp_dataset/labels
+wget https://raw.githubusercontent.com/datapink/robosat.pink/master/config.toml
+rsp rasterize --config config.toml --geojson ~/rsp_dataset/lyon_roofprint.json --web_ui ~/rsp_dataset/cover ~/rsp_dataset/labels
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/labels/"><img src="img/from_opendata_to_opendataset/labels.png" /></a>
