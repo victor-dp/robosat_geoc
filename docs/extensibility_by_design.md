@@ -81,10 +81,41 @@ class ParkHandler(osmium.SimpleHandler):
 
 ## Use an alternate Loss function ##
 To allows `rsp train` to use a loss function of your own:
-- In your extension directory (or an empty dir) create a sub dir `losses`, and inside it a file: `your_loss_name.py`
-- This file must contains at least a `Loss_name` class, with `__init__` and `forward` methods.
+- Your extension directory must looks like:
+```
+your_extension_dir
+└── robosat_pink
+    └── losses
+         └──yourlossname.py 
+```
+
+- Your loss file must contains a class, with `__init__` and `forward` methods. As an example, a MIoU loss, with `your_extension_dir/robosat_pink/losses/miou.py` file:
+
+```
+import torch
+
+class Miou(torch.nn.Module):
+    """mIoU Loss. cf http://www.cs.umanitoba.ca/~ywang/papers/isvc16.pdf"""
+
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, inputs, targets):
+
+        N, C, H, W = inputs.size()
+
+        softs = torch.nn.functional.softmax(inputs, dim=1).permute(1, 0, 2, 3)
+        masks = torch.zeros(N, C, H, W).to(targets.device).scatter_(1, targets.view(N, 1, H, W), 1).permute(1, 0, 2, 3)
+
+        inters = softs * masks
+        unions = (softs + masks) - (softs * masks)
+        mIoU = 1. - (inters.view(C, N, -1).sum(2) / unions.view(C, N, -1).sum(2)).mean()
+
+        return mIoU
+```
+
 - If your loss computation is not auto-differentiable by PyTorch, a related `backward` method, will be needed too.
-- Either update config file value: `["model"]["loss"]` or use `rsp train` with related `--loss` parameter
+- Update config file value: `["model"]["loss"]` or use `rsp train` with an ad hoc `--loss` parameter
 - Call `rsp train` with `--ext_path` pointing to your extension directory.
 
 
