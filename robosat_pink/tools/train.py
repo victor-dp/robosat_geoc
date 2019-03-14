@@ -9,8 +9,6 @@ from torchvision.transforms import Normalize
 
 from tqdm import tqdm
 
-import pkgutil
-from pathlib import Path
 from importlib import import_module
 
 from robosat_pink.transforms import (
@@ -62,19 +60,18 @@ def main(args):
     config["model"]["name"] = args.model if args.model else config["model"]["name"]
     config["model"]["loss"] = args.loss if args.loss else config["model"]["loss"]
 
-    module_search_paths = [args.ext_path] if args.ext_path else []
-    module_search_paths.append(Path(__file__).parent.parent)
-    sys.path.append(args.ext_path)
+    if args.ext_path:
+        sys.path.append(os.path.expanduser(args.ext_path))
 
-    losses = [name for path in module_search_paths for _, name, _ in pkgutil.iter_modules([os.path.join(path, "losses")])]
-    if config["model"]["loss"] not in losses:
-        sys.exit("Unknown loss, thoses available are {}".format(losses))
-    loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"]))
+    try:
+        loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"]))
+    except:
+        sys.exit("Unknown {} loss".format(config["model"]["loss"]))
 
-    models = [name for path in module_search_paths for _, name, _ in pkgutil.iter_modules([os.path.join(path, "models")])]
-    if config["model"]["name"] not in models:
-        sys.exit("Unknown model, thoses available are {}".format(models))
-    model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
+    try:
+        model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
+    except:
+        sys.exit("Unknown {} model".format(config["model"]["name"]))
 
     log = Logs(os.path.join(args.out, "log"))
 

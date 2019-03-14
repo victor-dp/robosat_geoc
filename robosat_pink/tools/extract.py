@@ -1,8 +1,6 @@
 import os
 import sys
 
-import pkgutil
-from pathlib import Path
 from importlib import import_module
 
 
@@ -23,17 +21,14 @@ def add_parser(subparser, formatter_class):
 
 
 def main(args):
-    module_search_path = [args.ext_path] if args.ext_path else []
-    module_search_path.append(os.path.join(Path(__file__).parent.parent, "osm"))
-    modules = [(path, name) for path, name, _ in pkgutil.iter_modules(module_search_path)]
-    if args.type not in [name for _, name in modules]:
-        sys.exit("Unknown type, thoses available are {}".format([name for _, name in modules]))
 
     if args.ext_path:
-        sys.path.append(args.ext_path)
-        module = import_module(args.type)
-    else:
+        sys.path.append(os.path.expanduser(args.ext_path))
+
+    try:
         module = import_module("robosat_pink.osm.{}".format(args.type))
+    except:
+        sys.exit("Unknown OSM {} type extactor".format(args.type))
 
     handler = getattr(module, "{}Handler".format(args.type.title()))()
     handler.apply_file(filename=args.pbf, locations=True)

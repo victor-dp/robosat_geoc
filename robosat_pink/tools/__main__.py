@@ -2,14 +2,15 @@ import os
 import sys
 import argparse
 
+import glob
 import shutil
-import pkgutil
 from importlib import import_module
-
-import robosat_pink.tools
 
 
 def main():
+
+    if not sys.version_info >= (3, 6):
+        sys.exit("ERROR: rsp needs Python 3.6 or later.")
 
     if not len(sys.argv) > 1:
         print("rsp: RoboSat.pink command line tools")
@@ -20,8 +21,7 @@ def main():
         print("rsp <tool> [...]        launch an rsp tool command")
         sys.exit()
 
-    path = os.path.dirname(robosat_pink.tools.__file__)
-    tools = [tool for tool in [name for _, name, _ in pkgutil.iter_modules([path]) if name != "__main__"]]
+    tools = [os.path.basename(tool)[:-3] for tool in glob.glob(os.path.join(os.path.dirname(__file__), "[a-z]*.py"))]
     tools = [sys.argv[1]] if sys.argv[1] in tools else tools
 
     os.environ["COLUMNS"] = str(shutil.get_terminal_size().columns)  # cf https://bugs.python.org/issue13041

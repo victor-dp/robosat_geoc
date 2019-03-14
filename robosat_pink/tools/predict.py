@@ -1,8 +1,6 @@
 import os
 import sys
 
-import pkgutil
-from pathlib import Path
 from importlib import import_module
 
 import numpy as np
@@ -69,14 +67,13 @@ def main(args):
     # https://github.com/pytorch/pytorch/issues/7178
     chkpt = torch.load(args.checkpoint, map_location=map_location)
 
-    module_search_paths = [args.ext_path] if args.ext_path else []
-    module_search_paths.append(Path(__file__).parent.parent)
-    sys.path.append(args.ext_path)
+    if args.ext_path:
+        sys.path.append(os.path.expanduser(args.ext_path))
 
-    models = [name for path in module_search_paths for _, name, _ in pkgutil.iter_modules([os.path.join(path, "models")])]
-    if config["model"]["name"] not in models:
-        sys.exit("Unknown model, thoses available are {}".format(models))
-    model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
+    try:
+        model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
+    except:
+        sys.exit("Unknown {} model".format(config["model"]["name"]))
 
     std = []
     mean = []
