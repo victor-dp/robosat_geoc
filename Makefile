@@ -56,7 +56,7 @@ it_train:
 	rsp train --config config.toml --workers 2 --batch_size 4 --resume --checkpoint it/pth/checkpoint-00003-of-00003.pth --epochs 5 --dataset it it/pth
 
 it_post:
-	rsp predict --config config.toml --workers 4 --batch_size 16 --checkpoint it/pth/checkpoint-00005-of-00005.pth --web_ui it/images it/masks
+	rsp predict --config config.toml --workers 2 --batch_size 4 --checkpoint it/pth/checkpoint-00005-of-00005.pth --web_ui it/images it/masks
 	rsp compare --images it/images it/labels it/masks --mode stack --labels it/labels --masks it/masks --config config.toml --web_ui it/compare
 	rsp compare --mode list --labels it/labels --maximum_qod 70 --minimum_fg 5 --masks it/masks --config config.toml --geojson it/tiles.json
 	rsp vectorize --type building --config config.toml it/masks it/vector.json
