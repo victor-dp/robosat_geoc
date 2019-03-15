@@ -25,11 +25,17 @@ Main Features:
 - High performances, PyTorch based, and native multi GPUs support
 
 
-
+News:
+-----
+- <a href='https://twitter.com/RobosatP'>@RoboSatP</a>
 
 
 Documentation:
 --------------
+
+
+### Tools:
+
 - <a href="./docs/tools.md#rsp-compare">`rsp compare`</a> Compute composite images and/or metrics to compare several XYZ dirs.
 - <a href="./docs/tools.md#rsp-cover">`rsp cover`</a> Generate a tiles covering, in csv format: X,Y,Z
 - <a href="./docs/tools.md#rsp-download">`rsp download`</a> Downloads tiles from a remote server (XYZ, WMS, or TMS)
@@ -41,20 +47,17 @@ Documentation:
 - <a href="./docs/tools.md#rsp-train">`rsp train`</a> Trains a model on a dataset
 - <a href="./docs/tools.md#rsp-vectorize">`rsp vectorize`</a> Extract simplified GeoJSON features from segmentation masks
 
+### Config file:
+- <a href="./docs/config.md">`config.toml`</a>
 
-News:
--------------
-- <a href='https://twitter.com/RobosatP'>@RoboSatP</a>
-
-Tutorials:
-----------
+### Tutorials:
 - <a href="./docs/from_opendata_to_opendataset.md">How to use plain OpenData to create a decent training OpenDataSet</a>
 - <a href="./docs/extensibility_by_design.md">How to extend RoboSat.pink</a>
 
-Presentations:
---------------
+### Presentations slides:
   - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">@PyParis 2018</a>
   - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">@FOSDEM 2019</a>
+
 
 Install:
 --------
@@ -79,7 +82,7 @@ WorkFlows:
 ### Data Preparation ###
 
 - Training and validation datasets have to be tiled, using <a href="https://en.wikipedia.org/wiki/Tiled_web_map">XYZ tiles format</a>.
-- A Dataset directory, so containing XYZ tiles, must be split as:
+- A Dataset directory, so containing XYZ tiles, can be split as:
 ```
 dataset
 ├── training
