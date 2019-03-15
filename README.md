@@ -33,6 +33,12 @@ News:
 Documentation:
 --------------
 
+### Tutorials:
+- <a href="./docs/from_opendata_to_opendataset.md">How to use plain OpenData to create a decent training OpenDataSet</a>
+- <a href="./docs/extensibility_by_design.md">How to extend RoboSat.pink</a>
+
+### Config file:
+- <a href="./docs/config.md">`config.toml`</a>
 
 ### Tools:
 
@@ -46,13 +52,6 @@ Documentation:
 - <a href="./docs/tools.md#rsp-tile">`rsp tile`</a> Tile a raster
 - <a href="./docs/tools.md#rsp-train">`rsp train`</a> Trains a model on a dataset
 - <a href="./docs/tools.md#rsp-vectorize">`rsp vectorize`</a> Extract simplified GeoJSON features from segmentation masks
-
-### Config file:
-- <a href="./docs/config.md">`config.toml`</a>
-
-### Tutorials:
-- <a href="./docs/from_opendata_to_opendataset.md">How to use plain OpenData to create a decent training OpenDataSet</a>
-- <a href="./docs/extensibility_by_design.md">How to extend RoboSat.pink</a>
 
 ### Presentations slides:
   - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">@PyParis 2018</a>
