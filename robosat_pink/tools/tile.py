@@ -32,7 +32,7 @@ def add_parser(subparser, formatter_class):
     out.add_argument("out", type=str, help="output directory path [required]")
     out.add_argument("--type", type=str, choices=choices, default="image", help="image or label tiling [default: image]")
     out.add_argument("--zoom", type=int, required=True, help="zoom level of tiles [required]")
-    out.add_argument("--tile_size", type=int, default=512, help="if set, override tiles side in pixels, from config file")
+    out.add_argument("--tile_size", type=int, default=512, help="tile size in pixels [default: 512]")
 
     ui = parser.add_argument_group("Web UI")
     ui.add_argument("--web_ui", action="store_true", help="activate Web UI output")
@@ -45,8 +45,8 @@ def add_parser(subparser, formatter_class):
 def main(args):
 
     config = load_config(args.config)
-    tile_size = args.tile_size if args.tile_size else config["model"]["tile_size"]
     colors = [classe["color"] for classe in config["classes"]]
+    tile_size = args.tile_size
 
     try:
         raster = rasterio_open(args.raster)
