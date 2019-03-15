@@ -158,7 +158,7 @@ Web UI:
 ```
 ## rsp subset
 ```
-usage: rsp subset [-h] [--mode {delete,move,copy}] --dir DIR --cover COVER
+usage: rsp subset [-h] [--mode {copy,delete,move}] --dir DIR --cover COVER
                   [--out OUT] [--web_ui] [--web_ui_base_url WEB_UI_BASE_URL]
                   [--web_ui_template WEB_UI_TEMPLATE]
 
@@ -166,7 +166,7 @@ optional arguments:
  -h, --help                         show this help message and exit
 
 Inputs:
- --mode {delete,move,copy}          subset mode [default: copy]
+ --mode {copy,delete,move}          subset mode [default: copy]
  --dir DIR                          path to inputs XYZ tiles dir [mandatory]
  --cover COVER                      path to csv cover file to subset tiles by [mandatory]
 

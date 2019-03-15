@@ -27,6 +27,12 @@ doc:
 		rsp $$tool -h        >> docs/tools.md; 				  	  \
 		echo '```'           >> docs/tools.md; 				  	  \
 	done
+	@echo "Doc generation: config.toml"
+	@echo "## config.toml" > docs/config.md; 				  	  \
+	echo '```'           >> docs/config.md; 				  	  \
+	cat config.toml      >> docs/config.md; 				  	  \
+	echo '```'           >> docs/config.md;
+	
 
 it: it_preparation it_train it_post
 
