@@ -1,5 +1,6 @@
 """Color handling, color maps, color palettes."""
 
+import re
 import colorsys
 import webcolors
 
@@ -9,27 +10,10 @@ def make_palette(*colors):
 
     assert 0 < len(colors) <= 256
 
-    hexs = [webcolors.CSS3_NAMES_TO_HEX[color] if color[0] != "#" else color for color in colors]
-    rgbs = [(int(h[1:3], 16), int(h[3:5], 16), int(h[5:7], 16)) for h in hexs]
+    hex_colors = [webcolors.CSS3_NAMES_TO_HEX[color] if color[0] != "#" else color for color in colors]
+    rgb_colors = [(int(h[1:3], 16), int(h[3:5], 16), int(h[5:7], 16)) for h in hex_colors]
 
-    return list(sum(rgbs, ()))
-
-
-def continuous_palette_for_color(color, bins=256):
-    """Creates a continuous PIL color palette based on a single color (CSS3 color name or #RRGGBB), and a bins number."""
-
-    hexs = webcolors.CSS3_NAMES_TO_HEX[color] if color[0] != "#" else color
-    r, g, b = [(int(h[1:3], 16), int(h[3:5], 16), int(h[5:7], 16)) for h in hexs]
-    h, s, v = colorsys.rgb_to_hsv(r, g, b)
-
-    assert 0 < bins <= 256
-
-    palette = []
-    for i in range(bins):
-        r, g, b = [int(v * 255) for v in colorsys.hsv_to_rgb(h, (1 / bins) * (i + 1), v)]
-        palette.extend(r, g, b)
-
-    return palette
+    return list(sum(rgb_colors, ()))
 
 
 def complementary_palette(palette):
@@ -44,3 +28,10 @@ def complementary_palette(palette):
         comp_palette.extend(map(int, colorsys.hsv_to_rgb((h + 0.5) % 1, s, v)))
 
     return comp_palette
+
+
+def check_color(color):
+    """Check if an input color is or not valid (i.e CSS3 color name or #RRGGBB)."""
+
+    hex_color = webcolors.CSS3_NAMES_TO_HEX[color] if color[0] != "#" else color
+    return bool(re.match(r"^#([0-9a-fA-F]){6}$", hex_color))
