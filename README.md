@@ -61,12 +61,19 @@ Documentation:
 Install:
 --------
 
+Latest stable release from PyPI:
 ```
 pip3 install RoboSat.pink
 ```
 
 
-Out of the box Ubuntu-server 18.04 full install:
+Latest developpement version from GitHub:
+```
+pip3 install -U git+https://github.com/datapink/robosat.pink
+```
+
+
+Out of the box Ubuntu-server 18.04 full install, including GPU stack:
 ```
 sudo sh -c "apt update && apt install -y build-essential python3-pip"
 sudo pip3 install RoboSat.pink
