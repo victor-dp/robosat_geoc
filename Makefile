@@ -58,8 +58,8 @@ it_preparation:
 	rsp subset --web_ui --dir it/labels --cover it/validation/cover --out it/validation/labels
 
 it_train:
-	rsp train --config config.toml --workers 2 --epochs 3 --batch_size 4 --dataset it it/pth
-	rsp train --config config.toml --workers 2 --batch_size 4 --resume --checkpoint it/pth/checkpoint-00003-of-00003.pth --epochs 5 --dataset it it/pth
+	rsp train --config config.toml --workers 2 --epochs 3 --batch_size 2 --dataset it it/pth
+	rsp train --config config.toml --workers 2 --batch_size 2 --resume --checkpoint it/pth/checkpoint-00003-of-00003.pth --epochs 5 --dataset it it/pth
 
 it_post:
 	rsp predict --config config.toml --workers 2 --batch_size 4 --checkpoint it/pth/checkpoint-00005-of-00005.pth --web_ui it/images it/masks
