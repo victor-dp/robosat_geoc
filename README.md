@@ -61,12 +61,12 @@ Documentation:
 Install:
 --------
 
-PIP based:
+### Using PIP:
 ```
 pip3 install RoboSat.pink
 ```
 
-Conda, with virtual env, based:
+### Using Conda, with a virtual env:
 ```
 conda create -n robosat_pink python=3.6
 conda activate robosat_pink
@@ -95,11 +95,10 @@ sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 
 
 ### NOTAS: 
+- Requires: Python 3.6 or later, and Nvidia GPU with at least 6Go RAM.
 - To test RoboSat.pink install, launch in a terminal: `rsp -h`
 - Upon your ```pip``` PATH setting, you could have to update it: ```export PATH=$PATH:.local/bin```
 - To use the development version: ```pip3 install git+https://github.com/datapink/robosat.pink```
-- Requires: Python 3.6 or later, and Nvidia GPU with at least 6Go RAM.
-
 
 
 WorkFlows:
@@ -167,14 +166,13 @@ OpenStreetMap Data to Get Faster Better Semantic Maps</a>
 
 
 
-
 Contributions and Services:
 ---------------------------
 
 - Pull Requests are welcome ! Feel free to send code...
   Don't hesitate either to initiate a prior discussion throught tickets on any implementation question.
 
-- Developpers should look first at the `Makefile`, as he provides several helpful rules.
+- Developpers should look first at the <a href="https://raw.githubusercontent.com/datapink/robosat.pink/master/Makefile">Makefile</a>, as he provides several helpful rules.
 
 - If you want to collaborate through code production and maintenance on a long term basis, please get in touch, co-edition with an ad hoc governance can be considered.
 
