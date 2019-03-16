@@ -43,7 +43,7 @@ it_preparation:
 	rsp download --rate 20 --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' --web_ui it/cover it/images
 	wget -nc -O it/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&BBOX=4.79,45.69,4.84,45.74&outputFormat=application/json; subtype=geojson' | true
 	rsp rasterize --config config.toml --geojson it/lyon_roofprint.json --web_ui it/cover it/labels
-	wget -O it/ra.pbf http://datapink.tools/rsp/it/lyon.pbf 
+	wget -O it/lyon.pbf http://datapink.tools/rsp/it/lyon.pbf 
 	rsp extract --type building it/lyon.pbf it/osm_lyon_footprint.json
 	rsp rasterize --config config.toml --geojson it/lyon_roofprint.json --web_ui it/cover it/labels_osm
 	rm -rf it/training it/validation
