@@ -61,25 +61,40 @@ Documentation:
 Install:
 --------
 
-Latest stable release from PyPI:
+### With PIP
+
 ```
 pip3 install RoboSat.pink
 ```
 
+### With Conda (using a virtual env)
 
-Latest developpement version from GitHub:
 ```
-pip3 install -U git+https://github.com/datapink/robosat.pink
+conda create -n robosat_pink python=3.6
+conda activate robosat_pink
+pip install robosat.pink
 ```
 
+### Out of the box Ubuntu-server 18.04 full install, including GPU stack:
 
-Out of the box Ubuntu-server 18.04 full install, including GPU stack:
 ```
 sudo sh -c "apt update && apt install -y build-essential python3-pip"
-sudo pip3 install RoboSat.pink
+pip3 install RoboSat.pink && export PATH=$PATH:.local/bin
 wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
 sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ```
+
+### Developper install (editable)
+
+```
+git clone https://github.com/datapink/robosat.pink
+pip3 -e ./robosat.pink
+```
+
+### NOTAS: 
+
+- Upon your ```pip``` PATH setting, you could have to update it: ```export PATH=$PATH:.local/bin```
+- To use development version: ```pip3 install git+https://github.com/datapink/robosat.pink```
 
 
 WorkFlows:
