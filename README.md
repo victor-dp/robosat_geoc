@@ -64,7 +64,7 @@ Install:
 ### With PIP
 
 ```
-pip3 install RoboSat.pink
+python3.6 -m pip install RoboSat.pink
 ```
 
 ### With Conda (using a virtual env)
@@ -88,13 +88,15 @@ sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 
 ```
 git clone https://github.com/datapink/robosat.pink
-pip3 -e ./robosat.pink
+python3.6 -m pip -e ./robosat.pink
 ```
 
 ### NOTAS: 
 
 - Upon your ```pip``` PATH setting, you could have to update it: ```export PATH=$PATH:.local/bin```
-- To use development version: ```pip3 install git+https://github.com/datapink/robosat.pink```
+- To use the development version: ```python3.6 -m pip install git+https://github.com/datapink/robosat.pink```
+- Python 3.7 is also fine.
+- To test RoboSat.pink install, launch in a terminal: `rsp -h`
 
 
 WorkFlows:
