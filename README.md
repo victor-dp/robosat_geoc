@@ -79,21 +79,26 @@ git clone https://github.com/datapink/robosat.pink
 pip3 -e ./robosat.pink
 ```
 
-### Out of the box Ubuntu-server 18.04 full install, including GPU stack:
+### Install from scratch:
+
+Ubuntu 18.04:
 ```
 sudo sh -c "apt update && apt install -y build-essential python3-pip"
 pip3 install RoboSat.pink && export PATH=$PATH:~/.local/bin
+```
+
+CentOS 7:
+```
+sudo sh -c "yum -y update && yum install -y python36 wget && python3.6 -m ensurepip"
+pip3 install --user RoboSat.pink
+```
+
+Add Nvidia GPU drivers:
+```
 wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
 sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ```
 
-### Out of the box CentOs full install, including GPU stack:
-```
-sudo sh -c "yum -y update && yum install -y python36 wget && python3.6 -m ensurepip"
-pip3 install --user RoboSat.pink
-wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
-sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
-```
 
 ### NOTAS: 
 - To test RoboSat.pink install, launch in a terminal: `rsp -h`
