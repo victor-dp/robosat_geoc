@@ -61,22 +61,16 @@ Documentation:
 Install:
 --------
 
-### With PIP
+PIP based:
 ```
 pip3 install RoboSat.pink
 ```
 
-### With Conda (using a virtual env)
+Conda, with virtual env, based:
 ```
 conda create -n robosat_pink python=3.6
 conda activate robosat_pink
 pip install robosat.pink
-```
-
-### Developper install (editable)
-```
-git clone https://github.com/datapink/robosat.pink
-pip3 -e ./robosat.pink
 ```
 
 ### Install from scratch:
@@ -179,6 +173,8 @@ Contributions and Services:
 
 - Pull Requests are welcome ! Feel free to send code...
   Don't hesitate either to initiate a prior discussion throught tickets on any implementation question.
+
+- Developpers should look first at the `Makefile`, as he provides several helpful rules.
 
 - If you want to collaborate through code production and maintenance on a long term basis, please get in touch, co-edition with an ad hoc governance can be considered.
 
