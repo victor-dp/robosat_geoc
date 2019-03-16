@@ -79,7 +79,7 @@ pip install robosat.pink
 
 ```
 sudo sh -c "apt update && apt install -y build-essential python3-pip"
-pip3 install RoboSat.pink && export PATH=$PATH:.local/bin
+pip3 install RoboSat.pink && export PATH=$PATH:~/.local/bin
 wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
 sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ```
