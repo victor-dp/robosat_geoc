@@ -3,6 +3,7 @@ import sys
 import math
 import json
 import torch
+import concurrent.futures as futures
 
 from PIL import Image
 from tqdm import tqdm
@@ -32,6 +33,7 @@ def add_parser(subparser, formatter_class):
     inp.add_argument("--labels", type=str, help="path to tiles labels directory [required for QoD filtering]")
     inp.add_argument("--masks", type=str, help="path to tiles masks directory [required for QoD filtering)")
     inp.add_argument("--images", type=str, nargs="+", help="path to images directories [required for stack or side modes]")
+    inp.add_argument("--workers", type=int, default=1, help="number of workers")
 
     qod = parser.add_argument_group("QoD Filtering")
     qod.add_argument("--minimum_fg", type=float, default=0.0, help="skip tile if label foreground below. [default: 0]")
@@ -101,64 +103,82 @@ def main(args):
         out = open(args.out, mode="w")
         if args.geojson:
             out.write('{"type":"FeatureCollection","features":[')
-            first = True
 
     tiles_compare = []
-    for tile in tqdm(list(tiles), desc="Compare", unit="tile", ascii=True):
+    progress = tqdm(total=len(tiles), ascii=True, unit="tile")
 
-        x, y, z = list(map(str, tile))
+    # Evading concurrent accesses issues
+    num_workers = args.workers
+    if args.mode == "list":
+        num_workers = 1
 
-        if args.masks and args.labels and args.config:
-            titles = [classe["title"] for classe in load_config(args.config)["classes"]]
-            dist, fg_ratio, qod = compare(args.masks, args.labels, tile, titles)
-            if not args.minimum_fg <= fg_ratio <= args.maximum_fg or not args.minimum_qod <= qod <= args.maximum_qod:
-                continue
+    with futures.ThreadPoolExecutor(num_workers) as executor:
 
-        tiles_compare.append(tile)
+        def worker(tile):
+            first = True  # args.mode = list
 
-        if args.mode == "side":
+            x, y, z = list(map(str, tile))
 
-            for i, root in enumerate(args.images):
-                img = tile_image_from_file(tile_from_slippy_map(root, x, y, z)[1])
+            if args.masks and args.labels and args.config:
+                titles = [classe["title"] for classe in load_config(args.config)["classes"]]
+                dist, fg_ratio, qod = compare(args.masks, args.labels, tile, titles)
+                if args.minimum_fg <= fg_ratio <= args.maximum_fg or args.minimum_qod <= qod <= args.maximum_qod:
+                    return False  # Exiting worker
 
-                if i == 0:
-                    side = np.zeros((img.shape[0], img.shape[1] * len(args.images), 3))
-                    side = np.swapaxes(side, 0, 1) if args.vertical else side
-                    image_shape = img.shape
+            tiles_compare.append(tile)
+
+            if args.mode == "side":
+
+                for i, root in enumerate(args.images):
+                    img = tile_image_from_file(tile_from_slippy_map(root, x, y, z)[1])
+
+                    if i == 0:
+                        side = np.zeros((img.shape[0], img.shape[1] * len(args.images), 3))
+                        side = np.swapaxes(side, 0, 1) if args.vertical else side
+                        image_shape = img.shape
+                    else:
+                        assert image_shape == img.shape, "Unconsistent image size to compare"
+
+                    if args.vertical:
+                        side[i * image_shape[0] : (i + 1) * image_shape[0], :, :] = img
+                    else:
+                        side[:, i * image_shape[0] : (i + 1) * image_shape[0], :] = img
+
+                os.makedirs(os.path.join(args.out, z, x), exist_ok=True)
+                cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.format), np.uint8(side))
+
+            elif args.mode == "stack":
+
+                for i, root in enumerate(args.images):
+                    img = tile_image_from_file(tile_from_slippy_map(root, x, y, z)[1])
+
+                    if i == 0:
+                        image_shape = img.shape[0:2]
+                        stack = img / len(args.images)
+                    else:
+                        assert image_shape == img.shape[0:2], "Unconsistent image size to compare"
+                        stack = stack + (img / len(args.images))
+
+                os.makedirs(os.path.join(args.out, str(z), str(x)), exist_ok=True)
+                cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.format), np.uint8(stack))
+
+            elif args.mode == "list":
+                if args.geojson:
+                    prop = '"properties":{{"x":{},"y":{},"z":{},"fg":{:.1f},"qod":{:.1f}}}'.format(x, y, z, fg_ratio, qod)
+                    geom = '"geometry":{}'.format(json.dumps(feature(tile, precision=6)["geometry"]))
+                    out.write('{}{{"type":"Feature",{},{}}}'.format("," if not first else "", geom, prop))
+                    first = False
                 else:
-                    assert image_shape == img.shape, "Unconsistent image size to compare"
+                    out.write("{},{},{}\t\t{:.1f}\t\t{:.1f}{}".format(x, y, z, fg_ratio, qod, os.linesep))
 
-                if args.vertical:
-                    side[i * image_shape[0] : (i + 1) * image_shape[0], :, :] = img
-                else:
-                    side[:, i * image_shape[0] : (i + 1) * image_shape[0], :] = img
+            return True
 
-            os.makedirs(os.path.join(args.out, z, x), exist_ok=True)
-            cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.format), np.uint8(side))
-
-        elif args.mode == "stack":
-
-            for i, root in enumerate(args.images):
-                img = tile_image_from_file(tile_from_slippy_map(root, x, y, z)[1])
-
-                if i == 0:
-                    image_shape = img.shape[0:2]
-                    stack = img / len(args.images)
-                else:
-                    assert image_shape == img.shape[0:2], "Unconsistent image size to compare"
-                    stack = stack + (img / len(args.images))
-
-            os.makedirs(os.path.join(args.out, str(z), str(x)), exist_ok=True)
-            cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.format), np.uint8(stack))
-
-        elif args.mode == "list":
-            if args.geojson:
-                prop = '"properties":{{"x":{},"y":{},"z":{},"fg":{:.1f},"qod":{:.1f}}}'.format(x, y, z, fg_ratio, qod)
-                geom = '"geometry":{}'.format(json.dumps(feature(tile, precision=6)["geometry"]))
-                out.write('{}{{"type":"Feature",{},{}}}'.format("," if not first else "", geom, prop))
-                first = False
-            else:
-                out.write("{},{},{}\t\t{:.1f}\t\t{:.1f}{}".format(x, y, z, fg_ratio, qod, os.linesep))
+    for ok in executor.map(worker, tiles):
+        if ok:
+            progress.update()
+        else:
+            # notice something?
+            out.write("Failure")
 
     if args.mode == "list":
         if args.geojson:
