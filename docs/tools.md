@@ -40,7 +40,9 @@ Web UI:
 ```
 ## rsp cover
 ```
-usage: rsp cover [-h] [--type {geojson,bbox,dir}] [--zoom ZOOM] input out
+usage: rsp cover [-h] [--type {geojson,bbox,dir}] [--zoom ZOOM]
+                 [--splits SPLITS]
+                 input out [out ...]
 
 optional arguments:
  -h, --help                 show this help message and exit
@@ -51,7 +53,8 @@ Inputs:
 
 Outputs:
  --zoom ZOOM                zoom level of tiles [required for geojson or bbox modes]
- out                        cover csv file output path [required]
+ --splits SPLITS            if set, shuffle and split in several cover pieces. [e.g 50,15,35]
+ out                        cover csv output paths [required]
 ```
 ## rsp download
 ```
@@ -156,7 +159,7 @@ Web UI:
 ```
 ## rsp subset
 ```
-usage: rsp subset [-h] [--mode {move,copy,delete}] --dir DIR --cover COVER
+usage: rsp subset [-h] [--mode {delete,copy,move}] --dir DIR --cover COVER
                   [--out OUT] [--web_ui] [--web_ui_base_url WEB_UI_BASE_URL]
                   [--web_ui_template WEB_UI_TEMPLATE]
 
@@ -164,7 +167,7 @@ optional arguments:
  -h, --help                         show this help message and exit
 
 Inputs:
- --mode {move,copy,delete}          subset mode [default: copy]
+ --mode {delete,copy,move}          subset mode [default: copy]
  --dir DIR                          path to inputs XYZ tiles dir [mandatory]
  --cover COVER                      path to csv cover file to subset tiles by [mandatory]
 

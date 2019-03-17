@@ -61,9 +61,7 @@ it_pre:
 	rsp rasterize --config config.toml --geojson it/lyon_roofprint.json --web_ui it/cover it/labels_osm
 	rm -rf it/training it/validation
 	mkdir it/training it/validation
-	cat it/cover | sort -R > it/cover.shuffled
-	head -n 500 it/cover.shuffled > it/training/cover
-	tail -n 236 it/cover.shuffled > it/validation/cover
+	rsp cover --type dir it/images --splits 70,30 it/training/cover it/validation/cover
 	rsp subset --web_ui --dir it/images --cover it/training/cover --out it/training/images
 	rsp subset --web_ui --dir it/labels --cover it/training/cover --out it/training/labels
 	rsp subset --web_ui --dir it/images --cover it/validation/cover --out it/validation/images
