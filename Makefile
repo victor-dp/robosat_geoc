@@ -1,10 +1,10 @@
-all:
+help:
 	@echo "This Makefile rules are designed for RoboSat.pink devs and power-users."
-	@echo "For plain user installation give a look on README.md."
+	@echo "For plain user installation follow README.md instructions, instead."
 	@echo ""
 	@echo ""
-	@echo " make install   Installs RoboSat.pink in an editable mode (and few Python dev tools)."
-	@echo "                So any further RoboSat.pink Python code modifications will be usable at once,"
+	@echo " make install   To install, few Python dev tools and RoboSat.pink in editable mode."
+	@echo "                So any further RoboSat.pink Python code modification will be usable at once,"
 	@echo "                throught either rsp tools commands or robosat_pink.* modules."
 	@echo ""
 	@echo " make check     Launchs all tests, and tools doc updating."
