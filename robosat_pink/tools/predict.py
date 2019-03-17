@@ -28,11 +28,12 @@ def add_parser(subparser, formatter_class):
 
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("tiles", type=str, help="tiles directory path [required]")
-    inp.add_argument("--checkpoint", type=str, required=True, help="path to trained model to use [required]")
-    inp.add_argument("--config", type=str, required=True, help="path to configuration file [required]")
     inp.add_argument("--tile_overlap", type=int, default=64, help="tile pixels overlap [default: 64]")
     inp.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
-    inp.add_argument("--ext_path", type=str, help="path to user's extension dir. Allow to use alternate models.")
+
+    inp.add_argument("--config", type=str, required=True, help="path to configuration file [required]")
+    inp.add_argument("--checkpoint", type=str, required=True, help="path to the trained model to use [required]")
+    inp.add_argument("--model", type=str, help="if set, override model name from config file")
 
     out = parser.add_argument_group("Outputs")
     out.add_argument("out", type=str, help="output directory path [required]")
@@ -51,9 +52,9 @@ def add_parser(subparser, formatter_class):
 
 def main(args):
     config = load_config(args.config)
-    num_classes = len(config["classes"])
-    batch_size = args.batch_size if args.batch_size else config["model"]["batch_size"]
-    tile_size = args.tile_size if args.tile_size else config["model"]["tile_size"]
+    config["model"]["batch_size"] = args.batch_size if args.batch_size else config["model"]["batch_size"]
+    config["model"]["tile_size"] = args.tile_size if args.tile_size else config["model"]["tile_size"]
+    config["model"]["name"] = args.model if args.model else config["model"]["name"]
 
     if torch.cuda.is_available():
         device = torch.device("cuda")
@@ -66,9 +67,6 @@ def main(args):
 
     # https://github.com/pytorch/pytorch/issues/7178
     chkpt = torch.load(args.checkpoint, map_location=map_location)
-
-    if args.ext_path:
-        sys.path.append(os.path.expanduser(args.ext_path))
 
     try:
         model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
@@ -83,49 +81,45 @@ def main(args):
         mean.extend(channel["mean"])
         num_channels += len(channel["bands"])
 
-    encoder = config["model"]["encoder"]
-    pretrained = config["model"]["pretrained"]
-
     net = getattr(model_module, "{}".format(config["model"]["name"].title()))(
-        num_classes=num_classes, num_channels=num_channels, encoder=encoder, pretrained=pretrained
+        num_classes=len(config["classes"]),
+        num_channels=num_channels,
+        encoder=config["model"]["encoder"],
+        pretrained=config["model"]["pretrained"],
     ).to(device)
     net = torch.nn.DataParallel(net)
     net.load_state_dict(chkpt["state_dict"])
     net.eval()
 
-    transform = Compose([ImageToTensor(), Normalize(mean=mean, std=std)])
-    dataset = DatasetTilesBuffer(args.tiles, transform=transform, size=tile_size, overlap=args.tile_overlap)
-    loader = DataLoader(dataset, batch_size=batch_size, num_workers=args.workers)
+    dataset = DatasetTilesBuffer(
+        args.tiles,
+        transform=Compose([ImageToTensor(), Normalize(mean=mean, std=std)]),
+        size=config["model"]["tile_size"],
+        overlap=args.tile_overlap,
+    )
+    loader = DataLoader(dataset, batch_size=config["model"]["batch_size"], num_workers=args.workers)
 
     palette = make_palette(config["classes"][0]["color"], config["classes"][1]["color"])
 
-    # don't track tensors with autograd during prediction
-    with torch.no_grad():
+    with torch.no_grad():  # don't track tensors with autograd during prediction
         for images, tiles in tqdm(loader, desc="Eval", unit="batch", ascii=True):
             images = images.to(device)
             outputs = net(images)
 
-            # manually compute segmentation mask class probabilities per pixel
             probs = torch.nn.functional.softmax(outputs, dim=1).data.cpu().numpy()
 
             for tile, prob in zip(tiles, probs):
                 x, y, z = list(map(int, tile))
 
-                # we predicted on buffered tiles; now get back probs for original image
-                prob = dataset.unbuffer(prob)
-
+                prob = dataset.unbuffer(prob)  # as we predicted on buffered tiles
                 assert prob.shape[0] == 2, "single channel requires binary model"
                 assert np.allclose(np.sum(prob, axis=0), 1.0), "single channel requires probabilities to sum up to one"
-
                 image = np.around(prob[1:, :, :]).astype(np.uint8).squeeze()
 
+                os.makedirs(os.path.join(args.out, str(z), str(x)), exist_ok=True)
                 out = Image.fromarray(image, mode="P")
                 out.putpalette(palette)
-
-                os.makedirs(os.path.join(args.out, str(z), str(x)), exist_ok=True)
-                path = os.path.join(args.out, str(z), str(x), str(y) + ".png")
-
-                out.save(path, optimize=True)
+                out.save(os.path.join(args.out, str(z), str(x), str(y) + ".png"), optimize=True)
 
     if args.web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template

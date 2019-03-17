@@ -84,25 +84,23 @@ Web UI:
 ```
 ## rsp extract
 ```
-usage: rsp extract [-h] --type TYPE [--ext_path EXT_PATH] pbf out
+usage: rsp extract [-h] --type TYPE pbf out
 
 optional arguments:
- -h, --help           show this help message and exit
+ -h, --help   show this help message and exit
 
 Inputs:
- pbf                  path to .osm.pbf file [required]
- --type TYPE          type of feature to extract [required]
- --ext_path EXT_PATH  path to user's extension dir. Allow to use alternate OSM types.
+ --type TYPE  type of feature to extract [required]
+ pbf          path to .osm.pbf file [required]
 
 Output:
- out                  path to GeoJSON file to store features in [required]
+ out          path to GeoJSON file to store features in [required]
 ```
 ## rsp predict
 ```
-usage: rsp predict [-h] --checkpoint CHECKPOINT --config CONFIG
-                   [--tile_overlap TILE_OVERLAP] [--tile_size TILE_SIZE]
-                   [--ext_path EXT_PATH] [--workers WORKERS]
-                   [--batch_size BATCH_SIZE] [--web_ui]
+usage: rsp predict [-h] [--tile_overlap TILE_OVERLAP] [--tile_size TILE_SIZE]
+                   --config CONFIG --checkpoint CHECKPOINT [--model MODEL]
+                   [--workers WORKERS] [--batch_size BATCH_SIZE] [--web_ui]
                    [--web_ui_base_url WEB_UI_BASE_URL]
                    [--web_ui_template WEB_UI_TEMPLATE]
                    tiles out
@@ -112,11 +110,11 @@ optional arguments:
 
 Inputs:
  tiles                              tiles directory path [required]
- --checkpoint CHECKPOINT            path to trained model to use [required]
- --config CONFIG                    path to configuration file [required]
  --tile_overlap TILE_OVERLAP        tile pixels overlap [default: 64]
  --tile_size TILE_SIZE              if set, override tile size value from config file
- --ext_path EXT_PATH                path to user's extension dir. Allow to use alternate models.
+ --config CONFIG                    path to configuration file [required]
+ --checkpoint CHECKPOINT            path to the trained model to use [required]
+ --model MODEL                      if set, override model name from config file
 
 Outputs:
  out                                output directory path [required]
@@ -158,7 +156,7 @@ Web UI:
 ```
 ## rsp subset
 ```
-usage: rsp subset [-h] [--mode {copy,delete,move}] --dir DIR --cover COVER
+usage: rsp subset [-h] [--mode {delete,copy,move}] --dir DIR --cover COVER
                   [--out OUT] [--web_ui] [--web_ui_base_url WEB_UI_BASE_URL]
                   [--web_ui_template WEB_UI_TEMPLATE]
 
@@ -166,7 +164,7 @@ optional arguments:
  -h, --help                         show this help message and exit
 
 Inputs:
- --mode {copy,delete,move}          subset mode [default: copy]
+ --mode {delete,copy,move}          subset mode [default: copy]
  --dir DIR                          path to inputs XYZ tiles dir [mandatory]
  --cover COVER                      path to csv cover file to subset tiles by [mandatory]
 
@@ -198,7 +196,7 @@ Output:
  out                                output directory path [required]
  --type {image,label}               image or label tiling [default: image]
  --zoom ZOOM                        zoom level of tiles [required]
- --tile_size TILE_SIZE              if set, override tiles side in pixels, from config file
+ --tile_size TILE_SIZE              tile size in pixels [default: 512]
 
 Web UI:
  --web_ui                           activate Web UI output
@@ -210,7 +208,7 @@ Web UI:
 usage: rsp train [-h] --config CONFIG [--dataset DATASET] [--epochs EPOCHS]
                  [--batch_size BATCH_SIZE] [--model MODEL] [--loss LOSS]
                  [--lr LR] [--resume] [--checkpoint CHECKPOINT]
-                 [--ext_path EXT_PATH] [--workers WORKERS]
+                 [--workers WORKERS]
                  out
 
 optional arguments:
@@ -231,10 +229,9 @@ Output:
 Model Training:
  --resume                 resume model training, if set imply to provide a checkpoint
  --checkpoint CHECKPOINT  path to a model checkpoint. To fine tune, or resume training if setted
- --ext_path EXT_PATH      path to user's extension dir. To use alternate models or losses
 
 Performances:
- --workers WORKERS        number pre-processing images workers [default: 0]
+ --workers WORKERS        number pre-processing images workers. [default: 0]
 ```
 ## rsp vectorize
 ```

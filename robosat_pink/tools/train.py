@@ -43,10 +43,9 @@ def add_parser(subparser, formatter_class):
     mod = parser.add_argument_group("Model Training")
     mod.add_argument("--resume", action="store_true", help="resume model training, if set imply to provide a checkpoint")
     mod.add_argument("--checkpoint", type=str, help="path to a model checkpoint. To fine tune, or resume training if setted")
-    mod.add_argument("--ext_path", type=str, help="path to user's extension dir. To use alternate models or losses")
 
     perf = parser.add_argument_group("Performances")
-    perf.add_argument("--workers", type=int, default=0, help="number pre-processing images workers [default: 0]")
+    perf.add_argument("--workers", type=int, default=0, help="number pre-processing images workers. [default: 0]")
 
     parser.set_defaults(func=main)
 
@@ -59,9 +58,6 @@ def main(args):
     config["model"]["batch_size"] = args.batch_size if args.batch_size else config["model"]["batch_size"]
     config["model"]["name"] = args.model if args.model else config["model"]["name"]
     config["model"]["loss"] = args.loss if args.loss else config["model"]["loss"]
-
-    if args.ext_path:
-        sys.path.append(os.path.expanduser(args.ext_path))
 
     try:
         loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"]))

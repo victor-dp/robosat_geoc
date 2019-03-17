@@ -39,19 +39,18 @@ A minimal Leaflet based template example:
 
 ## Use an alternate OSM type extractor ##
 To allows `rsp extract` to handle new OSM types:
-- Your extension directory must at least contains:
+- Retrieve RoboSat.pink code from GitHub and launch `make install`
+- Create a `yourtypename.py` file containing at least a `yourtypenameHandler` class, with `__init__`, `ways` and `save` methods.
+- This file must be located in `robosat_pink.osm` package:
+
 ```
-your_extension_dir
 └── robosat_pink
     └── osm
          └──yourtypename.py 
 ```
 
 
-- The `yourtypename.py` file must contains at least a `yourtypenameHandler` class, with `__init__`, `ways` and `save` methods.
-- Call `rsp extract` with `--ext_path` pointing to your extension directory, and ad hoc `--type` value. 
-
-A simple OSM `leisure:park` extractor example:
+A simple OSM `leisure:park` extractor example, callable with `rsp extract --type park`:
 
 ```
 import osmium
@@ -88,16 +87,19 @@ class ParkHandler(osmium.SimpleHandler):
 
 
 ## Use an alternate Loss function ##
+
 To allows `rsp train` to use a loss function of your own:
-- Your extension directory must at least contains:
+- Retrieve RoboSat.pink code from GitHub and launch `make install`
+- Create a yourlossname.py file containing at least a class, with `__init__` and `forward` methods.
+- This file must be located in `robosat_pink.losses` package:
 ```
-your_extension_dir
 └── robosat_pink
     └── losses
          └──yourlossname.py 
 ```
 
-- Your loss file must contains a class, with `__init__` and `forward` methods. As an example, a MIoU loss, with `your_extension_dir/robosat_pink/losses/miou.py` file:
+As an example, a MIoU loss, callable with `rsp train --loss miou`:
+
 
 ```
 import torch
@@ -122,20 +124,19 @@ class Miou(torch.nn.Module):
         return mIoU
 ```
 
-- If your loss computation is not auto-differentiable by PyTorch, a related `backward` method, will be needed too.
-- Update config file value: `["model"]["loss"]` or use `rsp train` with an ad hoc `--loss` parameter
-- Call `rsp train` with `--ext_path` pointing to your extension directory.
+Nota: If your loss computation is not auto-differentiable by PyTorch, a related `backward` method, will be needed too.
 
 
 ## Use an alternate Neural Network Model ##
 To allows `rsp train` and `rsp predict` to use a model of your own:
-- Your extension directory must at least contains:
+- Retrieve RoboSat.pink code from GitHub and launch `make install`
+- Create a `yourmodelname.py` file containing at least a `Model_name` class, with `__init__` and `forward` methods.
+- This file must be located in `robosat_pink.models` package:
 ```
-your_extension_dir
 └── robosat_pink
     └── models
          └──yourmodelname.py 
 ```
-- The `yourmodelname.py` must contains at least a `Model_name` class, with `__init__` and `forward` methods.
-- Either update config file value: `["model"]["name"]` or use `rsp train` with related `--model` parameter
-- Call `rsp train` then `rsp predict` with `--ext_path` pointing to your extension directory.
+- Then, to use it, with `rsp train` and `rsp predict` either:
+  - update config file value: `["model"]["name"]`
+  - use `--model` parameter
