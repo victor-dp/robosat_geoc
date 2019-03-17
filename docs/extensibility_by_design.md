@@ -44,7 +44,7 @@ To allows `rsp extract` to handle new OSM types:
 - This file must be located in `robosat_pink.osm` package:
 
 ```
-└── robosat_pink
+robosat_pink
     └── osm
          └──yourtypename.py 
 ```
@@ -93,7 +93,7 @@ To allows `rsp train` to use a loss function of your own:
 - Create a yourlossname.py file containing at least a class, with `__init__` and `forward` methods.
 - This file must be located in `robosat_pink.losses` package:
 ```
-└── robosat_pink
+robosat_pink
     └── losses
          └──yourlossname.py 
 ```
@@ -133,7 +133,7 @@ To allows `rsp train` and `rsp predict` to use a model of your own:
 - Create a `yourmodelname.py` file containing at least a `Model_name` class, with `__init__` and `forward` methods.
 - This file must be located in `robosat_pink.models` package:
 ```
-└── robosat_pink
+robosat_pink
     └── models
          └──yourmodelname.py 
 ```
