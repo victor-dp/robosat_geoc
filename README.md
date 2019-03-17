@@ -27,7 +27,7 @@ Main Features:
 
 News:
 -----
-- <a href='https://twitter.com/RobosatP'>@RoboSatP</a>
+- <a href='https://twitter.com/RobosatPink'>@RoboSatPink</a>
 
 
 Documentation:
