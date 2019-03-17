@@ -1,42 +1,44 @@
 all:
-	@echo "This Makefile purpose is for RoboSat.pink devs and maintainers."
-	@echo "For INSTALL concern give a look on README.md"
+	@echo "This Makefile is for RoboSat.pink devs and maintainers."
+	@echo "For users INSTALL concerns give a look on README.md"
 
-check_all: check it doc
 
-check:
+# ===============================
+
+
+# RoboSat.pink dev install
+install:
+	pip3 install pytest black flake8 twine
+	pip3 install -e .
+
+
+# To launch at least before to send a Pull Request
+check: unit it doc
+
+
+# Perform units tests, and linter checks
+unit:
 	pytest tests
-	@echo ""
-	@echo "==="
 	black -l 125 --check *.py robosat_pink/*.py robosat_pink/*/*.py
-	@echo "==="
-	@echo ""
 	flake8 --max-line-length 125 --ignore=E203,E241,E226,E272,E261,E221,W503,E722
-	@echo "==="
 
 
+# Python code beautifier
 black:
 	black -l 125 *.py robosat_pink/*.py robosat_pink/*/*.py
 
-doc:
-	@echo "# RoboSat.pink tools documentation" > docs/tools.md
-	@for tool in `ls robosat_pink/tools/[^_]*py | sed -e 's#.*/##g' -e 's#.py##'`; do \
-		echo "Doc generation: $$tool"; 						  \
-		echo "## rsp $$tool" >> docs/tools.md; 				  	  \
-		echo '```'           >> docs/tools.md; 				  	  \
-		rsp $$tool -h        >> docs/tools.md; 				  	  \
-		echo '```'           >> docs/tools.md; 				  	  \
-	done
-	@echo "Doc generation: config.toml"
-	@echo "## config.toml" > docs/config.md; 				  	  \
-	echo '```'           >> docs/config.md; 				  	  \
-	cat config.toml      >> docs/config.md; 				  	  \
-	echo '```'           >> docs/config.md;
-	
 
-it: it_preparation it_train it_post
+# Launch Integration Tests
+it: it_pre it_train it_post
 
-it_preparation:
+
+
+# ===============================
+
+
+
+# Integration Tests: Data Preparation
+it_pre:
 	rm -rf it
 	rsp cover --zoom 18 --type bbox 4.8,45.7,4.83,45.73  it/cover
 	rsp download --rate 20 --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' --web_ui it/cover it/images
@@ -56,23 +58,39 @@ it_preparation:
 	rsp subset --web_ui --dir it/images --cover it/validation/cover --out it/validation/images
 	rsp subset --web_ui --dir it/labels --cover it/validation/cover --out it/validation/labels
 
+
+# Integration Tests: Training
 it_train:
 	rsp train --config config.toml --workers 2 --epochs 3 --batch_size 2 --dataset it it/pth
 	rsp train --config config.toml --workers 2 --batch_size 2 --resume --checkpoint it/pth/checkpoint-00003-of-00003.pth --epochs 5 --dataset it it/pth
 
+
+# Integration Tests: Post Training
 it_post:
 	rsp predict --config config.toml --workers 2 --batch_size 4 --checkpoint it/pth/checkpoint-00005-of-00005.pth --web_ui it/images it/masks
 	rsp compare --images it/images it/labels it/masks --mode stack --labels it/labels --masks it/masks --config config.toml --web_ui it/compare
 	rsp compare --mode list --labels it/labels --maximum_qod 70 --minimum_fg 5 --masks it/masks --config config.toml --geojson it/tiles.json
 	rsp vectorize --type building --config config.toml it/masks it/vector.json
 
-install:
-	pip3 install -e .
 
-install-dev:
-	pip3 install pytest twine black flake8
+# Documentation generation (tools and config file)
+doc:
+	@echo "# RoboSat.pink tools documentation" > docs/tools.md
+	@for tool in `ls robosat_pink/tools/[^_]*py | sed -e 's#.*/##g' -e 's#.py##'`; do \
+		echo "Doc generation: $$tool"; 						  \
+		echo "## rsp $$tool" >> docs/tools.md; 				  	  \
+		echo '```'           >> docs/tools.md; 				  	  \
+		rsp $$tool -h        >> docs/tools.md; 				  	  \
+		echo '```'           >> docs/tools.md; 				  	  \
+	done
+	@echo "Doc generation: config.toml"
+	@echo "## config.toml" > docs/config.md; 				  	  \
+	echo '```'           >> docs/config.md; 				  	  \
+	cat config.toml      >> docs/config.md; 				  	  \
+	echo '```'           >> docs/config.md;
 
 
+# Send a release on PyPI
 pypi: check
 	rm -rf dist RoboSat.pink.egg-info
 	python3 setup.py sdist
