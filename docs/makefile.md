@@ -1,11 +1,11 @@
 ## Makefile
 ```
 This Makefile rules are designed for RoboSat.pink devs and power-users.
-For plain user installation give a look on README.md.
+For plain user installation follow README.md instructions, instead.
 
 
- make install   Installs RoboSat.pink in an editable mode (and few Python dev tools).
-                So any further RoboSat.pink Python code modifications will be usable at once,
+ make install   To install, few Python dev tools and RoboSat.pink in editable mode.
+                So any further RoboSat.pink Python code modification will be usable at once,
                 throught either rsp tools commands or robosat_pink.* modules.
 
  make check     Launchs all tests, and tools doc updating.
