@@ -38,7 +38,7 @@ Documentation:
 - <a href="./docs/extensibility_by_design.md">How to extend RoboSat.pink</a>
 
 ### Config file:
-- <a href="./docs/config.md">`config.toml`</a>
+- <a href="./docs/config.md">`config.toml`</a> RoboSat.pink configuration file
 
 ### Tools:
 
@@ -56,6 +56,9 @@ Documentation:
 ### Presentations slides:
   - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">@PyParis 2018</a>
   - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">@FOSDEM 2019</a>
+
+### Developpers tools:
+- <a href="https://github.com/datapink/robosat.pink/blob/master/docs/makefile.md">```make```</a>
 
 
 Install:
@@ -171,8 +174,6 @@ Contributions and Services:
 
 - Pull Requests are welcome ! Feel free to send code...
   Don't hesitate either to initiate a prior discussion throught tickets on any implementation question.
-
-- Developpers should look first at the <a href="https://raw.githubusercontent.com/datapink/robosat.pink/master/Makefile">Makefile</a>, as he provides several helpful rules.
 
 - If you want to collaborate through code production and maintenance on a long term basis, please get in touch, co-edition with an ad hoc governance can be considered.
 
