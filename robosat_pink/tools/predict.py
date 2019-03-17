@@ -39,7 +39,7 @@ def add_parser(subparser, formatter_class):
     out.add_argument("out", type=str, help="output directory path [required]")
 
     perf = parser.add_argument_group("Performances")
-    perf.add_argument("--workers", type=int, default=0, help="number of workers to load images [default: 0]")
+    perf.add_argument("--workers", type=int, help="number of workers to load images [default: GPU x 2]")
     perf.add_argument("--batch_size", type=int, help="if set, override batch_size value from config file")
 
     ui = parser.add_argument_group("Web UI")
@@ -52,6 +52,7 @@ def add_parser(subparser, formatter_class):
 
 def main(args):
     config = load_config(args.config)
+    args.workers = torch.cuda.device_count() * 2 if torch.device("cuda") and not args.workers else args.workers
     config["model"]["batch_size"] = args.batch_size if args.batch_size else config["model"]["batch_size"]
     config["model"]["tile_size"] = args.tile_size if args.tile_size else config["model"]["tile_size"]
     config["model"]["name"] = args.model if args.model else config["model"]["name"]
@@ -59,8 +60,11 @@ def main(args):
     if torch.cuda.is_available():
         device = torch.device("cuda")
         torch.backends.cudnn.benchmark = True
+        print("RoboSat.pink - predict on {} GPUs, with {} workers".format(torch.cuda.device_count(), args.workers))
     else:
         device = torch.device("cpu")
+        print("RoboSat.pink - predict on CPU, with {} workers".format(args.workers))
+
 
     def map_location(storage, _):
         return storage.cuda() if torch.cuda.is_available() else storage.cpu()

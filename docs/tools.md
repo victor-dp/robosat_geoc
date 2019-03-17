@@ -120,7 +120,7 @@ Outputs:
  out                                output directory path [required]
 
 Performances:
- --workers WORKERS                  number of workers to load images [default: 0]
+ --workers WORKERS                  number of workers to load images [default: GPU x 2]
  --batch_size BATCH_SIZE            if set, override batch_size value from config file
 
 Web UI:
@@ -156,7 +156,7 @@ Web UI:
 ```
 ## rsp subset
 ```
-usage: rsp subset [-h] [--mode {delete,copy,move}] --dir DIR --cover COVER
+usage: rsp subset [-h] [--mode {move,copy,delete}] --dir DIR --cover COVER
                   [--out OUT] [--web_ui] [--web_ui_base_url WEB_UI_BASE_URL]
                   [--web_ui_template WEB_UI_TEMPLATE]
 
@@ -164,7 +164,7 @@ optional arguments:
  -h, --help                         show this help message and exit
 
 Inputs:
- --mode {delete,copy,move}          subset mode [default: copy]
+ --mode {move,copy,delete}          subset mode [default: copy]
  --dir DIR                          path to inputs XYZ tiles dir [mandatory]
  --cover COVER                      path to csv cover file to subset tiles by [mandatory]
 
@@ -231,7 +231,7 @@ Model Training:
  --checkpoint CHECKPOINT  path to a model checkpoint. To fine tune, or resume training if setted
 
 Performances:
- --workers WORKERS        number pre-processing images workers. [default: 0]
+ --workers WORKERS        number pre-processing images workers. [default: GPU x 2]
 ```
 ## rsp vectorize
 ```

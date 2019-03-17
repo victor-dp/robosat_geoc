@@ -45,13 +45,14 @@ def add_parser(subparser, formatter_class):
     mod.add_argument("--checkpoint", type=str, help="path to a model checkpoint. To fine tune, or resume training if setted")
 
     perf = parser.add_argument_group("Performances")
-    perf.add_argument("--workers", type=int, default=0, help="number pre-processing images workers. [default: 0]")
+    perf.add_argument("--workers", type=int, help="number pre-processing images workers. [default: GPU x 2]")
 
     parser.set_defaults(func=main)
 
 
 def main(args):
     config = load_config(args.config)
+    args.workers = torch.cuda.device_count() * 2 if torch.device("cuda") and not args.workers else args.workers
     config["dataset"]["path"] = args.dataset if args.dataset else config["dataset"]["path"]
     config["model"]["lr"] = args.lr if args.lr else config["model"]["lr"]
     config["model"]["epochs"] = args.epochs if args.epochs else config["model"]["epochs"]
@@ -75,10 +76,10 @@ def main(args):
         device = torch.device("cuda")
 
         torch.backends.cudnn.benchmark = True
-        log.log("RoboSat - training on {} GPUs, with {} workers".format(torch.cuda.device_count(), args.workers))
+        log.log("RoboSat.pink - training on {} GPUs, with {} workers".format(torch.cuda.device_count(), args.workers))
     else:
         device = torch.device("cpu")
-        log.log("RoboSat - training on CPU, with {} workers".format(args.workers))
+        log.log("RoboSat.pink - training on CPU, with {} workers".format(args.workers))
 
     num_classes = len(config["classes"])
     num_channels = 0
