@@ -65,7 +65,6 @@ def main(args):
         device = torch.device("cpu")
         print("RoboSat.pink - predict on CPU, with {} workers".format(args.workers))
 
-
     def map_location(storage, _):
         return storage.cuda() if torch.cuda.is_available() else storage.cpu()
 
