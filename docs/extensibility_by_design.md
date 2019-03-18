@@ -16,7 +16,7 @@ Special values are substitued, if presents, in a template:
  - `{{tiles}}` JSON selected tiles list, if any. 
 
 
-<details><summary>A minimal Leaflet based template example</summary>
+<details><summary>Click me, for a minimal Leaflet based template example</summary>
  
 ```
 <!DOCTYPE html>
@@ -46,7 +46,7 @@ To allows `rsp extract` to handle new OSM types:
 - Create in `robosat_pink/osm` directory, a `yourtypename.py` file.
 - This file must contains at least a `yourtypenameHandler` class, with `__init__`, `ways` and `save` methods.
 
-<details><summary>A simple OSM parks extractor example</summary>
+<details><summary>Click me, for a simple OSM parks extractor example</summary>
 
 ```
 import osmium
@@ -92,7 +92,7 @@ To allows `rsp train` to use a loss function of your own:
 - This file must contains at least a class `Yourlossname` , with `__init__` and `forward` methods.
 - If your loss computation is not auto-differentiable by PyTorch, a related `backward` method, will be needed too.
 
-<details><summary>As an example, a MIoU loss</summary>
+<details><summary>Click me, for a MIoU loss example</summary>
 
 ```
 import torch
@@ -132,7 +132,7 @@ To allows `rsp train` and `rsp predict` to use a model of your own:
   - update config file value: `["model"]["name"]`
   - use `--model` parameter
 
-<details><summary>As an example, a basic UNet model</summary>
+<details><summary>Click me, for a UNet model example</summary>
 
 ```
 import torch
