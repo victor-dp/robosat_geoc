@@ -16,7 +16,8 @@ Special values are substitued, if presents, in a template:
  - `{{tiles}}` JSON selected tiles list, if any. 
 
 
-A minimal Leaflet based template example:
+<details><summary>A minimal Leaflet based template example</summary>
+ 
 ```
 <!DOCTYPE html>
 <html>
@@ -36,6 +37,8 @@ A minimal Leaflet based template example:
 </html>
 ```
 
+</details>
+
 
 ## Use an alternate OSM type extractor ##
 To allows `rsp extract` to handle new OSM types:
@@ -43,7 +46,7 @@ To allows `rsp extract` to handle new OSM types:
 - Create in `robosat_pink/osm` directory, a `yourtypename.py` file.
 - This file must contains at least a `yourtypenameHandler` class, with `__init__`, `ways` and `save` methods.
 
-A simple OSM `leisure:park` extractor example, callable with `rsp extract --type park`:
+<details><summary>A simple OSM parks extractor example</summary>
 
 ```
 import osmium
@@ -76,7 +79,9 @@ class ParkHandler(osmium.SimpleHandler):
             geojson.dump(geojson.FeatureCollection(self.features), fp)
 ```
 
+Callable with `rsp extract --type park`
 
+</details>
 
 
 ## Use an alternate Loss function ##
@@ -87,7 +92,7 @@ To allows `rsp train` to use a loss function of your own:
 - This file must contains at least a class `Yourlossname` , with `__init__` and `forward` methods.
 - If your loss computation is not auto-differentiable by PyTorch, a related `backward` method, will be needed too.
 
-As an example, a MIoU loss, callable with `rsp train --loss miou`:
+<details><summary>As an example, a MIoU loss</summary>
 
 ```
 import torch
@@ -112,6 +117,11 @@ class Miou(torch.nn.Module):
         return mIoU
 ```
 
+Callable with `rsp train --loss miou`
+
+</details>
+
+
 
 ## Use an alternate Neural Network Model ##
 To allows `rsp train` and `rsp predict` to use a model of your own:
@@ -122,7 +132,7 @@ To allows `rsp train` and `rsp predict` to use a model of your own:
   - update config file value: `["model"]["name"]`
   - use `--model` parameter
 
-As an example, a basic Unet model, callable with `rsp train --model unet`:
+<details><summary>As an example, a basic UNet model</summary>
 
 ```
 import torch
@@ -213,3 +223,7 @@ def Downsample():
 def Upsample(num_in):
     return nn.ConvTranspose2d(num_in, num_in // 2, kernel_size=2, stride=2)
 ```
+
+Callable with `rsp train --model unet`
+
+</details>
