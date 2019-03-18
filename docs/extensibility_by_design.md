@@ -91,6 +91,9 @@ To allows `rsp train` to use a loss function of your own:
 - Create in `robosat_pink/losses` directory a yourlossname.py file.
 - This file must contains at least a class `Yourlossname` , with `__init__` and `forward` methods.
 - If your loss computation is not auto-differentiable by PyTorch, a related `backward` method, will be needed too.
+- Then, to use it with `rsp train`, either:
+  - update config file value: `["model"]["loss"]`
+  - use `--loss` parameter
 
 <details><summary>Click me, for a MIoU loss example</summary>
 
