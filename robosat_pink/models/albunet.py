@@ -33,7 +33,15 @@ class Albunet(nn.Module):
         - https://arxiv.org/abs/1806.00844 - TernausNetV2: Fully Convolutional Network for Instance Segmentation
     """
 
-    def __init__(self, num_classes=2, num_channels=3, num_filters=32, encoder="resnet50", pretrained=True):
+    def __init__(self, config):
+
+        num_classes = len(config["classes"])
+        num_filters = config["model"]["num_filters"]
+        pretrained = config["model"]["pretrained"]
+        encoder = config["model"]["encoder"]
+        num_channels = 0
+        for channel in config["channels"]:
+            num_channels += len(channel["bands"])
 
         super().__init__()
 

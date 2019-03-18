@@ -8,7 +8,7 @@ class Lovasz(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, inputs, targets):
+    def forward(self, inputs, targets, config):
 
         N, C, H, W = inputs.size()
         masks = torch.zeros(N, C, H, W).to(targets.device).scatter_(1, targets.view(N, 1, H, W), 1)

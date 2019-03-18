@@ -31,18 +31,18 @@ def add_parser(subparser, formatter_class):
     hp = parser.add_argument_group("Hyper Parameters")
     hp.add_argument("--config", type=str, required=True, help="path to configuration file [required]")
     hp.add_argument("--dataset", type=str, help="if set, override dataset path value from config file")
-    hp.add_argument("--epochs", type=int, help="if set, override epochs value from config file")
     hp.add_argument("--batch_size", type=int, help="if set, override batch_size value from config file")
+    hp.add_argument("--lr", type=float, help="if set, override learning rate value from config file")
     hp.add_argument("--model", type=str, help="if set, override model name from config file")
     hp.add_argument("--loss", type=str, help="if set, override model loss from config file")
-    hp.add_argument("--lr", type=float, help="if set, override learning rate value from config file")
 
     out = parser.add_argument_group("Output")
     out.add_argument("out", type=str, help="output directory path to save checkpoint .pth files and logs [required]")
 
-    mod = parser.add_argument_group("Model Training")
-    mod.add_argument("--resume", action="store_true", help="resume model training, if set imply to provide a checkpoint")
-    mod.add_argument("--checkpoint", type=str, help="path to a model checkpoint. To fine tune, or resume training if setted")
+    mt = parser.add_argument_group("Model Training")
+    mt.add_argument("--epochs", type=int, default=10, help="number of epochs to train [default 10]")
+    mt.add_argument("--resume", action="store_true", help="resume model training, if set imply to provide a checkpoint")
+    mt.add_argument("--checkpoint", type=str, help="path to a model checkpoint. To fine tune, or resume training if setted")
 
     perf = parser.add_argument_group("Performances")
     perf.add_argument("--workers", type=int, help="number pre-processing images workers. [default: GPU x 2]")
@@ -55,7 +55,6 @@ def main(args):
     args.workers = torch.cuda.device_count() * 2 if torch.device("cuda") and not args.workers else args.workers
     config["dataset"]["path"] = args.dataset if args.dataset else config["dataset"]["path"]
     config["model"]["lr"] = args.lr if args.lr else config["model"]["lr"]
-    config["model"]["epochs"] = args.epochs if args.epochs else config["model"]["epochs"]
     config["model"]["batch_size"] = args.batch_size if args.batch_size else config["model"]["batch_size"]
     config["model"]["name"] = args.model if args.model else config["model"]["name"]
     config["model"]["loss"] = args.loss if args.loss else config["model"]["loss"]
@@ -63,12 +62,12 @@ def main(args):
     try:
         loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"]))
     except:
-        sys.exit("Unknown {} loss".format(config["model"]["loss"]))
+        sys.exit("ERROR: Unknown {} loss".format(config["model"]["loss"]))
 
     try:
         model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
     except:
-        sys.exit("Unknown {} model".format(config["model"]["name"]))
+        sys.exit("ERROR: Unknown {} model".format(config["model"]["name"]))
 
     log = Logs(os.path.join(args.out, "log"))
 
@@ -81,17 +80,7 @@ def main(args):
         device = torch.device("cpu")
         log.log("RoboSat.pink - training on CPU, with {} workers".format(args.workers))
 
-    num_classes = len(config["classes"])
-    num_channels = 0
-    for channel in config["channels"]:
-        num_channels += len(channel["bands"])
-    pretrained = config["model"]["pretrained"]
-    encoder = config["model"]["encoder"]
-
-    net = getattr(model_module, "{}".format(config["model"]["name"].title()))(
-        num_classes=num_classes, num_channels=num_channels, encoder=encoder, pretrained=pretrained
-    ).to(device)
-
+    net = getattr(model_module, "{}".format(config["model"]["name"].title()))(config).to(device)
     net = torch.nn.DataParallel(net)
     optimizer = Adam(net.parameters(), lr=config["model"]["lr"], weight_decay=config["model"]["decay"])
 
@@ -111,12 +100,11 @@ def main(args):
             resume = chkpt["epoch"]
 
     criterion = getattr(loss_module, "{}".format(config["model"]["loss"].title()))().to(device)
-
     train_loader, val_loader = get_dataset_loaders(config["dataset"]["path"], config, args.workers)
 
-    if resume >= config["model"]["epochs"]:
+    if resume >= args.epochs:
         sys.exit(
-            "Error: Epoch {} set in {} already reached by the checkpoint provided".format(
+            "ERROR: Epoch {} set in {} already reached by the checkpoint provided".format(
                 config["model"]["epochs"], args.config
             )
         )
@@ -130,23 +118,16 @@ def main(args):
             num_channel += 1
     log.log("")
     log.log("--- Hyper Parameters ---")
-    log.log("Model:\t\t\t {}".format(config["model"]["name"]))
-    log.log("Encoder model:\t\t {}".format(config["model"]["encoder"]))
-    log.log("Loss function:\t\t {}".format(config["model"]["loss"]))
-    log.log("ResNet pre-trained:\t {}".format(config["model"]["pretrained"]))
-    log.log("Batch Size:\t\t {}".format(config["model"]["batch_size"]))
-    log.log("Tile Size:\t\t {}".format(config["model"]["tile_size"]))
-    log.log("Data Augmentation:\t {}".format(config["model"]["data_augmentation"]))
-    log.log("Learning Rate:\t\t {}".format(config["model"]["lr"]))
-    log.log("Weight Decay:\t\t {}".format(config["model"]["decay"]))
+    for hp in config["model"]:
+        log.log("{}{}".format(hp.ljust(25, " "), config["model"][hp]))
     log.log("")
 
-    for epoch in range(resume, config["model"]["epochs"]):
+    for epoch in range(resume, args.epochs):
 
         log.log("---")
-        log.log("Epoch: {}/{}".format(epoch + 1, config["model"]["epochs"]))
+        log.log("Epoch: {}/{}".format(epoch + 1, args.epochs))
 
-        train_hist = train(train_loader, num_classes, device, net, optimizer, criterion)
+        train_hist = train(train_loader, config, device, net, optimizer, criterion)
         log.log(
             "Train    loss: {:.4f}, mIoU: {:.3f}, {} IoU: {:.3f}, MCC: {:.3f}".format(
                 train_hist["loss"],
@@ -157,7 +138,7 @@ def main(args):
             )
         )
 
-        val_hist = validate(val_loader, num_classes, device, net, criterion)
+        val_hist = validate(val_loader, config, device, net, criterion)
         log.log(
             "Validate loss: {:.4f}, mIoU: {:.3f}, {} IoU: {:.3f}, MCC: {:.3f}".format(
                 val_hist["loss"], val_hist["miou"], config["classes"][1]["title"], val_hist["fg_iou"], val_hist["mcc"]
@@ -165,13 +146,11 @@ def main(args):
         )
 
         states = {"epoch": epoch + 1, "state_dict": net.state_dict(), "optimizer": optimizer.state_dict()}
-        checkpoint_path = os.path.join(
-            args.out, "checkpoint-{:05d}-of-{:05d}.pth".format(epoch + 1, config["model"]["epochs"])
-        )
+        checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}-of-{:05d}.pth".format(epoch + 1, args.epochs))
         torch.save(states, checkpoint_path)
 
 
-def train(loader, num_classes, device, net, optimizer, criterion):
+def train(loader, config, device, net, optimizer, criterion):
     num_samples = 0
     running_loss = 0
 
@@ -191,9 +170,9 @@ def train(loader, num_classes, device, net, optimizer, criterion):
         outputs = net(images)
 
         assert outputs.size()[2:] == masks.size()[1:], "resolutions for predictions and masks are in sync"
-        assert outputs.size()[1] == num_classes, "classes for predictions and dataset are in sync"
+        assert outputs.size()[1] == len(config["classes"]), "classes for predictions and dataset are in sync"
 
-        loss = criterion(outputs, masks)
+        loss = criterion(outputs, masks, config)
         loss.backward()
 
         optimizer.step()
@@ -214,7 +193,7 @@ def train(loader, num_classes, device, net, optimizer, criterion):
     }
 
 
-def validate(loader, num_classes, device, net, criterion):
+def validate(loader, config, device, net, criterion):
 
     num_samples = 0
     running_loss = 0
@@ -233,9 +212,9 @@ def validate(loader, num_classes, device, net, criterion):
             outputs = net(images)
 
             assert outputs.size()[2:] == masks.size()[1:], "resolutions for predictions and masks are in sync"
-            assert outputs.size()[1] == num_classes, "classes for predictions and dataset are in sync"
+            assert outputs.size()[1] == len(config["classes"]), "classes for predictions and dataset are in sync"
 
-            loss = criterion(outputs, masks)
+            loss = criterion(outputs, masks, config)
             running_loss += loss.item()
 
             for mask, output in zip(masks, outputs):

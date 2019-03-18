@@ -101,9 +101,10 @@ Output:
 ```
 ## rsp predict
 ```
-usage: rsp predict [-h] [--tile_overlap TILE_OVERLAP] [--tile_size TILE_SIZE]
-                   --config CONFIG --checkpoint CHECKPOINT [--model MODEL]
-                   [--workers WORKERS] [--batch_size BATCH_SIZE] [--web_ui]
+usage: rsp predict [-h] --config CONFIG --checkpoint CHECKPOINT
+                   [--model MODEL] [--tile_size TILE_SIZE]
+                   [--tile_overlap TILE_OVERLAP] [--workers WORKERS]
+                   [--batch_size BATCH_SIZE] [--web_ui]
                    [--web_ui_base_url WEB_UI_BASE_URL]
                    [--web_ui_template WEB_UI_TEMPLATE]
                    tiles out
@@ -113,11 +114,11 @@ optional arguments:
 
 Inputs:
  tiles                              tiles directory path [required]
- --tile_overlap TILE_OVERLAP        tile pixels overlap [default: 64]
- --tile_size TILE_SIZE              if set, override tile size value from config file
  --config CONFIG                    path to configuration file [required]
  --checkpoint CHECKPOINT            path to the trained model to use [required]
  --model MODEL                      if set, override model name from config file
+ --tile_size TILE_SIZE              if set, override tile size value from config file
+ --tile_overlap TILE_OVERLAP        tile pixels overlap [default: 64]
 
 Outputs:
  out                                output directory path [required]
@@ -159,7 +160,7 @@ Web UI:
 ```
 ## rsp subset
 ```
-usage: rsp subset [-h] [--mode {delete,copy,move}] --dir DIR --cover COVER
+usage: rsp subset [-h] [--mode {move,copy,delete}] --dir DIR --cover COVER
                   [--out OUT] [--web_ui] [--web_ui_base_url WEB_UI_BASE_URL]
                   [--web_ui_template WEB_UI_TEMPLATE]
 
@@ -167,7 +168,7 @@ optional arguments:
  -h, --help                         show this help message and exit
 
 Inputs:
- --mode {delete,copy,move}          subset mode [default: copy]
+ --mode {move,copy,delete}          subset mode [default: copy]
  --dir DIR                          path to inputs XYZ tiles dir [mandatory]
  --cover COVER                      path to csv cover file to subset tiles by [mandatory]
 
@@ -208,10 +209,10 @@ Web UI:
 ```
 ## rsp train
 ```
-usage: rsp train [-h] --config CONFIG [--dataset DATASET] [--epochs EPOCHS]
-                 [--batch_size BATCH_SIZE] [--model MODEL] [--loss LOSS]
-                 [--lr LR] [--resume] [--checkpoint CHECKPOINT]
-                 [--workers WORKERS]
+usage: rsp train [-h] --config CONFIG [--dataset DATASET]
+                 [--batch_size BATCH_SIZE] [--lr LR] [--model MODEL]
+                 [--loss LOSS] [--epochs EPOCHS] [--resume]
+                 [--checkpoint CHECKPOINT] [--workers WORKERS]
                  out
 
 optional arguments:
@@ -220,16 +221,16 @@ optional arguments:
 Hyper Parameters:
  --config CONFIG          path to configuration file [required]
  --dataset DATASET        if set, override dataset path value from config file
- --epochs EPOCHS          if set, override epochs value from config file
  --batch_size BATCH_SIZE  if set, override batch_size value from config file
+ --lr LR                  if set, override learning rate value from config file
  --model MODEL            if set, override model name from config file
  --loss LOSS              if set, override model loss from config file
- --lr LR                  if set, override learning rate value from config file
 
 Output:
  out                      output directory path to save checkpoint .pth files and logs [required]
 
 Model Training:
+ --epochs EPOCHS          number of epochs to train [default 10]
  --resume                 resume model training, if set imply to provide a checkpoint
  --checkpoint CHECKPOINT  path to a model checkpoint. To fine tune, or resume training if setted
 

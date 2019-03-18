@@ -28,12 +28,11 @@ def add_parser(subparser, formatter_class):
 
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("tiles", type=str, help="tiles directory path [required]")
-    inp.add_argument("--tile_overlap", type=int, default=64, help="tile pixels overlap [default: 64]")
-    inp.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
-
     inp.add_argument("--config", type=str, required=True, help="path to configuration file [required]")
     inp.add_argument("--checkpoint", type=str, required=True, help="path to the trained model to use [required]")
     inp.add_argument("--model", type=str, help="if set, override model name from config file")
+    inp.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
+    inp.add_argument("--tile_overlap", type=int, default=64, help="tile pixels overlap [default: 64]")
 
     out = parser.add_argument_group("Outputs")
     out.add_argument("out", type=str, help="output directory path [required]")
@@ -76,23 +75,16 @@ def main(args):
     except:
         sys.exit("Unknown {} model".format(config["model"]["name"]))
 
-    std = []
-    mean = []
-    num_channels = 0
-    for channel in config["channels"]:
-        std.extend(channel["std"])
-        mean.extend(channel["mean"])
-        num_channels += len(channel["bands"])
-
-    net = getattr(model_module, "{}".format(config["model"]["name"].title()))(
-        num_classes=len(config["classes"]),
-        num_channels=num_channels,
-        encoder=config["model"]["encoder"],
-        pretrained=config["model"]["pretrained"],
-    ).to(device)
+    net = getattr(model_module, "{}".format(config["model"]["name"].title()))(config).to(device)
     net = torch.nn.DataParallel(net)
     net.load_state_dict(chkpt["state_dict"])
     net.eval()
+
+    std = []
+    mean = []
+    for channel in config["channels"]:
+        std.extend(channel["std"])
+        mean.extend(channel["mean"])
 
     dataset = DatasetTilesBuffer(
         args.tiles,

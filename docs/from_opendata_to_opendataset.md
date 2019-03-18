@@ -8,7 +8,7 @@ In supervised learning, you can't expect to obtain a good trained model from ina
 
 Even though OpenData datasets are widely available, those reliable enough to be used verbatim to train decents models are still scarse. Even with state of art model training algorithms, best results are only achieved by people who can afford to tag manually, with pixel accuracy, their own datasets.
 
-So how can we load and qualify OpenData sets in order to create our own training samples? That’s what this tutorial is about!
+So how can we load and qualify OpenData sets in order to create our own training samples ? That's what this tutorial is about !
 
 
 
@@ -42,7 +42,7 @@ NOTA:
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/images/"><img src="img/from_opendata_to_opendataset/images.png" /></a>
 
 
-Then to download buildings’ vector roofprints with <a href="https://www.opengeospatial.org/standards/wfs">WFS</a>, 
+Then to download buildings vector roofprints with <a href="https://www.opengeospatial.org/standards/wfs">WFS</a>, 
 
 ```
 wget -O ~/rsp_dataset/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&outputFormat=application/json; subtype=geojson'
@@ -69,12 +69,7 @@ rsp rasterize --config config.toml --geojson ~/rsp_dataset/lyon_roofprint.json -
 Then to create a training / validation dataset, with imagery and related roofprint labels:
 
 ```
-mkdir ~/rsp_dataset/training ~/rsp_dataset/validation
-
-cat ~/rsp_dataset/cover | sort -R >  ~/rsp_dataset/cover.shuffled
-head -n 16384 ~/rsp_dataset/cover.shuffled > ~/rsp_dataset/training/cover
-tail -n 7924  ~/rsp_dataset/cover.shuffled > ~/rsp_dataset/validation/cover
-
+rsp cover --dir ~/rsp_dataset/images --split 70,30 ~/rsp_dataset/training/cover ~/rsp_dataset/validation/cover
 rsp subset --web_ui --dir ~/rsp_dataset/images --cover ~/rsp_dataset/training/cover --out ~/rsp_dataset/training/images
 rsp subset --web_ui --dir ~/rsp_dataset/labels --cover ~/rsp_dataset/training/cover --out ~/rsp_dataset/training/labels
 rsp subset --web_ui --dir ~/rsp_dataset/images --cover ~/rsp_dataset/validation/cover --out ~/rsp_dataset/validation/images
@@ -92,7 +87,7 @@ Train
 Now to launch a first model training:
 
 ```
-rsp train --config config.toml ~/rsp_dataset/pth
+rsp train --epochs 10 --config config.toml ~/rsp_dataset/pth
 ```
 
 After ten epochs only, the building IoU metric on validation dataset is about **0.82**. 

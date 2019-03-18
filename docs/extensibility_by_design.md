@@ -98,7 +98,7 @@ class Miou(torch.nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, inputs, targets):
+    def forward(self, inputs, targets, config):
 
         N, C, H, W = inputs.size()
 
@@ -121,3 +121,95 @@ To allows `rsp train` and `rsp predict` to use a model of your own:
 - Then, to use it, with `rsp train` and `rsp predict` either:
   - update config file value: `["model"]["name"]`
   - use `--model` parameter
+
+As an example, a basic Unet model, callable with `rsp train --model unet`:
+
+```
+import torch
+import torch.nn as nn
+
+
+class Unet(nn.Module):
+    """UNet - cf https://arxiv.org/abs/1505.04597"""
+
+    def __init__(self, config):
+
+        num_classes = len(config["classes"])
+        num_channels = 0
+        for channel in config["channels"]:
+            num_channels += len(channel["bands"])
+        assert num_channels == 3, "This basic UNet example is RGB only."
+
+        super().__init__()
+
+        self.b1 = Block(3, 64)
+        self.d1 = Downsample()
+        self.b2 = Block(64, 128)
+        self.d2 = Downsample()
+        self.b3 = Block(128, 256)
+        self.d3 = Downsample()
+        self.b4 = Block(256, 512)
+        self.d4 = Downsample()
+        self.b5 = Block(512, 1024)
+        self.u1 = Upsample(1024)
+        self.b6 = Block(1024, 512)
+        self.u2 = Upsample(512)
+        self.b7 = Block(512, 256)
+        self.u3 = Upsample(256)
+        self.b8 = Block(256, 128)
+        self.u4 = Upsample(128)
+        self.b9 = Block(128, 64)
+        self.b10 = nn.Conv2d(64, num_classes, kernel_size=1)
+
+        self.initialize()
+
+    def forward(self, x):
+        b1 = self.b1(x)
+        d1 = self.d1(b1)
+        b2 = self.b2(d1)
+        d2 = self.d2(b2)
+        b3 = self.b3(d2)
+        d3 = self.d3(b3)
+        b4 = self.b4(d3)
+        d4 = self.d4(b4)
+        b5 = self.b5(d4)
+        u1 = self.u1(b5)
+        b6 = self.b6(torch.cat([b4, u1], dim=1))
+        u2 = self.u2(b6)
+        b7 = self.b7(torch.cat([b3, u2], dim=1))
+        u3 = self.u3(b7)
+        b8 = self.b8(torch.cat([b2, u3], dim=1))
+        u4 = self.u4(b8)
+        b9 = self.b9(torch.cat([b1, u4], dim=1))
+        b10 = self.b10(b9)
+
+        return b10
+
+    def initialize(self):
+        for module in self.modules():
+            if isinstance(module, nn.Conv2d):
+                nn.init.kaiming_normal_(module.weight, nonlinearity="relu")
+                nn.init.constant_(module.bias, 0)
+            if isinstance(module, nn.BatchNorm2d):
+                nn.init.constant_(module.weight, 1)
+                nn.init.constant_(module.bias, 0)
+
+
+def Block(num_in, num_out):
+    return nn.Sequential(
+        nn.Conv2d(num_in, num_out, kernel_size=3, padding=1),
+        nn.BatchNorm2d(num_out),
+        nn.PReLU(num_parameters=num_out),
+        nn.Conv2d(num_out, num_out, kernel_size=3, padding=1),
+        nn.BatchNorm2d(num_out),
+        nn.PReLU(num_parameters=num_out),
+    )
+
+
+def Downsample():
+    return nn.MaxPool2d(kernel_size=2, stride=2)
+
+
+def Upsample(num_in):
+    return nn.ConvTranspose2d(num_in, num_in // 2, kernel_size=2, stride=2)
+```
