@@ -62,10 +62,10 @@ it_pre:
 	rm -rf it/training it/validation
 	mkdir it/training it/validation
 	rsp cover --type dir it/images --splits 70,30 it/training/cover it/validation/cover
-	rsp subset --web_ui --dir it/images --cover it/training/cover --out it/training/images
-	rsp subset --web_ui --dir it/labels --cover it/training/cover --out it/training/labels
-	rsp subset --web_ui --dir it/images --cover it/validation/cover --out it/validation/images
-	rsp subset --web_ui --dir it/labels --cover it/validation/cover --out it/validation/labels
+	rsp subset --web_ui --dir it/images --filter it/training/cover it/training/images
+	rsp subset --web_ui --dir it/labels --filter it/training/cover it/training/labels
+	rsp subset --web_ui --dir it/images --filter it/validation/cover it/validation/images
+	rsp subset --web_ui --dir it/labels --filter it/validation/cover it/validation/labels
 
 
 # Integration Tests: Training

@@ -15,12 +15,12 @@ def add_parser(subparser, formatter_class):
     )
     inp = parser.add_argument_group("Inputs")
     choices = {"copy", "move", "delete"}
+    inp.add_argument("--dir", type=str, required=True, help="to XYZ tiles input dir path [required]")
+    inp.add_argument("--filter", type=str, required=True, help="path to csv cover file to filter dir by [required]")
     inp.add_argument("--mode", type=str, default="copy", choices=choices, help="subset mode [default: copy]")
-    inp.add_argument("--dir", type=str, required=True, help="path to inputs XYZ tiles dir [mandatory]")
-    inp.add_argument("--cover", type=str, required=True, help="path to csv cover file to subset tiles by [mandatory]")
 
     out = parser.add_argument_group("Output")
-    out.add_argument("--out", type=str, help="output directory path [mandatory for copy or move mode]")
+    out.add_argument("out", type=str, nargs='?', default=os.getcwd(), help="output dir path [required for copy or move]")
 
     ui = parser.add_argument_group("Web UI")
     ui.add_argument("--web_ui", action="store_true", help="activate Web UI output")
@@ -32,9 +32,9 @@ def add_parser(subparser, formatter_class):
 
 def main(args):
     if not args.out and args.mode in ["copy", "move"]:
-        sys.exit("Zoom parameter is required")
+        sys.exit("ERROR: out parameter is required")
 
-    tiles = set(tiles_from_csv(args.cover))
+    tiles = set(tiles_from_csv(args.filter))
     extension = ""
 
     for tile in tqdm(tiles, desc="Subset", unit="tiles", ascii=True):
