@@ -27,9 +27,7 @@ import psycopg2
 
 def add_parser(subparser, formatter_class):
     parser = subparser.add_parser(
-        "rasterize",
-        help="Rasterize vector features (GeoJSON or PostGIS), to raster tiles",
-        formatter_class=formatter_class,
+        "rasterize", help="Rasterize vector features (GeoJSON or PostGIS), to raster tiles", formatter_class=formatter_class
     )
 
     inp = parser.add_argument_group("Inputs")
@@ -43,9 +41,9 @@ def add_parser(subparser, formatter_class):
     out.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
 
     ui = parser.add_argument_group("Web UI")
-    ui.add_argument("--web_ui", action="store_true", help="activate Web UI output")
     ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
     ui.add_argument("--web_ui_template", type=str, help="alternate Web UI template path")
+    ui.add_argument("--no_web_ui", action="store_false", help="desactivate Web UI output")
 
     parser.set_defaults(func=main)
 
@@ -251,7 +249,7 @@ SELECT ST_AsBinary(ST_MapAlgebra(rast_a.rast, rast_b.rast, '{}', NULL, 'FIRST'))
 
             write_tile(args.out, tile, colors, raster)
 
-    if args.web_ui:
+    if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
         tiles = [tile for tile in tiles_from_csv(args.cover)]

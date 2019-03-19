@@ -42,9 +42,9 @@ def add_parser(subparser, formatter_class):
     perf.add_argument("--batch_size", type=int, help="if set, override batch_size value from config file")
 
     ui = parser.add_argument_group("Web UI")
-    ui.add_argument("--web_ui", action="store_true", help="activate Web UI output")
     ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
     ui.add_argument("--web_ui_template", type=str, help="alternate Web UI template path")
+    ui.add_argument("--no_web_ui", action="store_false", help="desactivate Web UI output")
 
     parser.set_defaults(func=main)
 
@@ -116,7 +116,7 @@ def main(args):
                 out.putpalette(palette)
                 out.save(os.path.join(args.out, str(z), str(x), str(y) + ".png"), optimize=True)
 
-    if args.web_ui:
+    if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
         tiles = [tile for tile, _ in tiles_from_slippy_map(args.tiles)]

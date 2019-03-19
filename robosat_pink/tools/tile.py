@@ -35,9 +35,9 @@ def add_parser(subparser, formatter_class):
     out.add_argument("--tile_size", type=int, default=512, help="tile size in pixels [default: 512]")
 
     ui = parser.add_argument_group("Web UI")
-    ui.add_argument("--web_ui", action="store_true", help="activate Web UI output")
     ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
     ui.add_argument("--web_ui_template", type=str, help="alternate Web UI template path")
+    ui.add_argument("--no_web_ui", action="store_false", help="desactivate Web UI output")
 
     parser.set_defaults(func=main)
 
@@ -113,7 +113,7 @@ def main(args):
                 ext = "webp"
                 Image.fromarray(np.moveaxis(data, 0, 2), mode="RGB").save("{}.{}".format(path, ext), optimize=True)
 
-    if args.web_ui:
+    if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         tiles = [tile for tile in tiles if tile not in tiles_nodata]
         base_url = args.web_ui_base_url if args.web_ui_base_url else "./"

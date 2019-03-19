@@ -47,9 +47,9 @@ def add_parser(subparser, formatter_class):
     out.add_argument("out", type=str, help="output path")
 
     ui = parser.add_argument_group("Web UI")
-    ui.add_argument("--web_ui", action="store_true", help="activate Web UI output")
     ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
     ui.add_argument("--web_ui_template", type=str, help="alternate Web UI template path")
+    ui.add_argument("--no_web_ui", action="store_false", help="desactivate Web UI output")
 
     parser.set_defaults(func=main)
 
@@ -187,11 +187,11 @@ def main(args):
 
     base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
 
-    if args.mode == "side" and args.web_ui:
+    if args.mode == "side" and not args.no_web_ui:
         template = "compare.html" if not args.web_ui_template else args.web_ui_template
         web_ui(args.out, base_url, None, tiles_compare, args.format, template)
 
-    if args.mode == "stack" and args.web_ui:
+    if args.mode == "stack" and not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         tiles = [tile for tile, _ in tiles_from_slippy_map(args.images[0])]
         web_ui(args.out, base_url, tiles, tiles_compare, args.format, template)

@@ -20,12 +20,12 @@ def add_parser(subparser, formatter_class):
     inp.add_argument("--mode", type=str, default="copy", choices=choices, help="subset mode [default: copy]")
 
     out = parser.add_argument_group("Output")
-    out.add_argument("out", type=str, nargs='?', default=os.getcwd(), help="output dir path [required for copy or move]")
+    out.add_argument("out", type=str, nargs="?", default=os.getcwd(), help="output dir path [required for copy or move]")
 
     ui = parser.add_argument_group("Web UI")
-    ui.add_argument("--web_ui", action="store_true", help="activate Web UI output")
     ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
     ui.add_argument("--web_ui_template", type=str, help="alternate Web UI template path")
+    ui.add_argument("--no_web_ui", action="store_false", help="desactivate Web UI output")
 
     parser.set_defaults(func=main)
 
@@ -66,7 +66,7 @@ def main(args):
         except:
             sys.exit("Error: Unable to process {}".format(tile))
 
-    if args.web_ui:
+    if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
         web_ui(args.out, base_url, tiles, tiles, extension, template)
