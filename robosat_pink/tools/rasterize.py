@@ -28,7 +28,7 @@ import psycopg2
 def add_parser(subparser, formatter_class):
     parser = subparser.add_parser(
         "rasterize",
-        help="Rasterize vector geospatial features (GeoJSON or PostGIS), to raster tiles",
+        help="Rasterize vector features (GeoJSON or PostGIS), to raster tiles",
         formatter_class=formatter_class,
     )
 

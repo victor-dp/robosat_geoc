@@ -21,7 +21,7 @@ from robosat_pink.web_ui import web_ui
 def add_parser(subparser, formatter_class):
     parser = subparser.add_parser(
         "compare",
-        help="Compute composite images and/or metrics to compare several XYZ dirs.",
+        help="Compute composite images and/or metrics to compare several XYZ dirs",
         formatter_class=formatter_class,
     )
 
