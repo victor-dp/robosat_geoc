@@ -42,15 +42,16 @@ Documentation:
 
 ### Tools:
 
-- <a href="./docs/tools.md#rsp-compare">`rsp compare`</a> Compute composite images and/or metrics to compare several XYZ dirs.
 - <a href="./docs/tools.md#rsp-cover">`rsp cover`</a> Generate a tiles covering, in csv format: X,Y,Z
 - <a href="./docs/tools.md#rsp-download">`rsp download`</a> Downloads tiles from a remote server (XYZ, WMS, or TMS)
 - <a href="./docs/tools.md#rsp-extract">`rsp extract`</a> Extracts GeoJSON features from OpenStreetMap .pbf
-- <a href="./docs/tools.md#rsp-predict">`rsp predict`</a> Predict masks, from given inputs and an already trained model
-- <a href="./docs/tools.md#rsp-rasterize">`rsp rasterize`</a> Rasterize vector geospatial features (GeoJSON or PostGIS), to raster tiles
+- <a href="./docs/tools.md#rsp-rasterize">`rsp rasterize`</a> Rasterize vector features (GeoJSON or PostGIS), to raster tiles
 - <a href="./docs/tools.md#rsp-subset">`rsp subset`</a> Filter images in a slippy map dir using a csv tiles cover
 - <a href="./docs/tools.md#rsp-tile">`rsp tile`</a> Tile a raster
 - <a href="./docs/tools.md#rsp-train">`rsp train`</a> Trains a model on a dataset
+- <a href="./docs/tools.md#rsp-export">`rsp export`</a> Export a model to ONNX or Torch JIT
+- <a href="./docs/tools.md#rsp-predict">`rsp predict`</a> Predict masks, from given inputs and an already trained model
+- <a href="./docs/tools.md#rsp-compare">`rsp compare`</a> Compute composite images and/or metrics to compare several XYZ dirs
 - <a href="./docs/tools.md#rsp-vectorize">`rsp vectorize`</a> Extract simplified GeoJSON features from segmentation masks
 
 ### Presentations slides:
