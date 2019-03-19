@@ -78,6 +78,8 @@ it_train:
 # Integration Tests: Post Training
 it_post:
 	@echo "==================================================================================="
+	rsp export --checkpoint it/pth/checkpoint-00005-of-00005.pth --config config.toml --type jit it/pth/export.jit
+	rsp export --checkpoint it/pth/checkpoint-00005-of-00005.pth --config config.toml --type onnx it/pth/export.onnx
 	rsp predict --config config.toml --batch_size 4 --checkpoint it/pth/checkpoint-00005-of-00005.pth --web_ui it/images it/masks
 	rsp compare --images it/images it/labels it/masks --mode stack --labels it/labels --masks it/masks --config config.toml --web_ui it/compare
 	rsp compare --mode list --labels it/labels --maximum_qod 75 --minimum_fg 5 --masks it/masks --config config.toml --geojson it/compare/tiles.json
