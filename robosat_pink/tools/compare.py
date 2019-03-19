@@ -26,14 +26,13 @@ def add_parser(subparser, formatter_class):
     )
 
     inp = parser.add_argument_group("Inputs")
-    inp.add_argument(
-        "--mode", type=str, default="side", choices=["side", "stack", "list"], help="compare mode [default: side]"
-    )
+    choices = ["side", "stack", "list"]
+    inp.add_argument("--mode", type=str, default="side", choices=choices, help="compare mode [default: side]")
     inp.add_argument("--config", type=str, help="path to configuration file [required for QoD filtering]")
     inp.add_argument("--labels", type=str, help="path to tiles labels directory [required for QoD filtering]")
     inp.add_argument("--masks", type=str, help="path to tiles masks directory [required for QoD filtering)")
     inp.add_argument("--images", type=str, nargs="+", help="path to images directories [required for stack or side modes]")
-    inp.add_argument("--workers", type=int, default=2, help="number of workers [default: 2]")
+    inp.add_argument("--workers", type=int, help="number of workers [default: CPU / 2]")
 
     qod = parser.add_argument_group("QoD Filtering")
     qod.add_argument("--minimum_fg", type=float, default=0.0, help="skip tile if label foreground below. [default: 0]")
@@ -79,6 +78,14 @@ def compare(masks, labels, tile, classes):
 
 def main(args):
 
+    if not args.workers:
+        args.workers = max(1, math.floor(os.cpu_count() * 0.5))
+
+    if args.mode == "list":
+        args.workers = 1  # List output is a single file
+
+    print("RoboSat.pink - compare {} on CPU, with {} workers".format(args.mode, args.workers))
+
     if not args.masks or not args.labels or not args.config:
         if args.mode == "list":
             sys.exit("Parameters masks, labels and config, are all mandatories in list mode.")
@@ -105,23 +112,20 @@ def main(args):
             out.write('{"type":"FeatureCollection","features":[')
 
     tiles_compare = []
-    progress = tqdm(len(tiles), ascii=True, unit="tile")
-    num_workers = args.workers
-    # evading multi access issues
-    if args.mode == "list":
-        num_workers = 1
+    progress = tqdm(total=len(tiles), ascii=True, unit="tile")
 
-    with futures.ThreadPoolExecutor(num_workers) as executor:
+    with futures.ThreadPoolExecutor(args.workers) as executor:
 
         def worker(tile):
-            first = True  # Case args.mode="list"
+            first = True
             x, y, z = list(map(str, tile))
 
             if args.masks and args.labels and args.config:
                 titles = [classe["title"] for classe in load_config(args.config)["classes"]]
                 dist, fg_ratio, qod = compare(args.masks, args.labels, tile, titles)
                 if not args.minimum_fg <= fg_ratio <= args.maximum_fg or not args.minimum_qod <= qod <= args.maximum_qod:
-                    return False  # continue
+                    progress.update()
+                    return
 
             tiles_compare.append(tile)
 
@@ -168,13 +172,10 @@ def main(args):
                     first = False
                 else:
                     out.write("{},{},{}\t\t{:.1f}\t\t{:.1f}{}".format(x, y, z, fg_ratio, qod, os.linesep))
-            return True
 
-        for ok in executor.map(worker, tiles):
-            if ok:
-                progress.update()
-            else:
-                out.write("Failure")  # stderr?
+            progress.update()
+
+        executor.map(worker, tiles)
 
     if args.mode == "list":
         if args.geojson:
