@@ -81,9 +81,6 @@ def main(args):
     if not args.workers:
         args.workers = max(1, math.floor(os.cpu_count() * 0.5))
 
-    if args.mode == "list":
-        args.workers = 1  # List output is a single file
-
     print("RoboSat.pink - compare {} on CPU, with {} workers".format(args.mode, args.workers))
 
     if not args.masks or not args.labels or not args.config:
@@ -106,18 +103,13 @@ def main(args):
             assert sorted(tiles_masks) == sorted(tiles_labels), "inconsistent coverages"
             tiles = tiles_masks
 
-    if args.mode == "list":
-        out = open(args.out, mode="w")
-        if args.geojson:
-            out.write('{"type":"FeatureCollection","features":[')
-
+    tiles_list = []
     tiles_compare = []
     progress = tqdm(total=len(tiles), ascii=True, unit="tile")
 
     with futures.ThreadPoolExecutor(args.workers) as executor:
 
         def worker(tile):
-            first = True
             x, y, z = list(map(str, tile))
 
             if args.masks and args.labels and args.config:
@@ -165,6 +157,22 @@ def main(args):
                 cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.format), np.uint8(stack))
 
             elif args.mode == "list":
+                tiles_list.append([tile, fg_ratio, qod])
+
+            progress.update()
+
+        executor.map(worker, tiles)
+
+    if args.mode == "list":
+        with open(args.out, mode="w") as out:
+
+            if args.geojson:
+                out.write('{"type":"FeatureCollection","features":[')
+
+            first = True
+            for tile_list in tiles_list:
+                tile, fg_ratio, qod = tile_list
+                x, y, z = list(map(str, tile))
                 if args.geojson:
                     prop = '"properties":{{"x":{},"y":{},"z":{},"fg":{:.1f},"qod":{:.1f}}}'.format(x, y, z, fg_ratio, qod)
                     geom = '"geometry":{}'.format(json.dumps(feature(tile, precision=6)["geometry"]))
@@ -173,14 +181,9 @@ def main(args):
                 else:
                     out.write("{},{},{}\t\t{:.1f}\t\t{:.1f}{}".format(x, y, z, fg_ratio, qod, os.linesep))
 
-            progress.update()
-
-        executor.map(worker, tiles)
-
-    if args.mode == "list":
-        if args.geojson:
-            out.write("]}")
-        out.close()
+            if args.geojson:
+                out.write("]}")
+            out.close()
 
     base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
 
