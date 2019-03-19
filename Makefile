@@ -80,7 +80,7 @@ it_post:
 	@echo "==================================================================================="
 	rsp predict --config config.toml --batch_size 4 --checkpoint it/pth/checkpoint-00005-of-00005.pth --web_ui it/images it/masks
 	rsp compare --images it/images it/labels it/masks --mode stack --labels it/labels --masks it/masks --config config.toml --web_ui it/compare
-	rsp compare --mode list --labels it/labels --maximum_qod 70 --minimum_fg 5 --masks it/masks --config config.toml --geojson it/tiles.json
+	rsp compare --mode list --labels it/labels --maximum_qod 75 --minimum_fg 5 --masks it/masks --config config.toml --geojson it/compare/tiles.json
 	rsp vectorize --type building --config config.toml it/masks it/vector.json
 
 
