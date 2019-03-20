@@ -80,7 +80,7 @@ def main(args):
                     url = args.url.format(xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
 
                 res = tile_image_from_url(session, url, args.timeout)
-                if not res: # retry
+                if not res:  # retry
                     res = tile_image_from_url(session, url, args.timeout)
                     if not res:
                         return tile, url, False

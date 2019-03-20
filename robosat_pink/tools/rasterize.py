@@ -1,6 +1,7 @@
 import io
 import os
 import sys
+import glob
 import json
 import struct
 import collections
@@ -31,13 +32,13 @@ def add_parser(subparser, formatter_class):
     )
 
     inp = parser.add_argument_group("Inputs")
-    inp.add_argument("cover", type=str, help="path to csv tiles cover file [mandatory]")
-    inp.add_argument("--config", type=str, required=True, help="path to configuration file [mandatory]")
-    inp.add_argument("--postgis", type=str, help="PostGIS SQL SELECT query to retrieve features")
-    inp.add_argument("--geojson", type=str, nargs="+", help="path to GeoJSON features files")
+    inp.add_argument("cover", type=str, help="path to csv tiles cover file [required]")
+    inp.add_argument("--postgis", type=str, help="SELECT query to retrieve 'geom' features [required if --geojson not set]")
+    inp.add_argument("--geojson", type=str, help="path to GeoJSON features files [requied if --postgis not set]")
+    inp.add_argument("--config", type=str, help="path to config file [required if RSP_CONFIG env var is not set]")
 
     out = parser.add_argument_group("Outputs")
-    out.add_argument("out", type=str, help="output directory path [mandatory]")
+    out.add_argument("out", type=str, help="output directory path [required]")
     out.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
 
     ui = parser.add_argument_group("Web UI")
@@ -110,7 +111,7 @@ def wkb_to_numpy(wkb):
 
 
 def write_tile(root, tile, colors, out):
-    """ """
+    """ Write a tile on disk. """
 
     out_path = os.path.join(root, str(tile.z), str(tile.x))
     os.makedirs(out_path, exist_ok=True)
@@ -123,7 +124,7 @@ def write_tile(root, tile, colors, out):
 def main(args):
 
     if (args.geojson and args.postgis) or (not args.geojson and not args.postgis):
-        sys.exit("Input features to rasterize must be either GeoJSON or PostGIS")
+        sys.exit("ERROR: Input features to rasterize must be either GeoJSON or PostGIS")
 
     config = load_config(args.config)
     tile_size = args.tile_size if args.tile_size else config["model"]["tile_size"]
@@ -171,7 +172,7 @@ def main(args):
         feature_map = collections.defaultdict(list)
 
         # Compute a spatial index like
-        for geojson_file in args.geojson:
+        for geojson_file in glob.glob(os.path.expanduser(args.geojson)):
             with open(geojson_file) as geojson:
                 feature_collection = json.load(geojson)
                 for i, feature in enumerate(tqdm(feature_collection["features"], ascii=True, unit="feature")):

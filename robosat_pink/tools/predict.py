@@ -28,8 +28,8 @@ def add_parser(subparser, formatter_class):
 
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("tiles", type=str, help="tiles directory path [required]")
-    inp.add_argument("--config", type=str, required=True, help="path to configuration file [required]")
     inp.add_argument("--checkpoint", type=str, required=True, help="path to the trained model to use [required]")
+    inp.add_argument("--config", type=str, help="path to config file [required if RSP_CONFIG env var is not set]")
     inp.add_argument("--model", type=str, help="if set, override model name from config file")
     inp.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
     inp.add_argument("--tile_overlap", type=int, default=64, help="tile pixels overlap [default: 64]")

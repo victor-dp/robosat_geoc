@@ -14,8 +14,8 @@ def add_parser(subparser, formatter_class):
 
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("--checkpoint", type=str, required=True, help="model checkpoint to load [required]")
-    inp.add_argument("--config", type=str, required=True, help="path to configuration file [required]")
     inp.add_argument("--type", type=str, choices=["onnx", "jit"], default="jit", help="output type [default: jit]")
+    inp.add_argument("--config", type=str, help="path to config file [required if RSP_CONFIG env var is not set]")
     out = parser.add_argument_group("Output")
     out.add_argument("out", type=str, help="path to save export model to [required]")
 

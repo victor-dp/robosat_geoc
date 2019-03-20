@@ -29,7 +29,7 @@ def add_parser(subparser, formatter_class):
     parser = subparser.add_parser("train", help="Trains a model on a dataset", formatter_class=formatter_class)
 
     hp = parser.add_argument_group("Hyper Parameters")
-    hp.add_argument("--config", type=str, required=True, help="path to configuration file [required]")
+    hp.add_argument("--config", type=str, help="path to config file [required if RSP_CONFIG env var is not set]")
     hp.add_argument("--dataset", type=str, help="if set, override dataset path value from config file")
     hp.add_argument("--batch_size", type=int, help="if set, override batch_size value from config file")
     hp.add_argument("--lr", type=float, help="if set, override learning rate value from config file")

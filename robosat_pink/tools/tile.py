@@ -24,7 +24,7 @@ def add_parser(subparser, formatter_class):
 
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("raster", type=str, help="path to the raster to tile [required]")
-    inp.add_argument("--config", type=str, required=True, help="path to the configuration file [required]")
+    inp.add_argument("--config", type=str, help="path to config file [required if RSP_CONFIG env var is not set]")
     inp.add_argument("--no_data", type=int, help="color considered as no data [0-255]. If set, skip related tile")
 
     out = parser.add_argument_group("Output")

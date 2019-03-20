@@ -28,11 +28,11 @@ def add_parser(subparser, formatter_class):
     inp = parser.add_argument_group("Inputs")
     choices = ["side", "stack", "list"]
     inp.add_argument("--mode", type=str, default="side", choices=choices, help="compare mode [default: side]")
-    inp.add_argument("--config", type=str, help="path to configuration file [required for QoD filtering]")
     inp.add_argument("--labels", type=str, help="path to tiles labels directory [required for QoD filtering]")
     inp.add_argument("--masks", type=str, help="path to tiles masks directory [required for QoD filtering)")
     inp.add_argument("--images", type=str, nargs="+", help="path to images directories [required for stack or side modes]")
     inp.add_argument("--workers", type=int, help="number of workers [default: CPU / 2]")
+    inp.add_argument("--config", type=str, help="path to config file [required for QoD, if RSP_CONFIG env var is not set]")
 
     qod = parser.add_argument_group("QoD Filtering")
     qod.add_argument("--minimum_fg", type=float, default=0.0, help="skip tile if label foreground below. [default: 0]")
@@ -83,11 +83,11 @@ def main(args):
 
     print("RoboSat.pink - compare {} on CPU, with {} workers".format(args.mode, args.workers))
 
-    if not args.masks or not args.labels or not args.config:
+    if not args.masks or not args.labels:
         if args.mode == "list":
-            sys.exit("Parameters masks, labels and config, are all mandatories in list mode.")
+            sys.exit("ERROR: Parameters masks and labels are mandatories in list mode.")
         if args.minimum_fg > 0 or args.maximum_fg < 100 or args.minimum_qod > 0 or args.maximum_qod < 100:
-            sys.exit("Parameters masks, labels and config, are all mandatories in QoD filtering.")
+            sys.exit("ERROR: Parameters masks and labels are mandatories in QoD filtering.")
 
     if args.images:
         tiles = [tile for tile, _ in tiles_from_slippy_map(args.images[0])]
@@ -113,6 +113,7 @@ def main(args):
             x, y, z = list(map(str, tile))
 
             if args.masks and args.labels and args.config:
+                # FIXME: put load_config outside of the loop
                 titles = [classe["title"] for classe in load_config(args.config)["classes"]]
                 dist, fg_ratio, qod = compare(args.masks, args.labels, tile, titles)
                 if not args.minimum_fg <= fg_ratio <= args.maximum_fg or not args.minimum_qod <= qod <= args.maximum_qod:

@@ -11,6 +11,11 @@ def load_config(path):
     """Loads a dictionary from configuration file."""
 
     try:
+        path = os.environ["RSP_CONFIG"] if not path else path
+    except:
+        sys.exit("CONFIG ERROR: Either RSP_CONFIG env var or --config parameter, is required.")
+
+    try:
         config = toml.load(os.path.expanduser(path))
     except:
         sys.exit("CONFIG ERROR: Unable to load config file, check both path and syntax.")
