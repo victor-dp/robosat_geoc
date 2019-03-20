@@ -60,6 +60,7 @@ def main(args):
 
             def worker(tile):
                 tick = time.monotonic()
+                progress.update()
 
                 x, y, z = map(str, [tile.x, tile.y, tile.z])
 
@@ -67,7 +68,6 @@ def main(args):
                 path = os.path.join(args.out, z, x, "{}.{}".format(y, args.format))
 
                 if os.path.isfile(path):
-                    progress.update()
                     return tile, None, True
 
                 if args.type == "XYZ":
@@ -80,12 +80,13 @@ def main(args):
                     url = args.url.format(xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
 
                 res = tile_image_from_url(session, url, args.timeout)
-                if not res:
-                    return tile, url, False
+                if not res: # retry
+                    res = tile_image_from_url(session, url, args.timeout)
+                    if not res:
+                        return tile, url, False
 
                 try:
                     cv2.imwrite(path, cv2.imdecode(np.fromstring(res.read(), np.uint8), cv2.IMREAD_COLOR))
-                    progress.update()
                 except OSError:
                     return tile, url, False
 
