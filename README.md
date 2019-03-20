@@ -27,9 +27,12 @@ Main Features:
 
 Community:
 ------
-- Twitter: <a href='https://twitter.com/RobosatPink'>@RoboSatPink</a>
-- Gitter: <a href='https://gitter.im/RoboSatPink/community'>https://gitter.im/RoboSatPink/community</a>
 
+  <a href="https://gitter.im/RoboSatPink/community"><img src="https://img.shields.io/gitter/room/robosatpink/community.svg?color=ff69b4&style=popout" /></a> 
+  
+  [![Twitter Follow](https://img.shields.io/twitter/follow/RoboSatPink.svg?label=Follow%20%40RoboSatPink&style=popout&color=ff69b4)](https://twitter.com/RoboSatPink)  
+ 
+ 
 Documentation:
 --------------
 
