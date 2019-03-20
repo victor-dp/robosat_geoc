@@ -25,10 +25,10 @@ Main Features:
 - High performances, PyTorch based, and native multi GPUs support
 
 
-News:
------
-- <a href='https://twitter.com/RobosatPink'>@RoboSatPink</a>
-
+Community:
+------
+- Twitter: <a href='https://twitter.com/RobosatPink'>@RoboSatPink</a>
+- Gitter: <a href='https://gitter.im/RoboSatPink/community'>https://gitter.im/RoboSatPink/community</a>
 
 Documentation:
 --------------
@@ -108,11 +108,8 @@ sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 WorkFlows:
 --------
 
-### HelloWorld  ###
+### A Minimal example ###
  
-
-A minimal example:
-
 
 ```
 # Configuration
