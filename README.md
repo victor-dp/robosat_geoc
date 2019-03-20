@@ -1,5 +1,5 @@
 <h1 align='center'>RoboSat.pink</h1>
-<h2 align='center'>Semantic Segmentation for GeoSpatial imagery</h2>
+<h2 align='center'>Semantic Segmentation ecosystem for GeoSpatial imagery</h2>
 
 <p align=center>
   <img src="https://pbs.twimg.com/media/DpjonykWwAANpPr.jpg" alt="RoboSat.pink buildings segmentation from Imagery" />
@@ -101,8 +101,8 @@ sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ### NOTAS: 
 - Requires: Python 3.6 or later, and Nvidia GPU with at least 6Go RAM.
 - To test RoboSat.pink install, launch in a terminal: `rsp -h`
-- Upon your ```pip``` PATH setting, you could have to update it: ```export PATH=$PATH:.local/bin```
-- To use the development version: ```pip3 install git+https://github.com/datapink/robosat.pink```
+- Upon your ```pip``` PATH setting, you may have to update it: ```export PATH=$PATH:.local/bin```
+- To use instead the development version: ```pip3 install git+https://github.com/datapink/robosat.pink```
 
 
 WorkFlows:
@@ -122,7 +122,7 @@ dataset
     └── labels
 ```
 - Tiles images formats could be either: JPEG, WEBP, GeoTIFF, PNG.
-- Tiles labels are expected to be PNG with single band and indexed palette.
+- Tiles labels are expected to be PNG with single band.
 - Tools producing XYZ tiles directory as output, also allows to easily generate a web map client, for visual inspection.
 - Following schema, show several paths to create your own training dataset from several kinds of input data. 
 
