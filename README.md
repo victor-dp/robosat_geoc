@@ -1,3 +1,7 @@
+<a href="https://twitter.com/RobosatPink"><img src="https://img.shields.io/badge/Follow-%40RoboSatPink-ff69b4.svg" /></a>  <a href="https://gitter.im/RoboSatPink/community"><img src="https://img.shields.io/gitter/room/robosatpink/community.svg?color=ff69b4&style=popout" /></a> 
+
+ 
+
 <h1 align='center'>RoboSat.pink</h1>
 <h2 align='center'>Semantic Segmentation ecosystem for GeoSpatial imagery</h2>
 
@@ -25,13 +29,9 @@ Main Features:
 - High performances, PyTorch based, and native multi GPUs support
 
 
-Community:
-------
 
-  <a href="https://gitter.im/RoboSatPink/community"><img src="https://img.shields.io/gitter/room/robosatpink/community.svg?color=ff69b4&style=popout" /></a> 
-  
-  [![Twitter Follow](https://img.shields.io/twitter/follow/RoboSatPink.svg?label=Follow%20%40RoboSatPink&style=popout&color=ff69b4)](https://twitter.com/RoboSatPink)  
- 
+
+
  
 Documentation:
 --------------
