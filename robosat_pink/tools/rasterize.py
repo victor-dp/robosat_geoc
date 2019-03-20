@@ -167,14 +167,18 @@ def main(args):
         zoom = tiles[0].z
 
         if [tile for tile in tiles if tile.z != zoom]:
-            sys.exit("With GeoJson input, all tiles z values have to be the same, in the csv cover file.")
+            sys.exit("ERROR: With GeoJson input, all tiles z values have to be the same, in the csv cover file.")
 
         feature_map = collections.defaultdict(list)
 
         # Compute a spatial index like
         for geojson_file in glob.glob(os.path.expanduser(args.geojson)):
             with open(geojson_file) as geojson:
-                feature_collection = json.load(geojson)
+                try:
+                    feature_collection = json.load(geojson)
+                except:
+                    sys.exit("ERROR: GeoJSON input file is not valid.")
+
                 for i, feature in enumerate(tqdm(feature_collection["features"], ascii=True, unit="feature")):
 
                     if feature["geometry"]["type"] == "GeometryCollection":
