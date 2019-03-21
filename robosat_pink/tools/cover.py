@@ -18,17 +18,14 @@ def add_parser(subparser, formatter_class):
         "cover", help="Generate a tiles covering, in csv format: X,Y,Z", formatter_class=formatter_class
     )
 
-    inp = parser.add_argument_group("Inputs")
-    inp.add_argument(
-        "--type", type=str, default="geojson", choices=["geojson", "bbox", "dir"], help="input type [default: geojson]"
-    )
-    inp.add_argument(
-        "input", type=str, help="upon input type: a geojson file path, a lat/lon bbox or a XYZ tiles dir path [required]"
-    )
+    inp = parser.add_argument_group("Input [one among the following is required]")
+    inp.add_argument("--dir", type=str, help="XYZ tiles dir path")
+    inp.add_argument("--bbox", type=str, help="a lat/lon bbox [e.g  4.2,45.1,5.4,46.3]")
+    inp.add_argument("--geojson", type=str, help="a geojson file path")
 
     out = parser.add_argument_group("Outputs")
-    out.add_argument("--zoom", type=int, help="zoom level of tiles [required for geojson or bbox modes]")
-    out.add_argument("--splits", type=str, help="if set, shuffle and split in several cover pieces. [e.g 50,15,35]")
+    out.add_argument("--zoom", type=int, help="zoom level of tiles [required with --geojson or --bbox]")
+    out.add_argument("--splits", type=str, help="if set, shuffle and split in several cover subpieces. [e.g 50,15,35]")
     out.add_argument("out", type=str, nargs="+", help="cover csv output paths [required]")
 
     parser.set_defaults(func=main)
@@ -36,8 +33,14 @@ def add_parser(subparser, formatter_class):
 
 def main(args):
 
-    if not args.zoom and args.type in ["geojson", "bbox"]:
-        sys.exit("ERROR: Zoom parameter is required.")
+    if int(args.bbox != None) + int(args.geojson != None) + int(args.dir != None) != 1:
+        sys.exit("ERROR: One, and only one, input type must be provided, among: --dir, --bbox or --geojson.")
+
+    if args.bbox:
+        try:
+            west, south, east, north = map(float, args.bbox.split(","))
+        except:
+            sys.exit("ERROR: invalid bbox parameter.")
 
     if args.splits:
 
@@ -48,23 +51,28 @@ def main(args):
         except:
             sys.exit("ERROR: Invalid split value or incoherent with provided out paths.")
 
+    if not args.zoom and (args.geojson or args.bbox):
+        sys.exit("ERROR: Zoom parameter is required.")
+
     cover = []
 
-    if args.type == "geojson":
-        with open(args.input) as f:
+    if args.geojson:
+        with open(args.geojson) as f:
             features = json.load(f)
 
-        for feature in tqdm(features["features"], ascii=True, unit="feature"):
-            cover.extend(map(tuple, burntiles.burn([feature], args.zoom).tolist()))
+        try:
+            for feature in tqdm(features["features"], ascii=True, unit="feature"):
+                cover.extend(map(tuple, burntiles.burn([feature], args.zoom).tolist()))
+        except:
+            sys.exit("ERROR: invalid or unsupported GeoJSON.")
 
         cover = list(set(cover))  # tiles can overlap for multiple features; unique tile ids
 
-    elif args.type == "bbox":
-        west, south, east, north = map(float, args.input.split(","))
+    if args.bbox:
         cover = tiles(west, south, east, north, args.zoom)
 
-    elif args.type == "dir":
-        cover = [tile for tile, _ in tiles_from_slippy_map(args.input)]
+    if args.dir:
+        cover = [tile for tile, _ in tiles_from_slippy_map(args.dir)]
 
     if args.splits:
         shuffle(cover)  # in-place

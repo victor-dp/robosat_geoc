@@ -51,7 +51,7 @@ it: it_pre it_train it_post
 it_pre:
 	@echo "==================================================================================="
 	rm -rf it
-	rsp cover --zoom 18 --type bbox 4.8,45.7,4.83,45.73  it/cover
+	rsp cover --zoom 18 --bbox 4.8,45.7,4.83,45.73  it/cover
 	rsp download --rate 20 --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' it/cover it/images
 	wget -nc -O it/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&BBOX=4.79,45.69,4.84,45.74&outputFormat=application/json; subtype=geojson' | true
 	rsp rasterize --geojson it/lyon_roofprint.json --config config.toml it/cover it/labels
@@ -60,7 +60,7 @@ it_pre:
 	rsp rasterize --geojson it/lyon_roofprint.json --config config.toml it/cover it/labels_osm
 	rm -rf it/training it/validation
 	mkdir it/training it/validation
-	rsp cover --type dir it/images --splits 70,30 it/training/cover it/validation/cover
+	rsp cover --dir it/images --splits 70,30 it/training/cover it/validation/cover
 	rsp subset --dir it/images --filter it/training/cover it/training/images
 	rsp subset --dir it/labels --filter it/training/cover it/training/labels
 	rsp subset --dir it/images --filter it/validation/cover it/validation/images
