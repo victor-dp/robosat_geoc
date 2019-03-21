@@ -113,6 +113,7 @@ WorkFlows:
 
 ### A Minimal example ###
  
+<img alt="Minimal Example" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/minimal.png" />
 
 ```
 # Configuration
