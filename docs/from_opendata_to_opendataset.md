@@ -22,20 +22,19 @@ We decided to use OpenData from <a href="https://rdata-grandlyon.readthedocs.io/
 The first step is to set the spatial extent and the <a href="https://wiki.openstreetmap.org/wiki/Zoom_levels">zoom level</a>:
 
 ```
-rsp cover --zoom 18 --type bbox 4.795,45.628,4.935,45.853  ~/rsp_dataset/cover
+rsp cover --zoom 18 --bbox 4.795,45.628,4.935,45.853  ~/rsp_dataset/cover
 ```
 
 
 To download imagery using <a href="https://www.opengeospatial.org/standards/wms">WMS</a>:
 
 ```
-rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' --web_ui --format jpeg ~/rsp_dataset/cover ~/rsp_dataset/images
+rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' ~/rsp_dataset/cover ~/rsp_dataset/images
 ```
 
 NOTA:
 - Retina resolution of 512px is preferred to a regular 256px, because it improves the training accuracy. 
 - Relaunch this command in case of download error, till the whole coverage is downloaded.
-- Jpeg is preferred over default webp only because a few browsers still not handle the webp format.
 
 
 
@@ -59,8 +58,7 @@ Prepare DataSet
 Now to transform the vector roofprints and raster labels:
 
 ```
-wget https://raw.githubusercontent.com/datapink/robosat.pink/master/config.toml
-rsp rasterize --config config.toml --geojson ~/rsp_dataset/lyon_roofprint.json --web_ui ~/rsp_dataset/cover ~/rsp_dataset/labels
+rsp rasterize --geojson ~/rsp_dataset/lyon_roofprint.json ~/rsp_dataset/cover ~/rsp_dataset/labels
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/labels/"><img src="img/from_opendata_to_opendataset/labels.png" /></a>
@@ -70,10 +68,10 @@ Then to create a training / validation dataset, with imagery and related roofpri
 
 ```
 rsp cover --dir ~/rsp_dataset/images --split 70,30 ~/rsp_dataset/training/cover ~/rsp_dataset/validation/cover
-rsp subset --web_ui --dir ~/rsp_dataset/images --cover ~/rsp_dataset/training/cover --out ~/rsp_dataset/training/images
-rsp subset --web_ui --dir ~/rsp_dataset/labels --cover ~/rsp_dataset/training/cover --out ~/rsp_dataset/training/labels
-rsp subset --web_ui --dir ~/rsp_dataset/images --cover ~/rsp_dataset/validation/cover --out ~/rsp_dataset/validation/images
-rsp subset --web_ui --dir ~/rsp_dataset/labels --cover ~/rsp_dataset/validation/cover --out ~/rsp_dataset/validation/labels
+rsp subset --dir ~/rsp_dataset/images --filter ~/rsp_dataset/training/cover  ~/rsp_dataset/training/images
+rsp subset --dir ~/rsp_dataset/labels --filter ~/rsp_dataset/training/cover  ~/rsp_dataset/training/labels
+rsp subset --dir ~/rsp_dataset/images --filter ~/rsp_dataset/validation/cover  ~/rsp_dataset/validation/images
+rsp subset --dir ~/rsp_dataset/labels --filter ~/rsp_dataset/validation/cover  ~/rsp_dataset/validation/labels
 ```
 
 Two points to emphasise here:
@@ -87,7 +85,7 @@ Train
 Now to launch a first model training:
 
 ```
-rsp train --epochs 10 --config config.toml ~/rsp_dataset/pth
+rsp train --epochs 10 ~/rsp_dataset/pth
 ```
 
 After ten epochs only, the building IoU metric on validation dataset is about **0.82**. 
@@ -102,7 +100,7 @@ Predictive masks
 To create predictive masks from our first model, on the entire coverage:
 
 ```
-rsp predict --config config.toml --checkpoint ~/rsp_dataset/pth/checkpoint-00010-of-00010.pth --web_ui ~/rsp_dataset/images ~/rsp_dataset/masks
+rsp predict --checkpoint ~/rsp_dataset/pth/checkpoint-00010-of-00010.pth ~/rsp_dataset/images ~/rsp_dataset/masks
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/masks/"><img src="img/from_opendata_to_opendataset/masks.png" /></a>
@@ -122,9 +120,9 @@ The colour of the patches means:
 
 
 ```
-rsp compare --images ~/rsp_dataset/images ~/rsp_dataset/labels ~/rsp_dataset/masks --mode stack --labels ~/rsp_dataset/labels --masks ~/rsp_dataset/masks --config config.toml --format jpeg --web_ui ~/rsp_dataset/compare
+rsp compare --images ~/rsp_dataset/images ~/rsp_dataset/labels ~/rsp_dataset/masks --mode stack --labels ~/rsp_dataset/labels --masks ~/rsp_dataset/masks ~/rsp_dataset/compare
 
-rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks --config config.toml --geojson ~/rsp_dataset/compare/tiles.json
+rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks --geojson ~/rsp_dataset/compare/tiles.json
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare/"><img src="img/from_opendata_to_opendataset/compare.png" /></a>
@@ -143,7 +141,7 @@ To do so, first step is to select the wrongly labelled tiles. The "compare" tool
 as it allows to check several tiles side by side, and to manually select those we want to keep.
 
 ```
-rsp compare --mode side --images ~/rsp_dataset/images ~/rsp_dataset/compare --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks --config config.toml --format jpeg --web_ui ~/rsp_dataset/compare_side
+rsp compare --mode side --images ~/rsp_dataset/images ~/rsp_dataset/compare --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks  ~/rsp_dataset/compare_side
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_side/"><img src="img/from_opendata_to_opendataset/compare_side.png" /></a>
@@ -159,10 +157,10 @@ We store the result in `~rsp_dataset/cover.to_remove`
 
 Then we just remove all the tiles from the dataset:
 ```
-rsp subset --mode delete --dir ~/rsp_dataset/training/images --cover ~/rsp_dataset/cover.to_remove > /dev/null
-rsp subset --mode delete --dir ~/rsp_dataset/training/labels --cover ~/rsp_dataset/cover.to_remove > /dev/null
-rsp subset --mode delete --dir ~/rsp_dataset/validation/images --cover ~/rsp_dataset/cover.to_remove > /dev/null
-rsp subset --mode delete --dir ~/rsp_dataset/validation/labels --cover ~/rsp_dataset/cover.to_remove > /dev/null
+rsp subset --mode delete --dir ~/rsp_dataset/training/images --filter ~/rsp_dataset/cover.to_remove > /dev/null
+rsp subset --mode delete --dir ~/rsp_dataset/training/labels --filter ~/rsp_dataset/cover.to_remove > /dev/null
+rsp subset --mode delete --dir ~/rsp_dataset/validation/images --filter ~/rsp_dataset/cover.to_remove > /dev/null
+rsp subset --mode delete --dir ~/rsp_dataset/validation/labels --filter ~/rsp_dataset/cover.to_remove > /dev/null
 ```
 
 For information, we remove about 500 tiles from this raw dataset in order to clean up obvious inconsistent labelling.
@@ -174,7 +172,7 @@ Train
 Having a cleaner training and validation dataset, we can launch a new and longer training:
 
 ```
-rsp train --config config.toml --epochs 100 ~/rsp_dataset/pth_clean
+rsp train --epochs 100 ~/rsp_dataset/pth_clean
 ```
 
 Building IoU metrics on validation dataset:
@@ -189,11 +187,11 @@ Predict and compare
 And now to generate masks prediction, and compare composite images, as previously done:
 
 ```
-rsp predict --config config.toml --checkpoint ~/rsp_dataset/pth_clean/checkpoint-00100-of-00100.pth ~/rsp_dataset/images ~/rsp_dataset/masks_clean
+rsp predict --checkpoint ~/rsp_dataset/pth_clean/checkpoint-00100-of-00100.pth ~/rsp_dataset/images ~/rsp_dataset/masks_clean
 
-rsp compare --images ~/rsp_dataset/images ~/rsp_dataset/labels ~/rsp_dataset/masks_clean --mode stack --labels ~/rsp_dataset/labels --masks ~/rsp_dataset/masks_clean --config config.toml --web_ui --format jpeg ~/rsp_dataset/compare_clean
+rsp compare --images ~/rsp_dataset/images ~/rsp_dataset/labels ~/rsp_dataset/masks_clean --mode stack --labels ~/rsp_dataset/labels --masks ~/rsp_dataset/masks_clean ~/rsp_dataset/compare_clean
 
-rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks_clean --config config.toml --geojson ~/rsp_dataset/compare_clean/tiles.json
+rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks_clean --geojson ~/rsp_dataset/compare_clean/tiles.json
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_clean/"><img src="img/from_opendata_to_opendataset/compare_clean.png" /></a>
@@ -204,11 +202,11 @@ And to compare only with filtered validation tiles, in side by side mode:
 ```
 rsp cover --type dir ~/rsp_dataset/validation/images  ~/rsp_dataset/validation/cover.clean
 
-rsp subset --dir ~/rsp_dataset/compare_clean --cover ~/rsp_dataset/validation/cover.clean --out ~/rsp_dataset/validation/compare_clean
+rsp subset --dir ~/rsp_dataset/compare_clean --filter ~/rsp_dataset/validation/cover.clean ~/rsp_dataset/validation/compare_clean
 
-rsp subset --dir ~/rsp_dataset/masks_clean --cover ~/rsp_dataset/validation/cover.clean --out ~/rsp_dataset/validation/masks_clean
+rsp subset --dir ~/rsp_dataset/masks_clean --filter ~/rsp_dataset/validation/cover.clean ~/rsp_dataset/validation/masks_clean
 
-rsp compare --mode side --images ~/rsp_dataset/validation/images ~/rsp_dataset/validation/compare_clean --labels ~/rsp_dataset/validation/labels --masks ~/rsp_dataset/validation/masks_clean --config config.toml --web_ui --format jpeg ~/rsp_dataset/validation/compare_side_clean
+rsp compare --mode side --images ~/rsp_dataset/validation/images ~/rsp_dataset/validation/compare_clean --labels ~/rsp_dataset/validation/labels --masks ~/rsp_dataset/validation/masks_clean ~/rsp_dataset/validation/compare_side_clean
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_side_clean/"><img src="img/from_opendata_to_opendataset/compare_side_clean.png" /></a>
