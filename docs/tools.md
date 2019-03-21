@@ -41,21 +41,22 @@ Web UI:
 ```
 ## rsp cover
 ```
-usage: rsp cover [-h] [--type {geojson,bbox,dir}] [--zoom ZOOM]
-                 [--splits SPLITS]
-                 input out [out ...]
+usage: rsp cover [-h] [--dir DIR] [--bbox BBOX] [--geojson GEOJSON]
+                 [--zoom ZOOM] [--splits SPLITS]
+                 out [out ...]
 
 optional arguments:
- -h, --help                 show this help message and exit
+ -h, --help         show this help message and exit
 
-Inputs:
- --type {geojson,bbox,dir}  input type [default: geojson]
- input                      upon input type: a geojson file path, a lat/lon bbox or a XYZ tiles dir path [required]
+Input [one among the following is required]:
+ --dir DIR          XYZ tiles dir path
+ --bbox BBOX        a lat/lon bbox [e.g  4.2,45.1,5.4,46.3]
+ --geojson GEOJSON  a geojson file path
 
 Outputs:
- --zoom ZOOM                zoom level of tiles [required for geojson or bbox modes]
- --splits SPLITS            if set, shuffle and split in several cover pieces. [e.g 50,15,35]
- out                        cover csv output paths [required]
+ --zoom ZOOM        zoom level of tiles [required with --geojson or --bbox]
+ --splits SPLITS    if set, shuffle and split in several cover subpieces. [e.g 50,15,35]
+ out                cover csv output paths [required]
 ```
 ## rsp download
 ```
@@ -178,7 +179,7 @@ Web UI:
 ```
 ## rsp subset
 ```
-usage: rsp subset [-h] --dir DIR --filter FILTER [--mode {copy,move,delete}]
+usage: rsp subset [-h] --dir DIR --filter FILTER [--mode {move,delete,copy}]
                   [--web_ui_base_url WEB_UI_BASE_URL]
                   [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                   [out]
@@ -189,7 +190,7 @@ optional arguments:
 Inputs:
  --dir DIR                          to XYZ tiles input dir path [required]
  --filter FILTER                    path to csv cover file to filter dir by [required]
- --mode {copy,move,delete}          subset mode [default: copy]
+ --mode {move,delete,copy}          subset mode [default: copy]
 
 Output:
  out                                output dir path [required for copy or move]
