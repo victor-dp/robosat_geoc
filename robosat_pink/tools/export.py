@@ -6,7 +6,7 @@ import torch
 import torch.onnx
 import torch.autograd
 
-from robosat_pink.config import load_config
+from robosat_pink.config import load_config, check_classes, check_model
 
 
 def add_parser(subparser, formatter_class):
@@ -24,17 +24,25 @@ def add_parser(subparser, formatter_class):
 
 def main(args):
     config = load_config(args.config)
+    check_classes(config)
+    check_model(config)
 
+    # FIXME
     def map_location(storage, _):
         return storage.cpu()
+
+    print("RoboSat.pink - export to {}".format(args.type))
 
     try:
         model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
     except:
-        sys.exit("Unknown {} model".format(config["model"]["name"]))
+        sys.exit("ERROR: Unknown {} model.".format(config["model"]["name"]))
 
-    net = getattr(model_module, "{}".format(config["model"]["name"].title()))(config).to("cpu")
-    chkpt = torch.load(args.checkpoint, map_location=map_location)
+    try:
+        net = getattr(model_module, "{}".format(config["model"]["name"].title()))(config).to("cpu")
+        chkpt = torch.load(args.checkpoint, map_location=map_location)
+    except:
+        sys.exit("ERROR: Unable to load {} in {} model.".format(args.checkpoint, config["model"]["name"]))
 
     try:  # https://github.com/pytorch/pytorch/issues/9176
         net.module.state_dict(chkpt["state_dict"])
@@ -48,8 +56,11 @@ def main(args):
 
     batch = torch.rand(1, num_channels, config["model"]["tile_size"], config["model"]["tile_size"])
 
-    if args.type == "onnx":
-        torch.onnx.export(net, torch.autograd.Variable(batch), args.out)
+    try:
+        if args.type == "onnx":
+            torch.onnx.export(net, torch.autograd.Variable(batch), args.out)
 
-    elif args.type == "jit":
-        torch.jit.trace(net, batch).save(args.out)
+        if args.type == "jit":
+            torch.jit.trace(net, batch).save(args.out)
+    except:
+        sys.exit("ERROR: Unable to export model {} in {}.".format(config["model"]["name"]), args.type)

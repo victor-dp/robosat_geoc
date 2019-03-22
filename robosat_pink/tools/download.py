@@ -1,6 +1,7 @@
 import os
 import sys
 import time
+import math
 import concurrent.futures as futures
 
 import cv2
@@ -20,13 +21,14 @@ def add_parser(subparser, formatter_class):
     )
 
     ws = parser.add_argument_group("Web Server")
-    ws.add_argument("url", type=str, help="url server endpoint to fetch image tiles [required]")
+    ws.add_argument("url", type=str, help="URL server endpoint, with: {z}/{x}/{y} or {xmin},{ymin},{xmax},{ymax} [required]")
     ws.add_argument("--type", type=str, default="XYZ", choices=["XYZ", "WMS", "TMS"], help="service type [default: XYZ]")
     ws.add_argument("--rate", type=int, default=10, help="download rate limit in max requests/seconds [default: 10]")
     ws.add_argument("--timeout", type=int, default=10, help="download request timeout (in seconds) [default: 10]")
+    ws.add_argument("--workers", type=int, help="number of workers [default: CPU / 2]")
 
     cover = parser.add_argument_group("Coverage to download")
-    cover.add_argument("tiles", type=str, help="path to .csv tiles list [required]")
+    cover.add_argument("cover", type=str, help="path to .csv tiles list [required]")
 
     out = parser.add_argument_group("Output")
     out.add_argument("--format", type=str, default="webp", help="file format to save images in [default: webp]")
@@ -37,26 +39,34 @@ def add_parser(subparser, formatter_class):
     ui.add_argument("--web_ui_template", type=str, help="alternate Web UI template path")
     ui.add_argument("--no_web_ui", action="store_false", help="desactivate Web UI output")
 
-    # epilog = "with {z}/{x}/{y} or {xmin},{ymin},{xmax},{ymax} "
-
     parser.set_defaults(func=main)
 
 
 def main(args):
-    tiles = list(tiles_from_csv(args.tiles))
+
+    try:
+        tiles = list(tiles_from_csv(args.cover))
+    except:
+        sys.exit("ERROR: unable to read cover file: {}".format(args.cover))
+
+    if not args.workers:
+        args.workers = max(1, math.floor(os.cpu_count() * 0.5))
+
+    try:
+        os.makedirs(os.path.expanduser(args.out), exist_ok=True)
+    except:
+        sys.exit("ERROR: unable to create output dir: {}".format(args.out))
+
+    log = Logs(os.path.join(args.out, "log"), out=sys.stderr)
+    log.log("RoboSat.pink - download with {} workers, at max rate {}/s\nfrom {}".format(args.workers, args.rate, args.url))
+
     already_dl = 0
     dl = 0
 
     with requests.Session() as session:
-        num_workers = args.rate
-
-        os.makedirs(os.path.join(args.out), exist_ok=True)
-        log = Logs(os.path.join(args.out, "log"), out=sys.stderr)
-        log.log("Begin download from {}".format(args.url))
 
         progress = tqdm(total=len(tiles), ascii=True, unit="image")
-
-        with futures.ThreadPoolExecutor(num_workers) as executor:
+        with futures.ThreadPoolExecutor(args.workers) as executor:
 
             def worker(tile):
                 tick = time.monotonic()
@@ -64,10 +74,13 @@ def main(args):
 
                 x, y, z = map(str, [tile.x, tile.y, tile.z])
 
-                os.makedirs(os.path.join(args.out, z, x), exist_ok=True)
-                path = os.path.join(args.out, z, x, "{}.{}".format(y, args.format))
+                try:
+                    os.makedirs(os.path.join(args.out, z, x), exist_ok=True)
+                except:
+                    return tile, None, False
 
-                if os.path.isfile(path):
+                path = os.path.join(args.out, z, x, "{}.{}".format(y, args.format))
+                if os.path.isfile(path):  # already downloaded
                     return tile, None, True
 
                 if args.type == "XYZ":
@@ -80,7 +93,7 @@ def main(args):
                     url = args.url.format(xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
 
                 res = tile_image_from_url(session, url, args.timeout)
-                if not res:  # retry
+                if not res:  # let's retry once
                     res = tile_image_from_url(session, url, args.timeout)
                     if not res:
                         return tile, url, False
@@ -93,7 +106,7 @@ def main(args):
                 tock = time.monotonic()
 
                 time_for_req = tock - tick
-                time_per_worker = num_workers / args.rate
+                time_per_worker = args.workers / args.rate
 
                 if time_for_req < time_per_worker:
                     time.sleep(time_per_worker - time_for_req)

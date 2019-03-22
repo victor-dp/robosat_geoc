@@ -9,9 +9,12 @@ import glob
 
 import cv2
 import numpy as np
+from PIL import Image
 
 import csv
 import mercantile
+
+from robosat_pink.colors import make_palette, complementary_palette
 
 
 def tile_pixel_to_location(tile, dx, dy):
@@ -69,8 +72,7 @@ def tiles_from_csv(path):
 def tile_image_from_file(path):
     """Return a multiband image numpy array, from a file path."""
 
-    path = os.path.expanduser(path)
-    image = cv2.imread(path, cv2.IMREAD_ANYCOLOR)
+    image = cv2.imread(os.path.expanduser(path), cv2.IMREAD_ANYCOLOR)
     if len(image.shape) == 3 and image.shape[2] >= 3:  # multibands BGR2RGB
         b = image[:, :, 0]
         image[:, :, 0] = image[:, :, 2]
@@ -79,11 +81,22 @@ def tile_image_from_file(path):
     return image
 
 
-def tile_image_from_url(session, url, timeout=10):
-    """Fetch a tile image using HTTP. Need requests.Session."""
+def tile_label_to_file(root, tile, colors, label):
+    """ Write a label tile on disk. """
+
+    out_path = os.path.join(os.path.expanduser(root), str(tile.z), str(tile.x))
+    os.makedirs(out_path, exist_ok=True)
+
+    out = Image.fromarray(label, mode="P")
+    out.putpalette(complementary_palette(make_palette(colors[0], colors[1])))
+    out.save(os.path.join(out_path, "{}.png".format(tile.y)), optimize=True)
+
+
+def tile_image_from_url(requests_session, url, timeout=10):
+    """Fetch a tile image using HTTP, and return it or None """
 
     try:
-        resp = session.get(url, timeout=timeout)
+        resp = requests_session.get(url, timeout=timeout)
         resp.raise_for_status()
         return io.BytesIO(resp.content)
 

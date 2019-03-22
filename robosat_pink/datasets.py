@@ -1,7 +1,6 @@
 """PyTorch-compatible datasets. Cf: https://pytorch.org/docs/stable/data.html """
 
 import os
-import sys
 
 import numpy as np
 from PIL import Image
@@ -64,20 +63,16 @@ class DatasetTilesConcat(torch.utils.data.Dataset):
         return len(self.target)
 
     def __getitem__(self, i):
-
         mask, tile = self.target[i]
 
         for channel in self.channels:
-            try:
-                data, band_tile = self.inputs[channel["sub"]][i]
-                assert band_tile == tile
+            data, band_tile = self.inputs[channel["sub"]][i]
+            assert band_tile == tile
 
-                for band in channel["bands"]:
-                    data_band = data[:, :, int(band) - 1] if len(data.shape) == 3 else []
-                    data_band = data_band.reshape(mask.shape[0], mask.shape[1], 1)
-                    tensor = np.concatenate((tensor, data_band), axis=2) if "tensor" in locals() else data_band  # noqa F821
-            except:
-                sys.exit("Unable to concatenate input Tensor")
+            for band in channel["bands"]:
+                data_band = data[:, :, int(band) - 1] if len(data.shape) == 3 else []
+                data_band = data_band.reshape(mask.shape[0], mask.shape[1], 1)
+                tensor = np.concatenate((tensor, data_band), axis=2) if "tensor" in locals() else data_band  # noqa F821
 
         if self.joint_transform is not None:
             tensor, mask = self.joint_transform(tensor, mask)
@@ -93,7 +88,6 @@ class DatasetTilesBuffer(torch.utils.data.Dataset):
     """
 
     def __init__(self, root, transform=None, size=512, overlap=32):
-
         super().__init__()
 
         assert size >= 256

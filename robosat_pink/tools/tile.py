@@ -14,7 +14,7 @@ from rasterio.enums import Resampling
 from rasterio.warp import transform_bounds, calculate_default_transform
 from rasterio.transform import from_bounds
 
-from robosat_pink.config import load_config
+from robosat_pink.config import load_config, check_classes
 from robosat_pink.colors import make_palette
 from robosat_pink.web_ui import web_ui
 
@@ -45,34 +45,40 @@ def add_parser(subparser, formatter_class):
 def main(args):
 
     config = load_config(args.config)
+    check_classes(config)
     colors = [classe["color"] for classe in config["classes"]]
     tile_size = args.tile_size
+    tiles_nodata = []
+
+    print("RoboSat.pink - tile raster {}".format(args.raster))
 
     try:
         raster = rasterio_open(args.raster)
         w, s, e, n = bounds = transform_bounds(raster.crs, "EPSG:4326", *raster.bounds)
         transform, _, _ = calculate_default_transform(raster.crs, "EPSG:3857", raster.width, raster.height, *bounds)
+        tiles = [mercantile.Tile(x=x, y=y, z=z) for x, y, z in mercantile.tiles(w, s, e, n, args.zoom)]
     except:
-        sys.exit("Error: Unable to load raster or deal with it's projection")
-
-    tiles = [mercantile.Tile(x=x, y=y, z=z) for x, y, z in mercantile.tiles(w, s, e, n, args.zoom)]
-    tiles_nodata = []
+        sys.exit("Error: Unable to load raster {} or deal with it's projection".format(args.raster))
 
     for tile in tqdm(tiles, desc="Tiling", unit="tile", ascii=True):
 
-        w, s, e, n = tile_bounds = mercantile.xy_bounds(tile)
+        try:
+            w, s, e, n = tile_bounds = mercantile.xy_bounds(tile)
 
-        # Inspired by Rio-Tiler, cf: https://github.com/mapbox/rio-tiler/pull/45
-        warp_vrt = WarpedVRT(
-            raster,
-            crs="EPSG:3857",
-            resampling=Resampling.bilinear,
-            add_alpha=False,
-            transform=from_bounds(*tile_bounds, args.size, args.size),
-            width=math.ceil((e - w) / transform.a),
-            height=math.ceil((s - n) / transform.e),
-        )
-        data = warp_vrt.read(out_shape=(len(raster.indexes), tile_size, tile_size), window=warp_vrt.window(w, s, e, n))
+            # Inspired by Rio-Tiler, cf: https://github.com/mapbox/rio-tiler/pull/45
+            warp_vrt = WarpedVRT(
+                raster,
+                crs="EPSG:3857",
+                resampling=Resampling.bilinear,
+                add_alpha=False,
+                transform=from_bounds(*tile_bounds, args.size, args.size),
+                width=math.ceil((e - w) / transform.a),
+                height=math.ceil((s - n) / transform.e),
+            )
+            data = warp_vrt.read(out_shape=(len(raster.indexes), tile_size, tile_size), window=warp_vrt.window(w, s, e, n))
+
+        except:
+            sys.exit("Error: Unable to tile {} from raster {}.".format(str(tile), args.raster))
 
         # If no_data is set, remove all tiles with at least one whole border filled only with no_data (on all bands)
         if type(args.no_data) is not None and (
@@ -84,34 +90,37 @@ def main(args):
             tiles_nodata.append(tile)
             continue
 
-        C, W, H = data.shape
-
-        os.makedirs(os.path.join(args.out, str(args.zoom), str(tile.x)), exist_ok=True)
         path = os.path.join(args.out, str(args.zoom), str(tile.x), str(tile.y))
+        try:
+            os.makedirs(os.path.join(args.out, str(args.zoom), str(tile.x)), exist_ok=True)
 
-        if args.type == "label":
-            assert C == 1, "Error: Label raster input should be 1 band"
+            C, W, H = data.shape
 
-            ext = "png"
-            img = Image.fromarray(np.squeeze(data, axis=0), mode="P")
-            img.putpalette(make_palette(colors[0], colors[1]))
-            img.save("{}.{}".format(path, ext), optimize=True)
+            if args.type == "label":
+                assert C == 1, "Error: Label raster input should be 1 band"  # FIXME: cf #8
 
-        elif args.type == "image":
-            assert C == 1 or C == 3, "Error: Image raster input should be either 1 or 3 bands"
-
-            # GeoTiff could be 16 or 32bits
-            if data.dtype == "uint16":
-                data = np.uint8(data / 256)
-            elif data.dtype == "uint32":
-                data = np.uint8(data / (256 * 256))
-
-            if C == 1:
                 ext = "png"
-                Image.fromarray(np.squeeze(data, axis=0), mode="L").save("{}.{}".format(path, ext), optimize=True)
-            elif C == 3:
-                ext = "webp"
-                Image.fromarray(np.moveaxis(data, 0, 2), mode="RGB").save("{}.{}".format(path, ext), optimize=True)
+                img = Image.fromarray(np.squeeze(data, axis=0), mode="P")
+                img.putpalette(make_palette(colors[0], colors[1]))
+                img.save("{}.{}".format(path, ext), optimize=True)
+
+            elif args.type == "image":
+                assert C == 1 or C == 3, "Error: Image raster input should be either 1 or 3 bands"
+
+                # GeoTiff could be 16 or 32bits
+                if data.dtype == "uint16":
+                    data = np.uint8(data / 256)
+                elif data.dtype == "uint32":
+                    data = np.uint8(data / (256 * 256))
+
+                if C == 1:
+                    ext = "png"
+                    Image.fromarray(np.squeeze(data, axis=0), mode="L").save("{}.{}".format(path, ext), optimize=True)
+                elif C == 3:
+                    ext = "webp"
+                    Image.fromarray(np.moveaxis(data, 0, 2), mode="RGB").save("{}.{}".format(path, ext), optimize=True)
+        except:
+            sys.exit("Error: Unable to write tile {}".format(path))
 
     if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template

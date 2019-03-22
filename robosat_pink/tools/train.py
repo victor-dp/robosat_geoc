@@ -21,7 +21,7 @@ from robosat_pink.transforms import (
 )
 from robosat_pink.datasets import DatasetTilesConcat
 from robosat_pink.metrics import Metrics
-from robosat_pink.config import load_config
+from robosat_pink.config import load_config, check_model, check_channels, check_classes, check_dataset
 from robosat_pink.logs import Logs
 
 
@@ -45,89 +45,103 @@ def add_parser(subparser, formatter_class):
     mt.add_argument("--checkpoint", type=str, help="path to a model checkpoint. To fine tune, or resume training if setted")
 
     perf = parser.add_argument_group("Performances")
-    perf.add_argument("--workers", type=int, help="number pre-processing images workers. [default: GPU x 2]")
+    perf.add_argument("--workers", type=int, help="number pre-processing images workers. [default: GPUs x 2]")
 
     parser.set_defaults(func=main)
 
 
 def main(args):
     config = load_config(args.config)
+    args.out = os.path.expanduser(args.out)
     args.workers = torch.cuda.device_count() * 2 if torch.device("cuda") and not args.workers else args.workers
     config["dataset"]["path"] = args.dataset if args.dataset else config["dataset"]["path"]
     config["model"]["lr"] = args.lr if args.lr else config["model"]["lr"]
     config["model"]["batch_size"] = args.batch_size if args.batch_size else config["model"]["batch_size"]
     config["model"]["name"] = args.model if args.model else config["model"]["name"]
     config["model"]["loss"] = args.loss if args.loss else config["model"]["loss"]
-
-    try:
-        loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"]))
-    except:
-        sys.exit("ERROR: Unknown {} loss".format(config["model"]["loss"]))
-
-    try:
-        model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
-    except:
-        sys.exit("ERROR: Unknown {} model".format(config["model"]["name"]))
+    check_dataset(config)
+    check_classes(config)
+    check_channels(config)
+    check_model(config)
 
     log = Logs(os.path.join(args.out, "log"))
 
     if torch.cuda.is_available():
-        device = torch.device("cuda")
-
-        torch.backends.cudnn.benchmark = True
         log.log("RoboSat.pink - training on {} GPUs, with {} workers".format(torch.cuda.device_count(), args.workers))
+        log.log("Cuda {} - CudNN {}".format(torch.version.cuda, torch.backends.cudnn.version()))
+        device = torch.device("cuda")
+        torch.backends.cudnn.benchmark = True
     else:
-        device = torch.device("cpu")
         log.log("RoboSat.pink - training on CPU, with {} workers".format(args.workers))
+        device = torch.device("cpu")
 
-    net = getattr(model_module, "{}".format(config["model"]["name"].title()))(config).to(device)
-    net = torch.nn.DataParallel(net)
-    optimizer = Adam(net.parameters(), lr=config["model"]["lr"], weight_decay=config["model"]["decay"])
+    try:
+        model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
+        net = getattr(model_module, "{}".format(config["model"]["name"].title()))(config).to(device)
+        net = torch.nn.DataParallel(net)
+    except:
+        sys.exit("ERROR: Unable to load {} model".format(config["model"]["name"]))
+
+    try:
+        optimizer = Adam(net.parameters(), lr=config["model"]["lr"], weight_decay=config["model"]["decay"])
+    except:
+        sys.exit("ERROR: Unable to load optimizer")
 
     resume = 0
     if args.checkpoint:
 
-        def map_location(storage, _):
-            return storage.cuda() if torch.cuda.is_available() else storage.cpu()
+        try:
 
-        # https://github.com/pytorch/pytorch/issues/7178
-        chkpt = torch.load(args.checkpoint, map_location=map_location)
-        net.load_state_dict(chkpt["state_dict"])
-        log.log("Using checkpoint: {}".format(args.checkpoint))
+            def map_location(storage, _):  # FIXME
+                return storage.cuda() if torch.cuda.is_available() else storage.cpu()
 
-        if args.resume:
-            optimizer.load_state_dict(chkpt["optimizer"])
-            resume = chkpt["epoch"]
+            chkpt = torch.load(os.path.expanduser(args.checkpoint), map_location=map_location)
+            net.load_state_dict(chkpt["state_dict"])
 
-    criterion = getattr(loss_module, "{}".format(config["model"]["loss"].title()))().to(device)
-    train_loader, val_loader = get_dataset_loaders(config["dataset"]["path"], config, args.workers)
+            log.log("Using checkpoint: {}".format(args.checkpoint))
 
-    if resume >= args.epochs:
-        sys.exit(
-            "ERROR: Epoch {} set in {} already reached by the checkpoint provided".format(
-                config["model"]["epochs"], args.config
-            )
-        )
+            if args.resume:
+                optimizer.load_state_dict(chkpt["optimizer"])
+                resume = chkpt["epoch"]
+                if resume >= args.epochs:
+                    sys.exit(
+                        "ERROR: Epoch {} set in {} already reached by the checkpoint provided".format(
+                            config["model"]["epochs"], args.config
+                        )
+                    )
+        except:
+            sys.exit("ERROR: Unable to load {} checkpoint".format(args.checkpoint))
 
-    log.log("")
+    try:
+        loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"]))
+        criterion = getattr(loss_module, "{}".format(config["model"]["loss"].title()))().to(device)
+    except:
+        sys.exit("ERROR: Unable to load {} loss".format(config["model"]["loss"]))
+
+    try:
+        train_loader, val_loader = get_dataset_loaders(config["dataset"]["path"], config, args.workers)
+    except:
+        sys.exit("ERROR: Unable to load {} loss".format(config["model"]["loss"]))
+
     log.log("--- Input tensor from Dataset: {} ---".format(config["dataset"]["path"]))
     num_channel = 1
     for channel in config["channels"]:
         for band in channel["bands"]:
             log.log("Channel {}:\t\t {}[band: {}]".format(num_channel, channel["sub"], band))
             num_channel += 1
-    log.log("")
+
     log.log("--- Hyper Parameters ---")
     for hp in config["model"]:
         log.log("{}{}".format(hp.ljust(25, " "), config["model"][hp]))
-    log.log("")
 
     for epoch in range(resume, args.epochs):
-
         log.log("---")
         log.log("Epoch: {}/{}".format(epoch + 1, args.epochs))
 
-        train_hist = train(train_loader, config, device, net, optimizer, criterion)
+        try:
+            train_hist = train(train_loader, config, device, net, optimizer, criterion)
+        except:
+            sys.exit("ERROR: train error")
         log.log(
             "Train    loss: {:.4f}, mIoU: {:.3f}, {} IoU: {:.3f}, MCC: {:.3f}".format(
                 train_hist["loss"],
@@ -138,16 +152,22 @@ def main(args):
             )
         )
 
-        val_hist = validate(val_loader, config, device, net, criterion)
+        try:
+            val_hist = validate(val_loader, config, device, net, criterion)
+        except:
+            sys.exit("ERROR: train error")
         log.log(
             "Validate loss: {:.4f}, mIoU: {:.3f}, {} IoU: {:.3f}, MCC: {:.3f}".format(
                 val_hist["loss"], val_hist["miou"], config["classes"][1]["title"], val_hist["fg_iou"], val_hist["mcc"]
             )
         )
 
-        states = {"epoch": epoch + 1, "state_dict": net.state_dict(), "optimizer": optimizer.state_dict()}
-        checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}-of-{:05d}.pth".format(epoch + 1, args.epochs))
-        torch.save(states, checkpoint_path)
+        try:
+            states = {"epoch": epoch + 1, "state_dict": net.state_dict(), "optimizer": optimizer.state_dict()}
+            checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}-of-{:05d}.pth".format(epoch + 1, args.epochs))
+            torch.save(states, checkpoint_path)
+        except:
+            sys.exit("ERROR: Unable to save checkpoint {}".format(checkpoint_path))
 
 
 def train(loader, config, device, net, optimizer, criterion):

@@ -3,11 +3,10 @@
 ```
 usage: rsp compare [-h] [--mode {side,stack,list}] [--labels LABELS]
                    [--masks MASKS] [--images IMAGES [IMAGES ...]]
-                   [--workers WORKERS] [--config CONFIG]
-                   [--minimum_fg MINIMUM_FG] [--maximum_fg MAXIMUM_FG]
-                   [--minimum_qod MINIMUM_QOD] [--maximum_qod MAXIMUM_QOD]
-                   [--vertical] [--geojson] [--format FORMAT]
-                   [--web_ui_base_url WEB_UI_BASE_URL]
+                   [--workers WORKERS] [--minimum_fg MINIMUM_FG]
+                   [--maximum_fg MAXIMUM_FG] [--minimum_qod MINIMUM_QOD]
+                   [--maximum_qod MAXIMUM_QOD] [--vertical] [--geojson]
+                   [--format FORMAT] [--web_ui_base_url WEB_UI_BASE_URL]
                    [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                    out
 
@@ -20,7 +19,6 @@ Inputs:
  --masks MASKS                      path to tiles masks directory [required for QoD filtering)
  --images IMAGES [IMAGES ...]       path to images directories [required for stack or side modes]
  --workers WORKERS                  number of workers [default: CPU / 2]
- --config CONFIG                    path to config file [required for QoD, if RSP_CONFIG env var is not set]
 
 QoD Filtering:
  --minimum_fg MINIMUM_FG            skip tile if label foreground below. [default: 0]
@@ -61,22 +59,23 @@ Outputs:
 ## rsp download
 ```
 usage: rsp download [-h] [--type {XYZ,WMS,TMS}] [--rate RATE]
-                    [--timeout TIMEOUT] [--format FORMAT]
+                    [--timeout TIMEOUT] [--workers WORKERS] [--format FORMAT]
                     [--web_ui_base_url WEB_UI_BASE_URL]
                     [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
-                    url tiles out
+                    url cover out
 
 optional arguments:
  -h, --help                         show this help message and exit
 
 Web Server:
- url                                url server endpoint to fetch image tiles [required]
+ url                                URL server endpoint, with: {z}/{x}/{y} or {xmin},{ymin},{xmax},{ymax} [required]
  --type {XYZ,WMS,TMS}               service type [default: XYZ]
  --rate RATE                        download rate limit in max requests/seconds [default: 10]
  --timeout TIMEOUT                  download request timeout (in seconds) [default: 10]
+ --workers WORKERS                  number of workers [default: CPU / 2]
 
 Coverage to download:
- tiles                              path to .csv tiles list [required]
+ cover                              path to .csv tiles list [required]
 
 Output:
  --format FORMAT                    file format to save images in [default: webp]
@@ -112,11 +111,11 @@ optional arguments:
  -h, --help   show this help message and exit
 
 Inputs:
- --type TYPE  type of feature to extract [required]
+ --type TYPE  type of feature to extract (e.g building, road) [required]
  pbf          path to .osm.pbf file [required]
 
 Output:
- out          path to GeoJSON file to store features in [required]
+ out          GeoJSON output file path [required]
 ```
 ## rsp predict
 ```
@@ -162,10 +161,10 @@ usage: rsp rasterize [-h] [--postgis POSTGIS] [--geojson GEOJSON]
 optional arguments:
  -h, --help                         show this help message and exit
 
-Inputs:
+Inputs [either --postgis or --geojson is required]:
  cover                              path to csv tiles cover file [required]
- --postgis POSTGIS                  SELECT query to retrieve 'geom' features [required if --geojson not set]
- --geojson GEOJSON                  path to GeoJSON features files [requied if --postgis not set]
+ --postgis POSTGIS                  SELECT query to retrieve geometry features [e.g SELECT geom FROM table]
+ --geojson GEOJSON                  path to GeoJSON features files [e.g /foo/bar/*.json] 
  --config CONFIG                    path to config file [required if RSP_CONFIG env var is not set]
 
 Outputs:
@@ -179,8 +178,8 @@ Web UI:
 ```
 ## rsp subset
 ```
-usage: rsp subset [-h] --dir DIR --filter FILTER [--mode {move,delete,copy}]
-                  [--web_ui_base_url WEB_UI_BASE_URL]
+usage: rsp subset [-h] --dir DIR --filter FILTER [--move MOVE]
+                  [--delete DELETE] [--web_ui_base_url WEB_UI_BASE_URL]
                   [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                   [out]
 
@@ -190,7 +189,10 @@ optional arguments:
 Inputs:
  --dir DIR                          to XYZ tiles input dir path [required]
  --filter FILTER                    path to csv cover file to filter dir by [required]
- --mode {move,delete,copy}          subset mode [default: copy]
+
+Alternate modes, as default is to copy.:
+ --move MOVE                        move filtered tiles from input to output
+ --delete DELETE                    delete filtered tiles
 
 Output:
  out                                output dir path [required for copy or move]
@@ -255,7 +257,7 @@ Model Training:
  --checkpoint CHECKPOINT  path to a model checkpoint. To fine tune, or resume training if setted
 
 Performances:
- --workers WORKERS        number pre-processing images workers. [default: GPU x 2]
+ --workers WORKERS        number pre-processing images workers. [default: GPUs x 2]
 ```
 ## rsp vectorize
 ```

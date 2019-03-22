@@ -50,39 +50,37 @@ it: it_pre it_train it_post
 # Integration Tests: Data Preparation
 it_pre:
 	@echo "==================================================================================="
-	rm -rf it
-	rsp cover --zoom 18 --bbox 4.8,45.7,4.83,45.73  it/cover
-	rsp download --rate 20 --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' it/cover it/images
-	wget -nc -O it/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&BBOX=4.79,45.69,4.84,45.74&outputFormat=application/json; subtype=geojson' | true
-	rsp rasterize --geojson it/lyon_roofprint.json --config config.toml it/cover it/labels
-	wget -O it/lyon.pbf http://datapink.tools/rsp/it/lyon.pbf 
-	rsp extract --type building it/lyon.pbf it/osm_lyon_footprint.json
-	rsp rasterize --geojson it/lyon_roofprint.json --config config.toml it/cover it/labels_osm
-	rm -rf it/training it/validation
-	mkdir it/training it/validation
-	rsp cover --dir it/images --splits 70,30 it/training/cover it/validation/cover
-	rsp subset --dir it/images --filter it/training/cover it/training/images
-	rsp subset --dir it/labels --filter it/training/cover it/training/labels
-	rsp subset --dir it/images --filter it/validation/cover it/validation/images
-	rsp subset --dir it/labels --filter it/validation/cover it/validation/labels
+	@rm -rf it
+	@rsp cover --zoom 18 --bbox 4.8,45.7,4.83,45.73  it/cover
+	@rsp download --rate 20 --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' it/cover it/images
+	@wget -nc -O it/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&BBOX=4.79,45.69,4.84,45.74&outputFormat=application/json; subtype=geojson' | true
+	@rsp rasterize --geojson it/lyon_roofprint.json --config config.toml it/cover it/labels
+	@wget -O it/lyon.pbf http://datapink.tools/rsp/it/lyon.pbf
+	@rsp extract --type building it/lyon.pbf it/osm_lyon_footprint.json
+	@rsp rasterize --geojson it/lyon_roofprint.json --config config.toml it/cover it/labels_osm
+	@rsp cover --dir it/images --splits 70,30 it/training/cover it/validation/cover
+	@rsp subset --dir it/images --filter it/training/cover it/training/images
+	@rsp subset --dir it/labels --filter it/training/cover it/training/labels
+	@rsp subset --dir it/images --filter it/validation/cover it/validation/images
+	@rsp subset --dir it/labels --filter it/validation/cover it/validation/labels
 
 
 # Integration Tests: Training
 it_train:
 	@echo "==================================================================================="
-	rsp train --config config.toml --batch_size 2 --epochs 3 --dataset it it/pth
-	rsp train --config config.toml --batch_size 2 --epochs 5 --resume --checkpoint it/pth/checkpoint-00003-of-00003.pth --dataset it it/pth
+	@rsp train --config config.toml --batch_size 2 --epochs 3 --dataset it it/pth
+	@rsp train --config config.toml --batch_size 2 --epochs 5 --resume --checkpoint it/pth/checkpoint-00003-of-00003.pth --dataset it it/pth
 
 
 # Integration Tests: Post Training
 it_post:
 	@echo "==================================================================================="
-	rsp export --checkpoint it/pth/checkpoint-00005-of-00005.pth --config config.toml --type jit it/pth/export.jit
-	rsp export --checkpoint it/pth/checkpoint-00005-of-00005.pth --config config.toml --type onnx it/pth/export.onnx
-	rsp predict --config config.toml --batch_size 4 --checkpoint it/pth/checkpoint-00005-of-00005.pth it/images it/masks
-	rsp compare --images it/images it/labels it/masks --mode stack --labels it/labels --masks it/masks --config config.toml it/compare
-	rsp compare --mode list --labels it/labels --maximum_qod 75 --minimum_fg 5 --masks it/masks --config config.toml --geojson it/compare/tiles.json
-	rsp vectorize --type building --config config.toml it/masks it/vector.json
+	@rsp export --checkpoint it/pth/checkpoint-00005-of-00005.pth --config config.toml --type jit it/pth/export.jit
+	@rsp export --checkpoint it/pth/checkpoint-00005-of-00005.pth --config config.toml --type onnx it/pth/export.onnx
+	@rsp predict --config config.toml --batch_size 4 --checkpoint it/pth/checkpoint-00005-of-00005.pth it/images it/masks
+	@rsp compare --images it/images it/labels it/masks --mode stack --labels it/labels --masks it/masks it/compare
+	@rsp compare --mode list --labels it/labels --maximum_qod 75 --minimum_fg 5 --masks it/masks --geojson it/compare/tiles.json
+	@rsp vectorize --type building --config config.toml it/masks it/vector.json
 
 
 # Documentation generation (tools and config file)

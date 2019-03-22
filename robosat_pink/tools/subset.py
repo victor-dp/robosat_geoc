@@ -14,10 +14,12 @@ def add_parser(subparser, formatter_class):
         "subset", help="Filter images in a slippy map dir using a csv tiles cover", formatter_class=formatter_class
     )
     inp = parser.add_argument_group("Inputs")
-    choices = {"copy", "move", "delete"}
     inp.add_argument("--dir", type=str, required=True, help="to XYZ tiles input dir path [required]")
     inp.add_argument("--filter", type=str, required=True, help="path to csv cover file to filter dir by [required]")
-    inp.add_argument("--mode", type=str, default="copy", choices=choices, help="subset mode [default: copy]")
+
+    mode = parser.add_argument_group("Alternate modes, as default is to copy.")
+    mode.add_argument("--move", type=str, help="move filtered tiles from input to output")
+    mode.add_argument("--delete", type=str, help="delete filtered tiles")
 
     out = parser.add_argument_group("Output")
     out.add_argument("out", type=str, nargs="?", default=os.getcwd(), help="output dir path [required for copy or move]")
@@ -31,15 +33,18 @@ def add_parser(subparser, formatter_class):
 
 
 def main(args):
-    if not args.out and args.mode in ["copy", "move"]:
+    if not args.out and not args.delete:
         sys.exit("ERROR: out parameter is required")
 
-    tiles = set(tiles_from_csv(args.filter))
+    args.out = os.path.expanduser(args.out)
     extension = ""
 
+    print("RoboSat.pink - subset {} with filter {}".format(args.dir, args.filter))
+
+    tiles = set(tiles_from_csv(os.path.expanduser(args.filter)))
     for tile in tqdm(tiles, desc="Subset", unit="tiles", ascii=True):
 
-        paths = glob(os.path.join(args.dir, str(tile.z), str(tile.x), "{}.*".format(tile.y)))
+        paths = glob(os.path.join(os.path.expanduser(args.dir), str(tile.z), str(tile.x), "{}.*".format(tile.y)))
         if len(paths) != 1:
             print("Warning: {} skipped.".format(tile))
             continue
@@ -52,19 +57,19 @@ def main(args):
             extension = os.path.splitext(src)[1][1:]
             dst = os.path.join(args.out, str(tile.z), str(tile.x), "{}.{}".format(tile.y, extension))
 
-            if args.mode == "move":
+            if args.move:
                 assert os.path.isfile(src)
                 shutil.move(src, dst)
 
-            if args.mode == "copy":
-                shutil.copyfile(src, dst)
-
-            if args.mode == "delete":
+            elif args.delete:
                 assert os.path.isfile(src)
                 os.remove(src)
 
+            else:
+                shutil.copyfile(src, dst)
+
         except:
-            sys.exit("Error: Unable to process {}".format(tile))
+            sys.exit("Error: Unable to process tile: {}".format(str(tile)))
 
     if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template

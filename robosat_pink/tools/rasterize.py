@@ -7,7 +7,6 @@ import struct
 import collections
 
 import numpy as np
-from PIL import Image
 from tqdm import tqdm
 
 import mercantile
@@ -17,9 +16,8 @@ from rasterio.features import rasterize
 from rasterio.warp import transform
 from supermercado import burntiles
 
-from robosat_pink.config import load_config
-from robosat_pink.colors import make_palette, complementary_palette
-from robosat_pink.tiles import tiles_from_csv
+from robosat_pink.config import load_config, check_classes
+from robosat_pink.tiles import tiles_from_csv, tile_label_to_file
 from robosat_pink.web_ui import web_ui
 from robosat_pink.logs import Logs
 
@@ -28,13 +26,13 @@ import psycopg2
 
 def add_parser(subparser, formatter_class):
     parser = subparser.add_parser(
-        "rasterize", help="Rasterize vector features (GeoJSON or PostGIS), to raster tiles", formatter_class=formatter_class
+        "rasterize", help="Rasterize GeoJSON or PostGIS features to tiles", formatter_class=formatter_class
     )
 
-    inp = parser.add_argument_group("Inputs")
+    inp = parser.add_argument_group("Inputs [either --postgis or --geojson is required]")
     inp.add_argument("cover", type=str, help="path to csv tiles cover file [required]")
-    inp.add_argument("--postgis", type=str, help="SELECT query to retrieve 'geom' features [required if --geojson not set]")
-    inp.add_argument("--geojson", type=str, help="path to GeoJSON features files [requied if --postgis not set]")
+    inp.add_argument("--postgis", type=str, help="SELECT query to retrieve geometry features [e.g SELECT geom FROM table]")
+    inp.add_argument("--geojson", type=str, help="path to GeoJSON features files [e.g /foo/bar/*.json] ")
     inp.add_argument("--config", type=str, help="path to config file [required if RSP_CONFIG env var is not set]")
 
     out = parser.add_argument_group("Outputs")
@@ -110,27 +108,18 @@ def wkb_to_numpy(wkb):
     return out
 
 
-def write_tile(root, tile, colors, out):
-    """ Write a tile on disk. """
-
-    out_path = os.path.join(root, str(tile.z), str(tile.x))
-    os.makedirs(out_path, exist_ok=True)
-
-    out = Image.fromarray(out, mode="P")
-    out.putpalette(complementary_palette(make_palette(colors[0], colors[1])))
-    out.save(os.path.join(out_path, "{}.png".format(tile.y)), optimize=True)
-
-
 def main(args):
 
     if (args.geojson and args.postgis) or (not args.geojson and not args.postgis):
         sys.exit("ERROR: Input features to rasterize must be either GeoJSON or PostGIS")
 
     config = load_config(args.config)
+    check_classes(config)
     tile_size = args.tile_size if args.tile_size else config["model"]["tile_size"]
     colors = [classe["color"] for classe in config["classes"]]
     burn_value = 1
 
+    args.out = os.path.expanduser(args.out)
     os.makedirs(args.out, exist_ok=True)
     log = Logs(os.path.join(args.out, "log"), out=sys.stderr)
 
@@ -163,11 +152,12 @@ def main(args):
 
     if args.geojson:
 
-        tiles = [tile for tile in tiles_from_csv(args.cover)]
-        zoom = tiles[0].z
-
-        if [tile for tile in tiles if tile.z != zoom]:
-            sys.exit("ERROR: With GeoJson input, all tiles z values have to be the same, in the csv cover file.")
+        try:
+            tiles = [tile for tile in tiles_from_csv(os.path.expanduser(args.cover))]
+            zoom = tiles[0].z
+            assert not [tile for tile in tiles if tile.z != zoom]
+        except:
+            sys.exit("ERROR: Inconsistent cover {}".format(args.cover))
 
         feature_map = collections.defaultdict(list)
 
@@ -177,24 +167,31 @@ def main(args):
                 try:
                     feature_collection = json.load(geojson)
                 except:
-                    sys.exit("ERROR: GeoJSON input file is not valid.")
+                    sys.exit("ERROR: {} is not a valid JSON file.".format(geojson_file))
 
                 for i, feature in enumerate(tqdm(feature_collection["features"], ascii=True, unit="feature")):
 
-                    if feature["geometry"]["type"] == "GeometryCollection":
-                        for geometry in feature["geometry"]["geometries"]:
-                            feature_map = geojson_parse_geometry(zoom, feature_map, geometry, i)
-                    else:
-                        feature_map = geojson_parse_geometry(zoom, feature_map, feature["geometry"], i)
+                    try:
+                        if feature["geometry"]["type"] == "GeometryCollection":
+                            for geometry in feature["geometry"]["geometries"]:
+                                feature_map = geojson_parse_geometry(zoom, feature_map, geometry, i)
+                        else:
+                            feature_map = geojson_parse_geometry(zoom, feature_map, feature["geometry"], i)
+                    except:
+                        sys.exit("ERROR: Unable to parse {}. seems not a valid GEOJSON file.".format(geojson_file))
 
         # Rasterize tiles
-        for tile in tqdm(list(tiles_from_csv(args.cover)), ascii=True, unit="tile"):
-            if tile in feature_map:
-                out = geojson_tile_burn(tile, feature_map[tile], tile_size, burn_value)
-            else:
-                out = np.zeros(shape=(tile_size, tile_size), dtype=np.uint8)
+        for tile in tqdm(list(tiles_from_csv(os.path.expanduser(args.cover))), ascii=True, unit="tile"):
 
-            write_tile(args.out, tile, colors, out)
+            try:
+                if tile in feature_map:
+                    out = geojson_tile_burn(tile, feature_map[tile], tile_size, burn_value)
+                else:
+                    out = np.zeros(shape=(tile_size, tile_size), dtype=np.uint8)
+
+                tile_label_to_file(args.out, tile, colors, out)
+            except:
+                log.log("Warning: Unable to rasterize tile. Skipping {}".format(str(tile)))
 
     if args.postgis:
 
@@ -252,7 +249,10 @@ SELECT ST_AsBinary(ST_MapAlgebra(rast_a.rast, rast_b.rast, '{}', NULL, 'FIRST'))
                 pg_conn = psycopg2.connect(config["dataset"]["pg_dsn"])
                 pg = pg_conn.cursor()
 
-            write_tile(args.out, tile, colors, raster)
+            try:
+                tile_label_to_file(args.out, tile, colors, raster)
+            except:
+                log.log("Warning: Unable to rasterize tile. Skipping {}".format(str(tile)))
 
     if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template

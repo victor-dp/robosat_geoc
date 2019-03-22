@@ -33,7 +33,7 @@ def add_parser(subparser, formatter_class):
 
 def main(args):
 
-    if int(args.bbox != None) + int(args.geojson != None) + int(args.dir != None) != 1:
+    if int(args.bbox is not None) + int(args.geojson is not None) + int(args.dir is not None) != 1:
         sys.exit("ERROR: One, and only one, input type must be provided, among: --dir, --bbox or --geojson.")
 
     if args.bbox:
@@ -54,6 +54,9 @@ def main(args):
     if not args.zoom and (args.geojson or args.bbox):
         sys.exit("ERROR: Zoom parameter is required.")
 
+    args.out = [os.path.expanduser(out) for out in args.out]
+
+    print("RoboSat.pink - cover")
     cover = []
 
     if args.geojson:

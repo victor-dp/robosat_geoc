@@ -31,14 +31,17 @@ def check_dataset(config):
     except:
         sys.exit("CONFIG ERROR: Missing or invalid dataset.path value.")
 
+    check_channels(config)
+    # TODO: check consistency on images/labels (including cover, tile size, bands and no empty tile)
+
+
+def check_channels(config):
     if "channels" not in config.keys():
         sys.exit("CONFIG ERROR: At least one channel is mandatory.")
 
     for channel in config["channels"]:
         if not (len(channel["bands"]) == len(channel["mean"]) == len(channel["std"])):
             sys.exit("CONFIG ERROR: Inconsistent channel bands, mean or std lenght in config file")
-
-    # TODO: check consistency on images/labels (including cover, tile size, bands and no empty tile)
 
 
 def check_classes(config):
@@ -67,7 +70,6 @@ def check_model(config):
         "loss": "str",
         "batch_size": "int",
         "tile_size": "int",
-        "epochs": "int",
         "lr": "float",
         "data_augmentation": "float",
         "decay": "float",
@@ -76,11 +78,3 @@ def check_model(config):
     for hp in hps:
         if hp not in config["model"].keys() or type(config["model"][hp]).__name__ != hps[hp]:
             sys.exit("CONFIG ERROR: Missing or invalid model.{} value.".format(hp))
-
-
-def check_config(config):
-    """Check if config file is consistent. Exit on error if not."""
-
-    check_dataset(config)
-    check_classes(config)
-    check_model(config)
