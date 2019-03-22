@@ -93,7 +93,7 @@ CentOS 7:
 ```
 sudo sh -c "yum -y update && yum install -y python36 wget && python3.6 -m ensurepip"
 pip3 install --user RoboSat.pink
-pip3 install https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl
+pip3 install --user https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl
 ```
 
 Add Nvidia GPU drivers:
