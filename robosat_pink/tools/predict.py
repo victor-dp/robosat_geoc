@@ -45,7 +45,7 @@ def add_parser(subparser, formatter_class):
     ui = parser.add_argument_group("Web UI")
     ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
     ui.add_argument("--web_ui_template", type=str, help="alternate Web UI template path")
-    ui.add_argument("--no_web_ui", action="store_false", help="desactivate Web UI output")
+    ui.add_argument("--no_web_ui", action="store_true", help="desactivate Web UI output")
 
     parser.set_defaults(func=main)
 
