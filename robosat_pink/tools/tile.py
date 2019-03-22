@@ -62,23 +62,23 @@ def main(args):
 
     for tile in tqdm(tiles, desc="Tiling", unit="tile", ascii=True):
 
-        try:
-            w, s, e, n = tile_bounds = mercantile.xy_bounds(tile)
+        #try:
+        w, s, e, n = mercantile.xy_bounds(tile)
 
-            # Inspired by Rio-Tiler, cf: https://github.com/mapbox/rio-tiler/pull/45
-            warp_vrt = WarpedVRT(
-                raster,
-                crs="EPSG:3857",
-                resampling=Resampling.bilinear,
-                add_alpha=False,
-                transform=from_bounds(*tile_bounds, args.size, args.size),
-                width=math.ceil((e - w) / transform.a),
-                height=math.ceil((s - n) / transform.e),
-            )
-            data = warp_vrt.read(out_shape=(len(raster.indexes), tile_size, tile_size), window=warp_vrt.window(w, s, e, n))
+        # inspired by rio-tiler, cf: https://github.com/mapbox/rio-tiler/pull/45
+        warp_vrt = WarpedVRT(
+            raster,
+            crs="epsg:3857",
+            resampling=Resampling.bilinear,
+            add_alpha=False,
+            transform=from_bounds(w, s, e, n, args.tile_size, args.tile_size),
+            width=math.ceil((e - w) / transform.a),
+            height=math.ceil((s - n) / transform.e),
+        )
+        data = warp_vrt.read(out_shape=(len(raster.indexes), tile_size, tile_size), window=warp_vrt.window(w, s, e, n))
 
-        except:
-            sys.exit("Error: Unable to tile {} from raster {}.".format(str(tile), args.raster))
+        #except:
+        #    sys.exit("Error: Unable to tile {} from raster {}.".format(str(tile), args.raster))
 
         # If no_data is set, remove all tiles with at least one whole border filled only with no_data (on all bands)
         if type(args.no_data) is not None and (
