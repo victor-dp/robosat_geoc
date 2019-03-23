@@ -2,7 +2,7 @@ numpy
 pillow
 opencv-python-headless
 torchvision>=0.2.2
-tqdm==4.19.9
+tqdm>=4.29.0
 requests
 geojson
 mercantile>=1.0.4
