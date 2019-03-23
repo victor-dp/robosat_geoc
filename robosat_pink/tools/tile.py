@@ -25,7 +25,7 @@ def add_parser(subparser, formatter_class):
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("raster", type=str, help="path to the raster to tile [required]")
     inp.add_argument("--config", type=str, help="path to config file [required if RSP_CONFIG env var is not set]")
-    inp.add_argument("--no_data", type=int, help="color considered as no data [0-255]. If set, skip related tile")
+    inp.add_argument("--no_data", type=int, help="no data value [0-255]. If set, skip tile with at least one no data border")
 
     out = parser.add_argument_group("Output")
     choices = ["image", "label"]
@@ -62,23 +62,23 @@ def main(args):
 
     for tile in tqdm(tiles, desc="Tiling", unit="tile", ascii=True):
 
-        #try:
-        w, s, e, n = mercantile.xy_bounds(tile)
+        try:
+            w, s, e, n = mercantile.xy_bounds(tile)
 
-        # inspired by rio-tiler, cf: https://github.com/mapbox/rio-tiler/pull/45
-        warp_vrt = WarpedVRT(
-            raster,
-            crs="epsg:3857",
-            resampling=Resampling.bilinear,
-            add_alpha=False,
-            transform=from_bounds(w, s, e, n, args.tile_size, args.tile_size),
-            width=math.ceil((e - w) / transform.a),
-            height=math.ceil((s - n) / transform.e),
-        )
-        data = warp_vrt.read(out_shape=(len(raster.indexes), tile_size, tile_size), window=warp_vrt.window(w, s, e, n))
+            # inspired by rio-tiler, cf: https://github.com/mapbox/rio-tiler/pull/45
+            warp_vrt = WarpedVRT(
+                raster,
+                crs="epsg:3857",
+                resampling=Resampling.bilinear,
+                add_alpha=False,
+                transform=from_bounds(w, s, e, n, args.tile_size, args.tile_size),
+                width=math.ceil((e - w) / transform.a),
+                height=math.ceil((s - n) / transform.e),
+            )
+            data = warp_vrt.read(out_shape=(len(raster.indexes), tile_size, tile_size), window=warp_vrt.window(w, s, e, n))
 
-        #except:
-        #    sys.exit("Error: Unable to tile {} from raster {}.".format(str(tile), args.raster))
+        except:
+            sys.exit("Error: Unable to tile {} from raster {}.".format(str(tile), args.raster))
 
         # If no_data is set, remove all tiles with at least one whole border filled only with no_data (on all bands)
         if type(args.no_data) is not None and (

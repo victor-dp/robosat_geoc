@@ -217,7 +217,7 @@ optional arguments:
 Inputs:
  raster                             path to the raster to tile [required]
  --config CONFIG                    path to config file [required if RSP_CONFIG env var is not set]
- --no_data NO_DATA                  color considered as no data [0-255]. If set, skip related tile
+ --no_data NO_DATA                  no data value [0-255]. If set, skip tile with at least one no data border
 
 Output:
  out                                output directory path [required]
