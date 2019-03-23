@@ -47,23 +47,22 @@ def add_parser(subparser, formatter_class):
     parser.set_defaults(func=main)
 
 
-def geojson_to_mercator(feature):
-    """Convert GeoJSON Polygon feature coords to Mercator (i.e EPSG:3857).
+def geojson_reproject(feature, srid_in, srid_out):
+    """Reproject GeoJSON Polygon feature coords
        Inspired by: https://gist.github.com/dnomadb/5cbc116aacc352c7126e779c29ab7abe
     """
 
-    # FIXME: We assume that GeoJSON input coordinates can't be anything else than EPSG:4326
     if feature["geometry"]["type"] == "Polygon":
         xys = (zip(*ring) for ring in feature["geometry"]["coordinates"])
-        xys = (list(zip(*transform(CRS.from_epsg(4326), CRS.from_epsg(3857), *xy))) for xy in xys)
+        xys = (list(zip(*transform(CRS.from_epsg(srid_in), CRS.from_epsg(srid_out), *xy))) for xy in xys)
 
         yield {"coordinates": list(xys), "type": "Polygon"}
 
 
-def geojson_tile_burn(tile, features, tile_size, burn_value=1):
+def geojson_tile_burn(tile, features, srid, tile_size, burn_value=1):
     """Burn tile with GeoJSON features."""
 
-    shapes = ((geometry, burn_value) for feature in features for geometry in geojson_to_mercator(feature))
+    shapes = ((geometry, burn_value) for feature in features for geometry in geojson_reproject(feature, srid, 3857))
 
     bounds = mercantile.xy_bounds(tile)
     transform = from_bounds(*bounds, tile_size, tile_size)
@@ -123,9 +122,12 @@ def main(args):
     os.makedirs(args.out, exist_ok=True)
     log = Logs(os.path.join(args.out, "log"), out=sys.stderr)
 
-    def geojson_parse_polygon(zoom, feature_map, polygon, i):
+    def geojson_parse_polygon(zoom, srid, feature_map, polygon, i):
 
         try:
+            if srid != 4326:
+                polygon = [xy for xy in geojson_reproject({"type": "feature", "geometry": polygon}, srid, 4326)][0]
+
             for i, ring in enumerate(polygon["coordinates"]):  # GeoJSON coordinates could be N dimensionals
                 polygon["coordinates"][i] = [[x, y] for point in ring for x, y in zip([point[0]], [point[1]])]
 
@@ -137,14 +139,14 @@ def main(args):
 
         return feature_map
 
-    def geojson_parse_geometry(zoom, feature_map, geometry, i):
+    def geojson_parse_geometry(zoom, srid, feature_map, geometry, i):
 
         if geometry["type"] == "Polygon":
-            feature_map = geojson_parse_polygon(zoom, feature_map, geometry, i)
+            feature_map = geojson_parse_polygon(zoom, srid, feature_map, geometry, i)
 
         elif geometry["type"] == "MultiPolygon":
             for polygon in geometry["coordinates"]:
-                feature_map = geojson_parse_polygon(zoom, feature_map, {"type": "Polygon", "coordinates": polygon}, i)
+                feature_map = geojson_parse_polygon(zoom, srid, feature_map, {"type": "Polygon", "coordinates": polygon}, i)
         else:
             log.log("Notice: {} is a non surfacic geometry type, skipping feature {}".format(geometry["type"], i))
 
@@ -163,20 +165,28 @@ def main(args):
 
         # Compute a spatial index like
         for geojson_file in glob.glob(os.path.expanduser(args.geojson)):
+
             with open(geojson_file) as geojson:
                 try:
                     feature_collection = json.load(geojson)
                 except:
                     sys.exit("ERROR: {} is not a valid JSON file.".format(geojson_file))
 
+                try:
+                    crs_mapping = {"CRS84": "4326", "900913": "3857"}
+                    srid = feature_collection["crs"]["properties"]["name"].split(":")[-1]
+                    srid = int(srid) if srid not in crs_mapping else int(crs_mapping[srid])
+                except:
+                    srid = int(4326)
+
                 for i, feature in enumerate(tqdm(feature_collection["features"], ascii=True, unit="feature")):
 
                     try:
                         if feature["geometry"]["type"] == "GeometryCollection":
                             for geometry in feature["geometry"]["geometries"]:
-                                feature_map = geojson_parse_geometry(zoom, feature_map, geometry, i)
+                                feature_map = geojson_parse_geometry(zoom, srid, feature_map, geometry, i)
                         else:
-                            feature_map = geojson_parse_geometry(zoom, feature_map, feature["geometry"], i)
+                            feature_map = geojson_parse_geometry(zoom, srid, feature_map, feature["geometry"], i)
                     except:
                         sys.exit("ERROR: Unable to parse {}. seems not a valid GEOJSON file.".format(geojson_file))
 
@@ -185,7 +195,7 @@ def main(args):
 
             try:
                 if tile in feature_map:
-                    out = geojson_tile_burn(tile, feature_map[tile], tile_size, burn_value)
+                    out = geojson_tile_burn(tile, feature_map[tile], 4326, tile_size, burn_value)
                 else:
                     out = np.zeros(shape=(tile_size, tile_size), dtype=np.uint8)
 

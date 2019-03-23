@@ -6,7 +6,7 @@ import mercantile
 
 from PIL import Image
 
-from robosat_pink.tools.rasterize import geojson_tile_burn, geojson_to_mercator
+from robosat_pink.tools.rasterize import geojson_tile_burn, geojson_reproject
 
 
 def get_parking():
@@ -24,7 +24,7 @@ class TestBurn(unittest.TestCase):
         # The tile below has a parking lot in our fixtures.
         tile = mercantile.Tile(70762, 104119, 18)
 
-        rasterized = geojson_tile_burn(tile, parking_fc["features"], 512)
+        rasterized = geojson_tile_burn(tile, parking_fc["features"], 4326, 512)
         rasterized = Image.fromarray(rasterized, mode="P")
 
         # rasterized.save('rasterized.png')
@@ -40,7 +40,7 @@ class TestBurn(unittest.TestCase):
         # This tile does not have a parking lot in our fixtures.
         tile = mercantile.Tile(69623, 104946, 18)
 
-        rasterized = geojson_tile_burn(tile, parking_fc["features"], 512)
+        rasterized = geojson_tile_burn(tile, parking_fc["features"], 4326, 512)
         rasterized = Image.fromarray(rasterized, mode="P")
 
         self.assertEqual(rasterized.size, (512, 512))
@@ -54,7 +54,7 @@ class TestFeatureToMercator(unittest.TestCase):
         parking_fc = get_parking()
 
         parking = parking_fc["features"][0]
-        mercator = next(geojson_to_mercator(parking))
+        mercator = next(geojson_reproject(parking, 4326, 3857))
 
         self.assertEqual(mercator["type"], "Polygon")
         self.assertEqual(int(mercator["coordinates"][0][0][0]), -9219757)
