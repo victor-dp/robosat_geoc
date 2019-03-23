@@ -68,11 +68,12 @@ def main(args):
 
     if torch.cuda.is_available():
         log.log("RoboSat.pink - training on {} GPUs, with {} workers".format(torch.cuda.device_count(), args.workers))
-        log.log("Cuda {} - CudNN {}".format(torch.version.cuda, torch.backends.cudnn.version()))
+        log.log("(Torch:{} Cuda:{} CudNN:{})".format(torch.__version__, torch.version.cuda, torch.backends.cudnn.version()))
         device = torch.device("cuda")
         torch.backends.cudnn.benchmark = True
     else:
-        log.log("RoboSat.pink - training on CPU, with {} workers".format(args.workers))
+        log.log("RoboSat.pink - training on CPU, with {} workers - (Torch:{})".format(args.workers, torch.__version__))
+        log.log("WARNING: Are you really sure sure about not training on GPU ?")
         device = torch.device("cpu")
 
     try:

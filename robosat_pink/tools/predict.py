@@ -64,7 +64,7 @@ def main(args):
 
     if torch.cuda.is_available():
         log.log("RoboSat.pink - predict on {} GPUs, with {} workers".format(torch.cuda.device_count(), args.workers))
-        log.log("Cuda {} - CudNN {}".format(torch.version.cuda, torch.backends.cudnn.version()))
+        log.log("(Torch:{} Cuda:{} CudNN:{})".format(torch.__version__, torch.version.cuda, torch.backends.cudnn.version()))
         device = torch.device("cuda")
         torch.backends.cudnn.benchmark = True
     else:

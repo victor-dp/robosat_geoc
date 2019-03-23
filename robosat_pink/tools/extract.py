@@ -19,7 +19,7 @@ def add_parser(subparser, formatter_class):
 def main(args):
 
     print("RoboSat.pink - extract {} from {}.".format(args.type, args.pbf))
-    print("Could take some time. Please wait.")
+    print("Notice: Could take some time. Please wait.")
 
     try:
         module = import_module("robosat_pink.osm.{}".format(args.type))
@@ -36,3 +36,5 @@ def main(args):
         osmium_handler.save(os.path.expanduser(args.out))
     except:
         sys.exit("ERROR: Unable to save {} in {}".format(args.type, args.out))
+
+    print("Notice: extract ended.")

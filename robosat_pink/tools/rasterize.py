@@ -163,7 +163,7 @@ def main(args):
 
         feature_map = collections.defaultdict(list)
 
-        # Compute a spatial index like
+        log.log("RoboSat.pink - rasterize - Compute spatial index")
         for geojson_file in glob.glob(os.path.expanduser(args.geojson)):
 
             with open(geojson_file) as geojson:
@@ -190,7 +190,7 @@ def main(args):
                     except:
                         sys.exit("ERROR: Unable to parse {}. seems not a valid GEOJSON file.".format(geojson_file))
 
-        # Rasterize tiles
+        log.log("RoboSat.pink - rasterize - rasterizing tiles from {} on cover {}".format(args.geojson, args.cover))
         for tile in tqdm(list(tiles_from_csv(os.path.expanduser(args.cover))), ascii=True, unit="tile"):
 
             try:
@@ -211,6 +211,8 @@ def main(args):
         except Exception:
             sys.exit("Unable to connect PostgreSQL: {}".format(config["dataset"]["pg_dsn"]))
 
+        log.log("RoboSat.pink - rasterize - rasterizing tiles from PostGIS on cover {}".format(args.cover))
+        log.log(" SQL {}".format(args.postgis))
         try:
             pg.execute("SELECT ST_Srid(geom) AS srid FROM ({} LIMIT 1) AS sub".format(args.postgis))
             srid = pg.fetchone()[0]

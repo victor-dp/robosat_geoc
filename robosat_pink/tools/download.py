@@ -58,7 +58,7 @@ def main(args):
         sys.exit("ERROR: unable to create output dir: {}".format(args.out))
 
     log = Logs(os.path.join(args.out, "log"), out=sys.stderr)
-    log.log("RoboSat.pink - download with {} workers, at max rate {}/s\nfrom {}".format(args.workers, args.rate, args.url))
+    log.log("RoboSat.pink - download with {} workers, at max {} req/s, from: {}".format(args.workers, args.rate, args.url))
 
     already_dl = 0
     dl = 0
@@ -122,9 +122,9 @@ def main(args):
                     log.log("Warning:\n {} failed, skipping.\n {}\n".format(tile, url))
 
     if already_dl:
-        log.log("Notice:\n {} tiles were already downloaded previously, and so skipped now.".format(already_dl))
+        log.log("Notice: {} tiles were already downloaded previously, and so skipped now.".format(already_dl))
     if already_dl + dl == len(tiles):
-        log.log(" Coverage is fully downloaded.")
+        log.log("Notice: Coverage is fully downloaded.")
 
     if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template

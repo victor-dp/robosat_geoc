@@ -31,7 +31,7 @@ def main(args):
     def map_location(storage, _):
         return storage.cpu()
 
-    print("RoboSat.pink - export to {}".format(args.type))
+    print("RoboSat.pink - export to {} - (Torch:{})".format(args.type, torch.__version__))
 
     try:
         model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
