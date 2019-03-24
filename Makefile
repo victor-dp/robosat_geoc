@@ -40,7 +40,7 @@ ut:
 	@echo "==================================================================================="
 	flake8 --max-line-length 125 --ignore=E203,E241,E226,E272,E261,E221,W503,E722
 	@echo "==================================================================================="
-	pytest tests
+	pytest tests -W ignore::UserWarning
 
 
 # Launch Integration Tests

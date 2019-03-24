@@ -6,15 +6,18 @@ import io
 import os
 import re
 import glob
+import warnings
 
-import cv2
 import numpy as np
 from PIL import Image
+from rasterio import open as rasterio_open
 
 import csv
 import mercantile
 
 from robosat_pink.colors import make_palette, complementary_palette
+
+warnings.simplefilter("ignore", UserWarning)  # To prevent rasterio NotGeoreferencedWarning
 
 
 def tile_pixel_to_location(tile, dx, dy):
@@ -37,7 +40,6 @@ def tiles_from_slippy_map(root):
     paths = glob.glob(os.path.join(root, "[0-9]*/[0-9]*/[0-9]*.*"))
 
     for path in paths:
-
         tile = re.match(os.path.join(root, "(?P<z>[0-9]+)/(?P<x>[0-9]+)/(?P<y>[0-9]+).+"), path)
         if not tile:
             continue
@@ -58,8 +60,7 @@ def tile_from_slippy_map(root, x, y, z):
 def tiles_from_csv(path):
     """Retrieve tiles from a line-delimited csv file."""
 
-    path = os.path.expanduser(path)
-    with open(path) as fp:
+    with open(os.path.expanduser(path)) as fp:
         reader = csv.reader(fp)
 
         for row in reader:
@@ -72,11 +73,12 @@ def tiles_from_csv(path):
 def tile_image_from_file(path):
     """Return a multiband image numpy array, from a file path."""
 
-    image = cv2.imread(os.path.expanduser(path), cv2.IMREAD_ANYCOLOR)
-    if len(image.shape) == 3 and image.shape[2] >= 3:  # multibands BGR2RGB
-        b = image[:, :, 0]
-        image[:, :, 0] = image[:, :, 2]
-        image[:, :, 2] = b
+    r = rasterio_open(os.path.expanduser(path))
+
+    for i in r.indexes:
+        data_band = r.read(i)
+        data_band = data_band.reshape(data_band.shape[0], data_band.shape[1], 1)  # H, W -> H, W, C
+        image = np.concatenate((image, data_band), axis=2) if "image" in locals() else data_band  # noqa F821
 
     return image
 
@@ -134,9 +136,9 @@ def tile_image_buffer(tile, tiles, overlap, tile_size):
     bc = tile_image_adjacent(tile, +0, +1, tiles)
     br = tile_image_adjacent(tile, +1, +1, tiles)
 
-    ts = tile_size
     o = overlap
     oo = overlap * 2
+    ts = tile_size
 
     img = np.zeros((ts + oo, ts + oo, 3)).astype(np.uint8)
 

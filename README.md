@@ -164,7 +164,7 @@ dataset
     ├── images
     └── labels
 ```
-- Tiles images formats could be either: JPEG, WEBP, GeoTIFF, PNG.
+- Tiles images formats could be any able to be read by GDAL.
 - Tiles labels are expected to be PNG with single band.
 - Tools producing XYZ tiles directory as output, also allows to easily generate a web map client, for visual inspection.
 
