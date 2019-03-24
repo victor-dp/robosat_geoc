@@ -122,7 +122,7 @@ def main(args):
     try:
         train_loader, val_loader = get_dataset_loaders(config["dataset"]["path"], config, args.workers)
     except:
-        sys.exit("ERROR: Unable to load {} loss".format(config["model"]["loss"]))
+        sys.exit("ERROR: Unable to create data loaders")
 
     log.log("--- Input tensor from Dataset: {} ---".format(config["dataset"]["path"]))
     num_channel = 1
@@ -139,10 +139,7 @@ def main(args):
         log.log("---")
         log.log("Epoch: {}/{}".format(epoch + 1, args.epochs))
 
-        try:
-            train_hist = train(train_loader, config, device, net, optimizer, criterion)
-        except:
-            sys.exit("ERROR: train error")
+        train_hist = train(train_loader, config, device, net, optimizer, criterion)
         log.log(
             "Train    loss: {:.4f}, mIoU: {:.3f}, {} IoU: {:.3f}, MCC: {:.3f}".format(
                 train_hist["loss"],
