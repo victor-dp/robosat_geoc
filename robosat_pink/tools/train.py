@@ -11,15 +11,8 @@ from tqdm import tqdm
 
 from importlib import import_module
 
-from robosat_pink.transforms import (
-    JointCompose,
-    JointTransform,
-    JointResize,
-    JointRandomFlipOrRotate,
-    ImageToTensor,
-    MaskToTensor,
-)
-from robosat_pink.datasets import DatasetTilesConcat
+from robosat_pink.transforms import JointCompose, JointTransform, JointRandomFlipOrRotate, ImageToTensor, MaskToTensor
+from robosat_pink.datasets import DatasetTilesSemSeg
 from robosat_pink.metrics import Metrics
 from robosat_pink.config import load_config, check_model, check_channels, check_classes, check_dataset
 from robosat_pink.logs import Logs
@@ -84,7 +77,7 @@ def main(args):
         sys.exit("ERROR: Unable to load {} model".format(config["model"]["name"]))
 
     try:
-        optimizer = Adam(net.parameters(), lr=config["model"]["lr"], weight_decay=config["model"]["decay"])
+        optimizer = Adam(net.parameters(), lr=config["model"]["lr"])
     except:
         sys.exit("ERROR: Unable to load optimizer")
 
@@ -128,7 +121,7 @@ def main(args):
     num_channel = 1
     for channel in config["channels"]:
         for band in channel["bands"]:
-            log.log("Channel {}:\t\t {}[band: {}]".format(num_channel, channel["sub"], band))
+            log.log("Channel {}:\t\t {}[band: {}]".format(num_channel, channel["name"], band))
             num_channel += 1
 
     log.log("--- Hyper Parameters ---")
@@ -258,26 +251,15 @@ def get_dataset_loaders(path, config, workers):
 
     transform = JointCompose(
         [
-            JointResize(config["model"]["tile_size"]),
             JointRandomFlipOrRotate(config["model"]["data_augmentation"]),
             JointTransform(ImageToTensor(), MaskToTensor()),
             JointTransform(Normalize(mean=mean, std=std), None),
         ]
     )
 
-    dataset_train = DatasetTilesConcat(
-        os.path.join(path, "training"),
-        config["channels"],
-        os.path.join(path, "training", "labels"),
-        joint_transform=transform,
-    )
+    dataset_train = DatasetTilesSemSeg(config, os.path.join(path, "training"), transform, "train")
 
-    dataset_val = DatasetTilesConcat(
-        os.path.join(path, "validation"),
-        config["channels"],
-        os.path.join(path, "validation", "labels"),
-        joint_transform=transform,
-    )
+    dataset_val = DatasetTilesSemSeg(config, os.path.join(path, "validation"), transform, "train")
 
     batch_size = config["model"]["batch_size"]
     train_loader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=workers)

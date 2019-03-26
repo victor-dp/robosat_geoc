@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-import torchvision.models
+from torchvision.models import resnet50
 
 
 class ConvRelu(nn.Module):
@@ -36,16 +36,15 @@ class Albunet(nn.Module):
     def __init__(self, config):
 
         num_classes = len(config["classes"])
-        num_filters = config["model"]["num_filters"]
         pretrained = config["model"]["pretrained"]
-        encoder = config["model"]["encoder"]
+        num_filters = 32
         num_channels = 0
         for channel in config["channels"]:
             num_channels += len(channel["bands"])
 
         super().__init__()
 
-        self.resnet = getattr(torchvision.models, encoder)(pretrained=pretrained)
+        self.resnet = resnet50(pretrained=pretrained)
 
         assert num_channels
         if num_channels != 3:

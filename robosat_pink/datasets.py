@@ -1,117 +1,76 @@
 """PyTorch-compatible datasets. Cf: https://pytorch.org/docs/stable/data.html """
 
 import os
-
-import numpy as np
-from PIL import Image
-
-import torch
 import torch.utils.data
+import numpy as np
 
-from robosat_pink.tiles import tiles_from_slippy_map, tile_image_buffer, tile_image_from_file
+from robosat_pink.tiles import tiles_from_slippy_map, tile_image_buffer, tile_image_from_file, tile_label_from_file
 
 
-class DatasetTiles(torch.utils.data.Dataset):
-    """Dataset for images stored in slippy map format."""
-
-    def __init__(self, root, mode, transform=None):
+class DatasetTilesSemSeg(torch.utils.data.Dataset):
+    def __init__(self, config, root, transform, mode, overlap=0):
         super().__init__()
 
-        self.tiles = []
+        self.root = os.path.expanduser(root)
         self.transform = transform
-
-        self.tiles = [(tile, path) for tile, path in tiles_from_slippy_map(root)]
-        self.tiles.sort(key=lambda tile: tile[0])
+        self.overlap = overlap
+        self.config = config
         self.mode = mode
 
+        self.tiles = {}
+
+        for channel in config["channels"]:
+            path = os.path.join(self.root, channel["name"])
+            self.tiles[channel["name"]] = [(tile, path) for tile, path in tiles_from_slippy_map(path)]
+            self.tiles[channel["name"]].sort(key=lambda tile: tile[0])
+
+        if self.mode == "train":
+            path = os.path.join(self.root, "labels")
+            self.tiles["labels"] = [(tile, path) for tile, path in tiles_from_slippy_map(path)]
+            self.tiles["labels"].sort(key=lambda tile: tile[0])
+
     def __len__(self):
-        return len(self.tiles)
+        return len(self.tiles[self.config["channels"][0]["name"]])
 
     def __getitem__(self, i):
-        tile, path = self.tiles[i]
 
-        if self.mode == "mask":
-            image = np.array(Image.open(path).convert("P"))
+        current_tile = None
+        mask = None
+        image = None
 
-        elif self.mode == "image":
-            image = tile_image_from_file(path)
+        for channel in self.config["channels"]:
 
-        if self.transform is not None:
+            tile, path = self.tiles[channel["name"]][i]
+            bands = None if not channel["bands"] else channel["bands"]
+
+            if current_tile is not None:
+                assert current_tile == tile, "Dataset channel inconsistency"
+            else:
+                current_tile = tile
+
+            if self.mode == "predict":
+                image_channel = tile_image_buffer(tile, path, self.overlap, bands)
+
+            if self.mode == "train":
+                image_channel = tile_image_from_file(path, bands)
+
+            assert image_channel is not None, "Dataset channel not retrieved"
+            image = np.concatenate((image, image_channel), axis=2) if image is not None else image_channel
+
+        if self.mode == "train":
+            assert current_tile == self.tiles["labels"][i][0], "Dataset mask inconsistency"
+            mask = tile_label_from_file(self.tiles["labels"][i][1])
+            assert mask is not None, "Dataset mask not retrieved"
+
+            image, mask = self.transform(image, mask)
+            return image, mask, tile
+
+        if self.mode == "predict":
             image = self.transform(image)
+            return image, tile
 
-        return image, tile
-
-
-class DatasetTilesConcat(torch.utils.data.Dataset):
-    """Dataset to concate multiple input images stored in slippy map format."""
-
-    def __init__(self, path, channels, target, joint_transform=None):
-        super().__init__()
-
-        assert len(channels)
-        self.channels = channels
-        self.inputs = dict()
-
-        for channel in channels:
-            for band in channel["bands"]:
-                self.inputs[channel["sub"]] = DatasetTiles(os.path.join(path, channel["sub"]), mode="image")
-
-        self.target = DatasetTiles(target, mode="mask")
-        self.joint_transform = joint_transform
-
-    def __len__(self):
-        return len(self.target)
-
-    def __getitem__(self, i):
-        mask, tile = self.target[i]
-
-        for channel in self.channels:
-            data, band_tile = self.inputs[channel["sub"]][i]
-            assert band_tile == tile
-
-            for band in channel["bands"]:
-                data_band = data[:, :, int(band) - 1] if len(data.shape) == 3 else []
-                data_band = data_band.reshape(mask.shape[0], mask.shape[1], 1)
-                tensor = np.concatenate((tensor, data_band), axis=2) if "tensor" in locals() else data_band  # noqa F821
-
-        if self.joint_transform is not None:
-            tensor, mask = self.joint_transform(tensor, mask)
-
-        return tensor, mask, tile
-
-
-class DatasetTilesBuffer(torch.utils.data.Dataset):
-    """Dataset for buffered slippy map tiles with overlap.
-
-       Notes: - The overlap must not span multiple tiles.
-              - Use `unbuffer` to get back the original tile.
-    """
-
-    def __init__(self, root, transform=None, size=512, overlap=32):
-        super().__init__()
-
-        assert size >= 256
-        assert overlap >= 0
-
-        self.size = size
-        self.overlap = overlap
-        self.transform = transform
-        self.tiles = list(tiles_from_slippy_map(root))
-
-    def __len__(self):
-        return len(self.tiles)
-
-    def __getitem__(self, i):
-        tile, path = self.tiles[i]
-        image = np.array(tile_image_buffer(tile, self.tiles, overlap=self.overlap, tile_size=self.size))
-
-        if self.transform is not None:
-            image = self.transform(image)
-
-        return image, torch.IntTensor([tile.x, tile.y, tile.z])
-
-    def unbuffer(self, probs):
+    def remove_overlap(self, probs):
+        C, W, H = probs.shape
         o = self.overlap
-        _, x, y = probs.shape
 
-        return probs[:, o : x - o, o : y - o]
+        return probs[:, o : W - o, o : H - o]

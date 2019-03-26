@@ -18,7 +18,7 @@ def load_config(path):
     try:
         config = toml.load(os.path.expanduser(path))
     except:
-        sys.exit("CONFIG ERROR: Unable to load config file, check both path and syntax.")
+        sys.exit("CONFIG ERROR: Unable to load config file from: {}, check both path and syntax.".format(path))
 
     return config
 
@@ -38,6 +38,8 @@ def check_dataset(config):
 def check_channels(config):
     if "channels" not in config.keys():
         sys.exit("CONFIG ERROR: At least one channel is mandatory.")
+
+    # TODO Add name check
 
     for channel in config["channels"]:
         if not (len(channel["bands"]) == len(channel["mean"]) == len(channel["std"])):
@@ -65,14 +67,11 @@ def check_model(config):
 
     hps = {
         "name": "str",
-        "encoder": "str",
         "pretrained": "bool",
         "loss": "str",
         "batch_size": "int",
-        "tile_size": "int",
         "lr": "float",
         "data_augmentation": "float",
-        "decay": "float",
     }
 
     for hp in hps:

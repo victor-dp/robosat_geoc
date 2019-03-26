@@ -37,7 +37,7 @@ def add_parser(subparser, formatter_class):
 
     out = parser.add_argument_group("Outputs")
     out.add_argument("out", type=str, help="output directory path [required]")
-    out.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
+    out.add_argument("--tile_size", type=int, default=512, help="output tile size [default: 512]")
 
     ui = parser.add_argument_group("Web UI")
     ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
@@ -114,7 +114,6 @@ def main(args):
 
     config = load_config(args.config)
     check_classes(config)
-    tile_size = args.tile_size if args.tile_size else config["model"]["tile_size"]
     colors = [classe["color"] for classe in config["classes"]]
     burn_value = 1
 
@@ -195,9 +194,9 @@ def main(args):
 
             try:
                 if tile in feature_map:
-                    out = geojson_tile_burn(tile, feature_map[tile], 4326, tile_size, burn_value)
+                    out = geojson_tile_burn(tile, feature_map[tile], 4326, args.tile_size, burn_value)
                 else:
-                    out = np.zeros(shape=(tile_size, tile_size), dtype=np.uint8)
+                    out = np.zeros(shape=(args.tile_size, args.tile_size), dtype=np.uint8)
 
                 tile_label_to_file(args.out, tile, colors, out)
             except:
@@ -222,7 +221,8 @@ def main(args):
         for tile in tqdm(list(tiles_from_csv(args.cover)), ascii=True, unit="tile"):
 
             s, w, e, n = mercantile.bounds(tile)
-            raster = np.zeros((tile_size, tile_size))
+            raster = np.zeros((args.tile_size, args.tile_size))
+            tile_size = args.tile_size
 
             query = """
 WITH

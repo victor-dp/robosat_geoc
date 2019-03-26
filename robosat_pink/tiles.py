@@ -70,17 +70,30 @@ def tiles_from_csv(path):
             yield mercantile.Tile(*map(int, row))
 
 
-def tile_image_from_file(path):
-    """Return a multiband image numpy array, from a file path."""
+def tile_image_from_file(path, bands=None):
+    """Return a multiband image numpy array, from an image file path, or None."""
 
-    r = rasterio_open(os.path.expanduser(path))
+    try:
+        raster = rasterio_open(os.path.expanduser(path))
+    except:
+        return None
 
-    for i in r.indexes:
-        data_band = r.read(i)
+    image = None
+    for i in raster.indexes if bands is None else bands:
+        data_band = raster.read(i)
         data_band = data_band.reshape(data_band.shape[0], data_band.shape[1], 1)  # H, W -> H, W, C
-        image = np.concatenate((image, data_band), axis=2) if "image" in locals() else data_band  # noqa F821
+        image = np.concatenate((image, data_band), axis=2) if image is not None else data_band
 
     return image
+
+
+def tile_label_from_file(path):
+    """Return a numpy array, from a label file path, or None."""
+
+    try:
+        return np.array(Image.open(os.path.expanduser(path)))
+    except:
+        return None
 
 
 def tile_label_to_file(root, tile, colors, label):
@@ -106,39 +119,30 @@ def tile_image_from_url(requests_session, url, timeout=10):
         return None
 
 
-def tile_image_adjacent(tile, dx, dy, tiles):
-    """Retrieves an adjacent tile image if exists from a tile store, or None."""
+def tile_image_buffer(tile, path, overlap=64):
+    """Buffers a tile image adding borders on all sides based on adjacent tiles, if presents, or with zeros."""
 
-    try:
-        path = tiles[mercantile.Tile(x=int(tile.x) + dx, y=int(tile.y) + dy, z=int(tile.z))]
-    except KeyError:
-        return None
+    def tile_image_adjacent(root, tile, dx, dy):
+        path = tile_from_slippy_map(root, int(tile.x) + dx, int(tile.y) + dy, int(tile.z))
+        return None if not path else tile_image_from_file(path)
 
-    return tile_image_from_file(path)
-
-
-def tile_image_buffer(tile, tiles, overlap, tile_size):
-    """Buffers a tile image adding borders on all sides based on adjacent tiles."""
-
-    assert 0 <= overlap <= tile_size, "Overlap value can't be either negative or bigger than tile_size"
-
-    tiles = dict(tiles)
-    x, y, z = map(int, [tile.x, tile.y, tile.z])
+    root = re.sub("^(.+)(/[0-9]+/[0-9]+/[0-9]+.+)$", r"\1", path)
 
     # 3x3 matrix (upper, center, bottom) x (left, center, right)
-    ul = tile_image_adjacent(tile, -1, -1, tiles)
-    uc = tile_image_adjacent(tile, +0, -1, tiles)
-    ur = tile_image_adjacent(tile, +1, -1, tiles)
-    cl = tile_image_adjacent(tile, -1, +0, tiles)
-    cc = tile_image_adjacent(tile, +0, +0, tiles)
-    cr = tile_image_adjacent(tile, +1, +0, tiles)
-    bl = tile_image_adjacent(tile, -1, +1, tiles)
-    bc = tile_image_adjacent(tile, +0, +1, tiles)
-    br = tile_image_adjacent(tile, +1, +1, tiles)
+    ul = tile_image_adjacent(root, tile, -1, -1)
+    uc = tile_image_adjacent(root, tile, +0, -1)
+    ur = tile_image_adjacent(root, tile, +1, -1)
+    cl = tile_image_adjacent(root, tile, -1, +0)
+    cc = tile_image_adjacent(root, tile, +0, +0)
+    cr = tile_image_adjacent(root, tile, +1, +0)
+    bl = tile_image_adjacent(root, tile, -1, +1)
+    bc = tile_image_adjacent(root, tile, +0, +1)
+    br = tile_image_adjacent(root, tile, +1, +1)
 
     o = overlap
     oo = overlap * 2
-    ts = tile_size
+    ts = cc.shape[1]
+    assert 0 <= overlap <= ts, "Overlap value can't be either negative or bigger than tile_size"
 
     img = np.zeros((ts + oo, ts + oo, 3)).astype(np.uint8)
 

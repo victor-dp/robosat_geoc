@@ -13,7 +13,7 @@ from torchvision.transforms import Compose, Normalize
 from tqdm import tqdm
 from PIL import Image
 
-from robosat_pink.datasets import DatasetTilesBuffer
+from robosat_pink.datasets import DatasetTilesSemSeg
 from robosat_pink.tiles import tiles_from_slippy_map
 from robosat_pink.config import load_config, check_model, check_classes, check_channels
 from robosat_pink.colors import make_palette
@@ -96,10 +96,11 @@ def main(args):
         std.extend(channel["std"])
         mean.extend(channel["mean"])
 
-    dataset = DatasetTilesBuffer(
+    dataset = DatasetTilesSemSeg(
+        config,
         args.tiles,
         transform=Compose([ImageToTensor(), Normalize(mean=mean, std=std)]),
-        size=config["model"]["tile_size"],
+        mode="predict",
         overlap=args.tile_overlap,
     )
     loader = DataLoader(dataset, batch_size=config["model"]["batch_size"], num_workers=args.workers)
@@ -124,7 +125,7 @@ def main(args):
                 x, y, z = list(map(int, tile))
 
                 try:
-                    prob = dataset.unbuffer(prob)  # as we predicted on buffered tiles
+                    prob = dataset.remove_overlap(prob)  # as we predicted on buffered tiles
                     image = np.around(prob[1:, :, :]).astype(np.uint8).squeeze()
 
                     os.makedirs(os.path.join(args.out, str(z), str(x)), exist_ok=True)
