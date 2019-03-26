@@ -50,7 +50,7 @@ def tiles_from_slippy_map(root):
 def tile_from_slippy_map(root, x, y, z):
     """Retrieve a single tile from a slippy map dir."""
 
-    path = glob.glob(os.path.join(os.path.expanduser(root), z, x, y + ".*"))
+    path = glob.glob(os.path.join(os.path.expanduser(root), str(z), str(x), str(y) + ".*"))
     if not path:
         return None
 
@@ -119,26 +119,27 @@ def tile_image_from_url(requests_session, url, timeout=10):
         return None
 
 
-def tile_image_buffer(tile, path, overlap=64):
+def tile_image_buffer(tile, path, overlap=64, bands=None):
     """Buffers a tile image adding borders on all sides based on adjacent tiles, if presents, or with zeros."""
 
-    def tile_image_adjacent(root, tile, dx, dy):
-        path = tile_from_slippy_map(root, int(tile.x) + dx, int(tile.y) + dy, int(tile.z))
-        return None if not path else tile_image_from_file(path)
+    def tile_image_adjacent(root, tile, dx, dy, bands):
+        tile = tile_from_slippy_map(root, int(tile.x) + dx, int(tile.y) + dy, int(tile.z))
+        return None if not tile else tile_image_from_file(tile[1], bands)
 
     root = re.sub("^(.+)(/[0-9]+/[0-9]+/[0-9]+.+)$", r"\1", path)
 
     # 3x3 matrix (upper, center, bottom) x (left, center, right)
-    ul = tile_image_adjacent(root, tile, -1, -1)
-    uc = tile_image_adjacent(root, tile, +0, -1)
-    ur = tile_image_adjacent(root, tile, +1, -1)
-    cl = tile_image_adjacent(root, tile, -1, +0)
-    cc = tile_image_adjacent(root, tile, +0, +0)
-    cr = tile_image_adjacent(root, tile, +1, +0)
-    bl = tile_image_adjacent(root, tile, -1, +1)
-    bc = tile_image_adjacent(root, tile, +0, +1)
-    br = tile_image_adjacent(root, tile, +1, +1)
+    ul = tile_image_adjacent(root, tile, -1, -1, bands)
+    uc = tile_image_adjacent(root, tile, +0, -1, bands)
+    ur = tile_image_adjacent(root, tile, +1, -1, bands)
+    cl = tile_image_adjacent(root, tile, -1, +0, bands)
+    cc = tile_image_adjacent(root, tile, +0, +0, bands)
+    cr = tile_image_adjacent(root, tile, +1, +0, bands)
+    bl = tile_image_adjacent(root, tile, -1, +1, bands)
+    bc = tile_image_adjacent(root, tile, +0, +1, bands)
+    br = tile_image_adjacent(root, tile, +1, +1, bands)
 
+    assert cc is not None, "Unable to retrieve image to buffer"
     o = overlap
     oo = overlap * 2
     ts = cc.shape[1]

@@ -34,19 +34,20 @@ class DatasetTilesSemSeg(torch.utils.data.Dataset):
 
     def __getitem__(self, i):
 
-        current_tile = None
+        tile = None
         mask = None
         image = None
 
         for channel in self.config["channels"]:
 
-            tile, path = self.tiles[channel["name"]][i]
+            image_channel = None
             bands = None if not channel["bands"] else channel["bands"]
 
-            if current_tile is not None:
-                assert current_tile == tile, "Dataset channel inconsistency"
+            if tile is None:
+                tile, path = self.tiles[channel["name"]][i]
             else:
-                current_tile = tile
+                assert tile == self.tiles[channel["name"]][i][0], "Dataset channel inconsistency"
+                tile, path = self.tiles[channel["name"]][i]
 
             if self.mode == "predict":
                 image_channel = tile_image_buffer(tile, path, self.overlap, bands)
@@ -54,11 +55,11 @@ class DatasetTilesSemSeg(torch.utils.data.Dataset):
             if self.mode == "train":
                 image_channel = tile_image_from_file(path, bands)
 
-            assert image_channel is not None, "Dataset channel not retrieved"
+            assert image_channel is not None, "Dataset channel {} not retrieved: {}".format(channel["name"], path)
             image = np.concatenate((image, image_channel), axis=2) if image is not None else image_channel
 
         if self.mode == "train":
-            assert current_tile == self.tiles["labels"][i][0], "Dataset mask inconsistency"
+            assert tile == self.tiles["labels"][i][0], "Dataset mask inconsistency"
             mask = tile_label_from_file(self.tiles["labels"][i][1])
             assert mask is not None, "Dataset mask not retrieved"
 
@@ -67,7 +68,7 @@ class DatasetTilesSemSeg(torch.utils.data.Dataset):
 
         if self.mode == "predict":
             image = self.transform(image)
-            return image, tile
+            return image, torch.IntTensor([tile.x, tile.y, tile.z])
 
     def remove_overlap(self, probs):
         C, W, H = probs.shape

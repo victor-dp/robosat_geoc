@@ -71,6 +71,7 @@ def check_model(config):
         "loss": "str",
         "batch_size": "int",
         "lr": "float",
+        "tile_size": "int",
         "data_augmentation": "float",
     }
 

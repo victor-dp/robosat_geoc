@@ -30,7 +30,7 @@ check: ut it doc
 
 # Python code beautifier
 pink:
-	black -l 125 *.py robosat_pink/*.py robosat_pink/*/*.py
+	black -l 125 *.py robosat_pink/*.py robosat_pink/*/*.py tests/*py
 
 
 # Perform units tests, and linter checks
@@ -58,11 +58,13 @@ it_pre:
 	@echo "Download PBF" && wget --show-progress -q -O it/lyon.pbf http://datapink.tools/rsp/it/lyon.pbf
 	@rsp extract --type building it/lyon.pbf it/osm_lyon_footprint.json
 	@rsp rasterize --geojson it/lyon_roofprint.json --config config.toml it/cover it/labels_osm
-	@rsp cover --dir it/images --splits 70,30 it/training/cover it/validation/cover
+	@rsp cover --dir it/images --splits 70,15,15 it/training/cover it/validation/cover it/prediction/cover
 	@rsp subset --dir it/images --filter it/training/cover it/training/images
 	@rsp subset --dir it/labels --filter it/training/cover it/training/labels
 	@rsp subset --dir it/images --filter it/validation/cover it/validation/images
 	@rsp subset --dir it/labels --filter it/validation/cover it/validation/labels
+	@rsp subset --dir it/images --filter it/prediction/cover it/prediction/images
+	@rsp subset --dir it/labels --filter it/prediction/cover it/prediction/labels
 
 
 # Integration Tests: Training
@@ -77,9 +79,9 @@ it_post:
 	@echo "==================================================================================="
 	@rsp export --checkpoint it/pth/checkpoint-00005-of-00005.pth --config config.toml --type jit it/pth/export.jit
 	@rsp export --checkpoint it/pth/checkpoint-00005-of-00005.pth --config config.toml --type onnx it/pth/export.onnx
-	@rsp predict --config config.toml --batch_size 4 --checkpoint it/pth/checkpoint-00005-of-00005.pth it/images it/masks
-	@rsp compare --images it/images it/labels it/masks --mode stack --labels it/labels --masks it/masks it/compare
-	@rsp compare --mode list --labels it/labels --maximum_qod 75 --minimum_fg 5 --masks it/masks --geojson it/compare/tiles.json
+	@rsp predict --config config.toml --batch_size 4 --checkpoint it/pth/checkpoint-00005-of-00005.pth it/prediction it/masks
+	@rsp compare --images it/prediction/images it/prediction/labels it/masks --mode stack --labels it/prediction/labels --masks it/masks it/compare
+	@rsp compare --mode list --labels it/prediction/labels --maximum_qod 75 --minimum_fg 5 --masks it/masks --geojson it/compare/tiles.json
 	@rsp vectorize --type building --config config.toml it/masks it/vector.json
 
 

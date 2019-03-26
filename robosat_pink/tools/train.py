@@ -11,7 +11,14 @@ from tqdm import tqdm
 
 from importlib import import_module
 
-from robosat_pink.transforms import JointCompose, JointTransform, JointRandomFlipOrRotate, ImageToTensor, MaskToTensor
+from robosat_pink.transforms import (
+    JointCompose,
+    JointResize,
+    JointTransform,
+    JointRandomFlipOrRotate,
+    ImageToTensor,
+    MaskToTensor,
+)
 from robosat_pink.datasets import DatasetTilesSemSeg
 from robosat_pink.metrics import Metrics
 from robosat_pink.config import load_config, check_model, check_channels, check_classes, check_dataset
@@ -251,6 +258,7 @@ def get_dataset_loaders(path, config, workers):
 
     transform = JointCompose(
         [
+            JointResize(config["model"]["tile_size"]),
             JointRandomFlipOrRotate(config["model"]["data_augmentation"]),
             JointTransform(ImageToTensor(), MaskToTensor()),
             JointTransform(Normalize(mean=mean, std=std), None),

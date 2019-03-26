@@ -55,4 +55,7 @@
 
   # Data augmentation
   data_augmentation = 0.75
+
+  # Model input tile size
+  tile_size = 512
 ```
