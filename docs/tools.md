@@ -170,7 +170,7 @@ Inputs [either --postgis or --geojson is required]:
 
 Outputs:
  out                                output directory path [required]
- --tile_size TILE_SIZE              if set, override tile size value from config file
+ --tile_size TILE_SIZE              output tile size [default: 512]
 
 Web UI:
  --web_ui_base_url WEB_UI_BASE_URL  alternate Web UI base URL
