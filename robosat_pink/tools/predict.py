@@ -138,5 +138,5 @@ def main(args):
     if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
-        tiles = [tile for tile, _ in tiles_from_slippy_map(args.tiles)]
+        tiles = [tile for tile, _ in tiles_from_slippy_map(args.out)]
         web_ui(args.out, base_url, tiles, tiles, "png", template)

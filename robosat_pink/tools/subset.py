@@ -71,7 +71,7 @@ def main(args):
         except:
             sys.exit("Error: Unable to process tile: {}".format(str(tile)))
 
-    if not args.no_web_ui:
+    if not args.no_web_ui and not args.delete:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
         web_ui(args.out, base_url, tiles, tiles, extension, template)
