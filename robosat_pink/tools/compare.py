@@ -117,8 +117,9 @@ def main(args):
             x, y, z = list(map(str, tile))
 
             if args.masks and args.labels:
+
                 try:
-                    dist, fg_ratio, qod = compare(args.masks, args.labels, tiles)
+                    dist, fg_ratio, qod = compare(args.masks, args.labels, tile)
                 except:
                     progress.update()
                     return False, tile
@@ -129,49 +130,44 @@ def main(args):
 
             tiles_compare.append(tile)
 
-            try:
-                if args.mode == "side":
-                    for i, root in enumerate(args.images):
-                        img = tile_image_from_file(tile_from_slippy_map(root, x, y, z)[1])
+            if args.mode == "side":
+                for i, root in enumerate(args.images):
+                    img = tile_image_from_file(tile_from_slippy_map(root, x, y, z)[1])
 
                     if i == 0:
                         side = np.zeros((img.shape[0], img.shape[1] * len(args.images), 3))
                         side = np.swapaxes(side, 0, 1) if args.vertical else side
                         image_shape = img.shape
                     else:
-                        assert image_shape == img.shape, "Unconsistent image size to compare"
+                        assert image_shape[0:2] == img.shape[0:2], "Unconsistent image size to compare"
 
                     if args.vertical:
                         side[i * image_shape[0] : (i + 1) * image_shape[0], :, :] = img
                     else:
                         side[:, i * image_shape[0] : (i + 1) * image_shape[0], :] = img
 
-                    os.makedirs(os.path.join(args.out, z, x), exist_ok=True)
-                    cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.format), np.uint8(side))
+                os.makedirs(os.path.join(args.out, z, x), exist_ok=True)
+                cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.format), np.uint8(side))
 
-                elif args.mode == "stack":
-                    for i, root in enumerate(args.images):
-                        img = tile_image_from_file(tile_from_slippy_map(root, x, y, z)[1])
+            elif args.mode == "stack":
+                for i, root in enumerate(args.images):
+                    tile_image = tile_image_from_file(tile_from_slippy_map(root, x, y, z)[1])
 
-                        if i == 0:
-                            image_shape = img.shape[0:2]
-                            stack = img / len(args.images)
-                        else:
-                            assert image_shape == img.shape[0:2], "Unconsistent image size to compare"
-                            stack = stack + (img / len(args.images))
+                    if i == 0:
+                        image_shape = tile_image.shape[0:2]
+                        stack = tile_image / len(args.images)
+                    else:
+                        assert image_shape == tile_image.shape[0:2], "Unconsistent image size to compare"
+                        stack = stack + (tile_image / len(args.images))
 
-                    os.makedirs(os.path.join(args.out, str(z), str(x)), exist_ok=True)
-                    cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.format), np.uint8(stack))
+                os.makedirs(os.path.join(args.out, str(z), str(x)), exist_ok=True)
+                cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.format), np.uint8(stack))
 
-                elif args.mode == "list":
-                    tiles_list.append([tile, fg_ratio, qod])
+            elif args.mode == "list":
+                tiles_list.append([tile, fg_ratio, qod])
 
-                return True, tile
-                progress.update()
-
-            except:
-                progress.update()
-                return False, tile
+            progress.update()
+            return True, tile
 
         for tile, ok in executor.map(worker, tiles):
             if not ok and log:
