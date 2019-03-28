@@ -189,7 +189,7 @@ def main(args):
                     out.write('{}{{"type":"Feature",{},{}}}'.format("," if not first else "", geom, prop))
                     first = False
                 else:
-                    out.write("{},{},{}\t\t{:.1f}\t\t{:.1f}{}".format(x, y, z, fg_ratio, qod, os.linesep))
+                    out.write("{},{},{}\t{:.1f}\t{:.1f}{}".format(x, y, z, fg_ratio, qod, os.linesep))
 
             if args.geojson:
                 out.write("]}")
