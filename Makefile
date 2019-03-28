@@ -70,8 +70,8 @@ it_pre:
 # Integration Tests: Training
 it_train:
 	@echo "==================================================================================="
-	@rsp train --config config.toml --batch_size 2 --epochs 3 --dataset it it/pth
-	@rsp train --config config.toml --batch_size 2 --epochs 5 --resume --checkpoint it/pth/checkpoint-00003-of-00003.pth --dataset it it/pth
+	@rsp train --config config.toml --batch_size 2 --epochs 3 it it/pth
+	@rsp train --config config.toml --batch_size 2 --epochs 5 --resume --checkpoint it/pth/checkpoint-00003-of-00003.pth it it/pth
 
 
 # Integration Tests: Post Training

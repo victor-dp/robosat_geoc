@@ -30,7 +30,7 @@ def add_parser(subparser, formatter_class):
     parser.add_argument("--config", type=str, help="path to config file [required if RSP_CONFIG env var is not set]")
 
     data = parser.add_argument_group("Dataset")
-    data.add_argument("--dataset", type=str, help="training dataset path [if set override config file value]")
+    data.add_argument("dataset", type=str, help="training dataset path")
     data.add_argument("--loader", type=str, help="dataset loader name [if set override config file value]")
     data.add_argument("--workers", type=int, help="number of pre-processing images workers [default: GPUs x 2]")
 

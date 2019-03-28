@@ -232,18 +232,18 @@ Web UI:
 ```
 ## rsp train
 ```
-usage: rsp train [-h] [--config CONFIG] [--dataset DATASET] [--loader LOADER]
-                 [--workers WORKERS] [--batch_size BATCH_SIZE] [--lr LR]
-                 [--model MODEL] [--loss LOSS] [--epochs EPOCHS] [--resume]
+usage: rsp train [-h] [--config CONFIG] [--loader LOADER] [--workers WORKERS]
+                 [--batch_size BATCH_SIZE] [--lr LR] [--model MODEL]
+                 [--loss LOSS] [--epochs EPOCHS] [--resume]
                  [--checkpoint CHECKPOINT]
-                 out
+                 dataset out
 
 optional arguments:
  -h, --help               show this help message and exit
  --config CONFIG          path to config file [required if RSP_CONFIG env var is not set]
 
 Dataset:
- --dataset DATASET        training dataset path [if set override config file value]
+ dataset                  training dataset path
  --loader LOADER          dataset loader name [if set override config file value]
  --workers WORKERS        number of pre-processing images workers [default: GPUs x 2]
 
