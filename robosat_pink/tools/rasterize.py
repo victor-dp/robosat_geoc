@@ -195,10 +195,10 @@ def main(args):
 
                 try:
                     if tile in feature_map:
-                        cover.write("{},{},{}  {}".format(tile.x, tile.y, tile.z, len(feature_map[tile])))
+                        cover.write("{},{},{}  {}{}".format(tile.x, tile.y, tile.z, len(feature_map[tile]), os.linesep))
                         out = geojson_tile_burn(tile, feature_map[tile], 4326, args.tile_size, burn_value)
                     else:
-                        cover.write("{},{},{}  0".format(tile.x, tile.y, tile.z))
+                        cover.write("{},{},{}  {}{}".format(tile.x, tile.y, tile.z, 0, os.linesep))
                         out = np.zeros(shape=(args.tile_size, args.tile_size), dtype=np.uint8)
 
                     tile_label_to_file(args.out, tile, colors, out)
