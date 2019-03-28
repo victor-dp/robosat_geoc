@@ -3,22 +3,22 @@ import unittest
 import torch
 import mercantile
 
-from robosat_pink.datasets import DatasetTilesSemSeg
+from robosat_pink.loaders.semsegtiles import SemSegTiles
 from robosat_pink.transforms import ImageToTensor, JointTransform
 
 
-class TestDatasetSemSeg(unittest.TestCase):
+class TestSemSegTiles(unittest.TestCase):
     def test_len(self):
         path = "tests/fixtures"
         config = {"channels": [{"name": "images", "bands": [1, 2, 3]}]}
         transform = ImageToTensor()
 
         # mode train
-        dataset = DatasetTilesSemSeg(config, path, transform, "train")
+        dataset = SemSegTiles(config, path, transform, "train")
         self.assertEqual(len(dataset), 3)
 
         # mode predict
-        dataset = DatasetTilesSemSeg(config, path, transform, "predict", 64)
+        dataset = SemSegTiles(config, path, transform, "predict", 64)
         self.assertEqual(len(dataset), 3)
 
     def test_getitem(self):
@@ -27,7 +27,7 @@ class TestDatasetSemSeg(unittest.TestCase):
 
         # mode train
         transform = JointTransform(None, None)
-        dataset = DatasetTilesSemSeg(config, path, transform, "train")
+        dataset = SemSegTiles(config, path, transform, "train")
         image, mask, tile = dataset[0]
 
         assert tile == mercantile.Tile(69105, 105093, 18)
@@ -36,7 +36,7 @@ class TestDatasetSemSeg(unittest.TestCase):
 
         # mode predict
         transform = ImageToTensor()
-        dataset = DatasetTilesSemSeg(config, path, transform, "predict", 64)
+        dataset = SemSegTiles(config, path, transform, "predict", 64)
         images, tiles = dataset[0]
 
         self.assertEqual(type(images), torch.Tensor)

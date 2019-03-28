@@ -4,12 +4,11 @@
 
 [dataset]
 
-  # Optional PostgreSQL Database connection, using psycopg2 syntax (could be use by rasterize tool).
+  # Optional PostgreSQL Database connection, using psycopg2 syntax (could be use by rasterize tool)
   pg_dsn = "host=127.0.0.1 dbname=rsp user=postgres"
 
 
-
-# Input channels configuration.
+# Input channels configuration
 # You can, add several channels blocks to compose your input Tensor. Order is meaningful.
 #
 # sub:		dataset subdirectory name
@@ -25,7 +24,7 @@
 
 
 
-# Output Classes configuration.
+# Output Classes configuration
 # Nota: available colors are either CSS3 colors names or #RRGGBB hexadecimal representation.
 # Nota: only support binary classification for now.
 [[classes]]
@@ -33,24 +32,25 @@
   color = "white"
 
 [[classes]]
-  title = "building"
+  title = "Building"
   color = "deeppink"
 
 
 
 [model]
-  # Model name.
-  name = "albunet"
+  # Model name
+  name = "Albunet"
 
+  # Pretrained on ImageNet
   pretrained = true
 
-  # Loss function name.
-  loss = "lovasz"
+  # Loss function name
+  loss = "Lovasz"
   
-  # Batch size for training.
+  # Batch size for training
   batch_size = 4
 
-  # Learning rate for the optimizer.
+  # Learning rate for the optimizer
   lr = 0.000025
 
   # Data augmentation
@@ -58,4 +58,7 @@
 
   # Model input tile size
   tile_size = 512
+
+  # Dataset loader name
+  loader = "SemSegTiles"
 ```

@@ -13,7 +13,6 @@ from torchvision.transforms import Compose, Normalize
 from tqdm import tqdm
 from PIL import Image
 
-from robosat_pink.datasets import DatasetTilesSemSeg
 from robosat_pink.tiles import tiles_from_slippy_map
 from robosat_pink.config import load_config, check_model, check_classes, check_channels
 from robosat_pink.colors import make_palette
@@ -75,7 +74,7 @@ def main(args):
         return storage.cuda() if torch.cuda.is_available() else storage.cpu()
 
     try:
-        model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
+        model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"].lower()))
     except:
         sys.exit("ERROR: Unknown {} model.".format(config["model"]["name"]))
 
@@ -83,7 +82,7 @@ def main(args):
         # FIXME https://github.com/pytorch/pytorch/issues/7178
         chkpt = torch.load(args.checkpoint, map_location=map_location)
 
-        net = getattr(model_module, "{}".format(config["model"]["name"].title()))(config).to(device)
+        net = getattr(model_module, config["model"]["name"])(config).to(device)
         net = torch.nn.DataParallel(net)
         net.load_state_dict(chkpt["state_dict"])
         net.eval()
@@ -96,14 +95,15 @@ def main(args):
         std.extend(channel["std"])
         mean.extend(channel["mean"])
 
-    dataset = DatasetTilesSemSeg(
+    loader_module = import_module("robosat_pink.loaders.{}".format(config["model"]["loader"].lower()))
+    loader_predict = getattr(loader_module, config["model"]["loader"])(
         config,
         args.tiles,
         transform=Compose([ImageToTensor(), Normalize(mean=mean, std=std)]),
         mode="predict",
         overlap=args.tile_overlap,
     )
-    loader = DataLoader(dataset, batch_size=config["model"]["batch_size"], num_workers=args.workers)
+    loader = DataLoader(loader_predict, batch_size=config["model"]["batch_size"], num_workers=args.workers)
     palette = make_palette(config["classes"][0]["color"], config["classes"][1]["color"])
 
     with torch.no_grad():  # don't track tensors with autograd during prediction
@@ -125,7 +125,7 @@ def main(args):
                 x, y, z = list(map(int, tile))
 
                 try:
-                    prob = dataset.remove_overlap(prob)  # as we predicted on buffered tiles
+                    prob = loader_predict.remove_overlap(prob)  # as we predicted on buffered tiles
                     image = np.around(prob[1:, :, :]).astype(np.uint8).squeeze()
 
                     os.makedirs(os.path.join(args.out, str(z), str(x)), exist_ok=True)

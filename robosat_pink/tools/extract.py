@@ -22,12 +22,12 @@ def main(args):
     print("Notice: Could take some time. Please wait.")
 
     try:
-        module = import_module("robosat_pink.osm.{}".format(args.type))
+        module = import_module("robosat_pink.osm.{}".format(args.type.lower()))
     except:
         sys.exit("ERROR: Unknown OSM {} type extactor".format(args.type))
 
     try:
-        osmium_handler = getattr(module, "{}Handler".format(args.type.title()))()
+        osmium_handler = getattr(module, "{}Handler".format(args.type))()
         osmium_handler.apply_file(filename=os.path.expanduser(args.pbf), locations=True)
     except:
         sys.exit("ERROR: Unable to extract {} from {}".format(args.type, args.pbf))

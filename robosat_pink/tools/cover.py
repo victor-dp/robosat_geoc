@@ -11,8 +11,7 @@ from supermercado import burntiles
 from rasterio import open as rasterio_open
 from rasterio.warp import transform_bounds
 
-
-from robosat_pink.datasets import tiles_from_slippy_map
+from robosat_pink.tiles import tiles_from_slippy_map
 
 
 def add_parser(subparser, formatter_class):

@@ -56,7 +56,7 @@ it_pre:
 	@echo "Download GeoJSON" && wget --show-progress -q -nc -O it/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&BBOX=4.79,45.69,4.84,45.74&outputFormat=application/json; subtype=geojson' | true
 	@rsp rasterize --geojson it/lyon_roofprint.json --config config.toml it/cover it/labels
 	@echo "Download PBF" && wget --show-progress -q -O it/lyon.pbf http://datapink.tools/rsp/it/lyon.pbf
-	@rsp extract --type building it/lyon.pbf it/osm_lyon_footprint.json
+	@rsp extract --type Building it/lyon.pbf it/osm_lyon_footprint.json
 	@rsp rasterize --geojson it/lyon_roofprint.json --config config.toml it/cover it/labels_osm
 	@rsp cover --dir it/images --splits 70,15,15 it/training/cover it/validation/cover it/prediction/cover
 	@rsp subset --dir it/images --filter it/training/cover it/training/images
@@ -82,7 +82,7 @@ it_post:
 	@rsp predict --config config.toml --batch_size 4 --checkpoint it/pth/checkpoint-00005-of-00005.pth it/prediction it/masks
 	@rsp compare --images it/prediction/images it/prediction/labels it/masks --mode stack --labels it/prediction/labels --masks it/masks it/compare
 	@rsp compare --mode list --labels it/prediction/labels --maximum_qod 75 --minimum_fg 5 --masks it/masks --geojson it/compare/tiles.json
-	@rsp vectorize --type building --config config.toml it/masks it/vector.json
+	@rsp vectorize --type Building --config config.toml it/masks it/vector.json
 
 
 # Documentation generation (tools and config file)

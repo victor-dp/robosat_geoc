@@ -19,7 +19,6 @@ from robosat_pink.transforms import (
     ImageToTensor,
     MaskToTensor,
 )
-from robosat_pink.datasets import DatasetTilesSemSeg
 from robosat_pink.metrics import Metrics
 from robosat_pink.config import load_config, check_model, check_channels, check_classes, check_dataset
 from robosat_pink.logs import Logs
@@ -28,24 +27,26 @@ from robosat_pink.logs import Logs
 def add_parser(subparser, formatter_class):
     parser = subparser.add_parser("train", help="Trains a model on a dataset", formatter_class=formatter_class)
 
-    hp = parser.add_argument_group("Hyper Parameters")
-    hp.add_argument("--config", type=str, help="path to config file [required if RSP_CONFIG env var is not set]")
-    hp.add_argument("--dataset", type=str, help="if set, override dataset path value from config file")
-    hp.add_argument("--batch_size", type=int, help="if set, override batch_size value from config file")
-    hp.add_argument("--lr", type=float, help="if set, override learning rate value from config file")
-    hp.add_argument("--model", type=str, help="if set, override model name from config file")
-    hp.add_argument("--loss", type=str, help="if set, override model loss from config file")
+    parser.add_argument("--config", type=str, help="path to config file [required if RSP_CONFIG env var is not set]")
 
-    out = parser.add_argument_group("Output")
-    out.add_argument("out", type=str, help="output directory path to save checkpoint .pth files and logs [required]")
+    data = parser.add_argument_group("Dataset")
+    data.add_argument("--dataset", type=str, help="training dataset path [if set override config file value]")
+    data.add_argument("--loader", type=str, help="dataset loader name [if set override config file value]")
+    data.add_argument("--workers", type=int, help="number of pre-processing images workers [default: GPUs x 2]")
+
+    hp = parser.add_argument_group("Hyper Parameters [if set override config file value]")
+    hp.add_argument("--batch_size", type=int, help="batch_size")
+    hp.add_argument("--lr", type=float, help="learning rate")
+    hp.add_argument("--model", type=str, help="model name")
+    hp.add_argument("--loss", type=str, help="model loss")
 
     mt = parser.add_argument_group("Model Training")
     mt.add_argument("--epochs", type=int, default=10, help="number of epochs to train [default 10]")
     mt.add_argument("--resume", action="store_true", help="resume model training, if set imply to provide a checkpoint")
-    mt.add_argument("--checkpoint", type=str, help="path to a model checkpoint. To fine tune, or resume training if setted")
+    mt.add_argument("--checkpoint", type=str, help="path to a model checkpoint. To fine tune or resume a training")
 
-    perf = parser.add_argument_group("Performances")
-    perf.add_argument("--workers", type=int, help="number pre-processing images workers. [default: GPUs x 2]")
+    out = parser.add_argument_group("Output")
+    out.add_argument("out", type=str, help="output directory path to save checkpoint .pth files and logs [required]")
 
     parser.set_defaults(func=main)
 
@@ -55,6 +56,7 @@ def main(args):
     args.out = os.path.expanduser(args.out)
     args.workers = torch.cuda.device_count() * 2 if torch.device("cuda") and not args.workers else args.workers
     config["dataset"]["path"] = args.dataset if args.dataset else config["dataset"]["path"]
+    config["model"]["loader"] = args.loader if args.loader else config["model"]["loader"]
     config["model"]["lr"] = args.lr if args.lr else config["model"]["lr"]
     config["model"]["batch_size"] = args.batch_size if args.batch_size else config["model"]["batch_size"]
     config["model"]["name"] = args.model if args.model else config["model"]["name"]
@@ -77,8 +79,8 @@ def main(args):
         device = torch.device("cpu")
 
     try:
-        model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
-        net = getattr(model_module, "{}".format(config["model"]["name"].title()))(config).to(device)
+        model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"].lower()))
+        net = getattr(model_module, config["model"]["name"])(config).to(device)
         net = torch.nn.DataParallel(net)
     except:
         sys.exit("ERROR: Unable to load {} model".format(config["model"]["name"]))
@@ -114,8 +116,8 @@ def main(args):
             sys.exit("ERROR: Unable to load {} checkpoint".format(args.checkpoint))
 
     try:
-        loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"]))
-        criterion = getattr(loss_module, "{}".format(config["model"]["loss"].title()))().to(device)
+        loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"].lower()))
+        criterion = getattr(loss_module, config["model"]["loss"])().to(device)
     except:
         sys.exit("ERROR: Unable to load {} loss".format(config["model"]["loss"]))
 
@@ -248,7 +250,7 @@ def validate(loader, config, device, net, criterion):
     }
 
 
-def get_dataset_loaders(path, config, workers):
+def get_dataset_loaders(path, config, num_workers):
 
     std = []
     mean = []
@@ -265,12 +267,12 @@ def get_dataset_loaders(path, config, workers):
         ]
     )
 
-    dataset_train = DatasetTilesSemSeg(config, os.path.join(path, "training"), transform, "train")
-
-    dataset_val = DatasetTilesSemSeg(config, os.path.join(path, "validation"), transform, "train")
+    loader = import_module("robosat_pink.loaders.{}".format(config["model"]["loader"].lower()))
+    loader_train = getattr(loader, config["model"]["loader"])(config, os.path.join(path, "training"), transform, "train")
+    loader_val = getattr(loader, config["model"]["loader"])(config, os.path.join(path, "validation"), transform, "train")
 
     batch_size = config["model"]["batch_size"]
-    train_loader = DataLoader(dataset_train, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=workers)
-    val_loader = DataLoader(dataset_val, batch_size=batch_size, shuffle=False, drop_last=True, num_workers=workers)
+    train_loader = DataLoader(loader_train, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=num_workers)
+    val_loader = DataLoader(loader_val, batch_size=batch_size, shuffle=False, drop_last=True, num_workers=num_workers)
 
     return train_loader, val_loader

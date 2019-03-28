@@ -1,13 +1,13 @@
 """PyTorch-compatible datasets. Cf: https://pytorch.org/docs/stable/data.html """
 
 import os
-import torch.utils.data
 import numpy as np
+import torch.utils.data
 
 from robosat_pink.tiles import tiles_from_slippy_map, tile_image_buffer, tile_image_from_file, tile_label_from_file
 
 
-class DatasetTilesSemSeg(torch.utils.data.Dataset):
+class SemSegTiles(torch.utils.data.Dataset):
     def __init__(self, config, root, transform, mode, overlap=0):
         super().__init__()
 

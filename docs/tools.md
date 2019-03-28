@@ -232,33 +232,34 @@ Web UI:
 ```
 ## rsp train
 ```
-usage: rsp train [-h] [--config CONFIG] [--dataset DATASET]
-                 [--batch_size BATCH_SIZE] [--lr LR] [--model MODEL]
-                 [--loss LOSS] [--epochs EPOCHS] [--resume]
-                 [--checkpoint CHECKPOINT] [--workers WORKERS]
+usage: rsp train [-h] [--config CONFIG] [--dataset DATASET] [--loader LOADER]
+                 [--workers WORKERS] [--batch_size BATCH_SIZE] [--lr LR]
+                 [--model MODEL] [--loss LOSS] [--epochs EPOCHS] [--resume]
+                 [--checkpoint CHECKPOINT]
                  out
 
 optional arguments:
  -h, --help               show this help message and exit
-
-Hyper Parameters:
  --config CONFIG          path to config file [required if RSP_CONFIG env var is not set]
- --dataset DATASET        if set, override dataset path value from config file
- --batch_size BATCH_SIZE  if set, override batch_size value from config file
- --lr LR                  if set, override learning rate value from config file
- --model MODEL            if set, override model name from config file
- --loss LOSS              if set, override model loss from config file
 
-Output:
- out                      output directory path to save checkpoint .pth files and logs [required]
+Dataset:
+ --dataset DATASET        training dataset path [if set override config file value]
+ --loader LOADER          dataset loader name [if set override config file value]
+ --workers WORKERS        number of pre-processing images workers [default: GPUs x 2]
+
+Hyper Parameters [if set override config file value]:
+ --batch_size BATCH_SIZE  batch_size
+ --lr LR                  learning rate
+ --model MODEL            model name
+ --loss LOSS              model loss
 
 Model Training:
  --epochs EPOCHS          number of epochs to train [default 10]
  --resume                 resume model training, if set imply to provide a checkpoint
- --checkpoint CHECKPOINT  path to a model checkpoint. To fine tune, or resume training if setted
+ --checkpoint CHECKPOINT  path to a model checkpoint. To fine tune or resume a training
 
-Performances:
- --workers WORKERS        number pre-processing images workers. [default: GPUs x 2]
+Output:
+ out                      output directory path to save checkpoint .pth files and logs [required]
 ```
 ## rsp vectorize
 ```

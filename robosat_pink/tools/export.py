@@ -34,12 +34,12 @@ def main(args):
     print("RoboSat.pink - export to {} - (Torch:{})".format(args.type, torch.__version__))
 
     try:
-        model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"]))
+        model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"].lower()))
     except:
         sys.exit("ERROR: Unknown {} model.".format(config["model"]["name"]))
 
     try:
-        net = getattr(model_module, "{}".format(config["model"]["name"].title()))(config).to("cpu")
+        net = getattr(model_module, config["model"]["name"])(config).to("cpu")
         chkpt = torch.load(args.checkpoint, map_location=map_location)
     except:
         sys.exit("ERROR: Unable to load {} in {} model.".format(args.checkpoint, config["model"]["name"]))
