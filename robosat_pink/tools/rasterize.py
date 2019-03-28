@@ -190,17 +190,20 @@ def main(args):
                         sys.exit("ERROR: Unable to parse {}. seems not a valid GEOJSON file.".format(geojson_file))
 
         log.log("RoboSat.pink - rasterize - rasterizing tiles from {} on cover {}".format(args.geojson, args.cover))
-        for tile in tqdm(list(tiles_from_csv(os.path.expanduser(args.cover))), ascii=True, unit="tile"):
+        with open(os.path.join(os.path.expanduser(args.out), "instances.cover"), mode="w") as cover:
+            for tile in tqdm(list(tiles_from_csv(os.path.expanduser(args.cover))), ascii=True, unit="tile"):
 
-            try:
-                if tile in feature_map:
-                    out = geojson_tile_burn(tile, feature_map[tile], 4326, args.tile_size, burn_value)
-                else:
-                    out = np.zeros(shape=(args.tile_size, args.tile_size), dtype=np.uint8)
+                try:
+                    if tile in feature_map:
+                        cover.write("{},{},{}  {}".format(tile.x, tile.y, tile.z, len(feature_map[tile])))
+                        out = geojson_tile_burn(tile, feature_map[tile], 4326, args.tile_size, burn_value)
+                    else:
+                        cover.write("{},{},{}  0".format(tile.x, tile.y, tile.z))
+                        out = np.zeros(shape=(args.tile_size, args.tile_size), dtype=np.uint8)
 
-                tile_label_to_file(args.out, tile, colors, out)
-            except:
-                log.log("Warning: Unable to rasterize tile. Skipping {}".format(str(tile)))
+                    tile_label_to_file(args.out, tile, colors, out)
+                except:
+                    log.log("Warning: Unable to rasterize tile. Skipping {}".format(str(tile)))
 
     if args.postgis:
 
