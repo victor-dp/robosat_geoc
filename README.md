@@ -121,7 +121,7 @@ WorkFlows:
 
 ```
 # Configuration
-wget -O config.toml https://raw.githubusercontent.com/datapink/robosat.pink/master/config.toml
+wget -O ~/.rsp_config https://raw.githubusercontent.com/datapink/robosat.pink/master/config.toml
 
 # Data Preparation
 
@@ -129,21 +129,21 @@ rsp cover --bbox 4.8,45.7,4.83,45.73 --zoom 18 cover
 rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' cover images
 
 wget -nc -O lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&BBOX=4.79,45.69,4.84,45.74&outputFormat=application/json; subtype=geojson'
-rsp rasterize --config config.toml --geojson lyon_roofprint.json cover labels
+rsp rasterize --geojson lyon_roofprint.json cover labels
 
-rsp cover --dir images --splits 70,20,10 training/cover validation/cover prediction/cover
-rsp subset --dir images --filter training/cover training/images
-rsp subset --dir labels --filter training/cover training/labels
-rsp subset --dir images --filter validation/cover validation/images
-rsp subset --dir labels --filter validation/cover validation/labels
+rsp cover --dir images --splits 70,20,10 ds/training/cover ds/validation/cover ds/prediction/cover
+rsp subset --dir images --filter ds/training/cover ds/training/images
+rsp subset --dir labels --filter ds/training/cover ds/training/labels
+rsp subset --dir images --filter ds/validation/cover ds/validation/images
+rsp subset --dir labels --filter ds/validation/cover ds/validation/labels
 
 
 # Model Training and Prediction
 
-rsp train  --config config.toml --epochs 5 . models
-rsp subset --dir images --filter prediction/cover prediction/images
-rsp predict --config config.toml --checkpoint models/checkpoint-00005-of-00005.pth prediction prediction/masks
-rsp compare --images prediction/images prediction/masks --mode side prediction/compare
+rsp train  --epochs 5 ds models
+rsp subset --dir images --filter ds/prediction/cover ds/prediction/images
+rsp predict --checkpoint models/checkpoint-00005-of-00005.pth ds/prediction ds/prediction/masks
+rsp compare --images ds/prediction/images ds/prediction/masks --mode side ds/prediction/compare
 
 ```
 

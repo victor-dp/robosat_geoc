@@ -19,7 +19,7 @@ def add_parser(subparser, formatter_class):
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("masks", type=str, help="input masks directory path [required]")
     inp.add_argument("--type", type=str, required=True, help="type of features to extract (i.e class title) [required]")
-    inp.add_argument("--config", type=str, help="path to config file [required if RSP_CONFIG env var is not set]")
+    inp.add_argument("--config", type=str, help="path to config file [required]")
 
     out = parser.add_argument_group("Outputs")
     out.add_argument("out", type=str, help="path to GeoJSON file to store features in [required]")

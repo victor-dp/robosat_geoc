@@ -10,10 +10,12 @@ import robosat_pink.colors as colors
 def load_config(path):
     """Loads a dictionary from configuration file."""
 
-    try:
-        path = os.environ["RSP_CONFIG"] if not path else path
-    except:
-        sys.exit("CONFIG ERROR: Either RSP_CONFIG env var or --config parameter, is required.")
+    if not path:
+        path = os.environ["RSP_CONFIG"] if "RSP_CONFIG" in os.environ else None
+    if not path:
+        path = os.path.expanduser("~/.rsp_config") if os.path.isfile(os.path.expanduser("~/.rsp_config")) else None
+    if not path:
+        sys.exit("CONFIG ERROR: Either ~/.rsp_config or RSP_CONFIG env var or --config parameter, is required.")
 
     try:
         config = toml.load(os.path.expanduser(path))

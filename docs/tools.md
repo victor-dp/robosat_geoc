@@ -99,7 +99,7 @@ optional arguments:
 Inputs:
  --checkpoint CHECKPOINT  model checkpoint to load [required]
  --type {onnx,jit}        output type [default: jit]
- --config CONFIG          path to config file [required if RSP_CONFIG env var is not set]
+ --config CONFIG          path to config file [required]
 
 Output:
  out                      path to save export model to [required]
@@ -134,7 +134,7 @@ optional arguments:
 Inputs:
  tiles                              tiles directory path [required]
  --checkpoint CHECKPOINT            path to the trained model to use [required]
- --config CONFIG                    path to config file [required if RSP_CONFIG env var is not set]
+ --config CONFIG                    path to config file [required]
  --model MODEL                      if set, override model name from config file
  --tile_size TILE_SIZE              if set, override tile size value from config file
  --tile_overlap TILE_OVERLAP        tile pixels overlap [default: 64]
@@ -166,7 +166,7 @@ Inputs [either --postgis or --geojson is required]:
  cover                              path to csv tiles cover file [required]
  --postgis POSTGIS                  SELECT query to retrieve geometry features [e.g SELECT geom FROM table]
  --geojson GEOJSON                  path to GeoJSON features files [e.g /foo/bar/*.json] 
- --config CONFIG                    path to config file [required if RSP_CONFIG env var is not set]
+ --config CONFIG                    path to config file [required]
 
 Outputs:
  out                                output directory path [required]
@@ -216,7 +216,7 @@ optional arguments:
 
 Inputs:
  raster                             path to the raster to tile [required]
- --config CONFIG                    path to config file [required if RSP_CONFIG env var is not set]
+ --config CONFIG                    path to config file [required in label mode]
  --no_data NO_DATA                  no data value [0-255]. If set, skip tile with at least one no data border
 
 Output:
@@ -240,7 +240,7 @@ usage: rsp train [-h] [--config CONFIG] [--loader LOADER] [--workers WORKERS]
 
 optional arguments:
  -h, --help               show this help message and exit
- --config CONFIG          path to config file [required if RSP_CONFIG env var is not set]
+ --config CONFIG          path to config file [required]
 
 Dataset:
  dataset                  training dataset path
@@ -271,7 +271,7 @@ optional arguments:
 Inputs:
  masks            input masks directory path [required]
  --type TYPE      type of features to extract (i.e class title) [required]
- --config CONFIG  path to config file [required if RSP_CONFIG env var is not set]
+ --config CONFIG  path to config file [required]
 
 Outputs:
  out              path to GeoJSON file to store features in [required]

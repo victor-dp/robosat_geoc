@@ -33,7 +33,7 @@ def add_parser(subparser, formatter_class):
     inp.add_argument("cover", type=str, help="path to csv tiles cover file [required]")
     inp.add_argument("--postgis", type=str, help="SELECT query to retrieve geometry features [e.g SELECT geom FROM table]")
     inp.add_argument("--geojson", type=str, help="path to GeoJSON features files [e.g /foo/bar/*.json] ")
-    inp.add_argument("--config", type=str, help="path to config file [required if RSP_CONFIG env var is not set]")
+    inp.add_argument("--config", type=str, help="path to config file [required]")
 
     out = parser.add_argument_group("Outputs")
     out.add_argument("out", type=str, help="output directory path [required]")

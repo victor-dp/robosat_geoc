@@ -27,7 +27,7 @@ from robosat_pink.logs import Logs
 def add_parser(subparser, formatter_class):
     parser = subparser.add_parser("train", help="Trains a model on a dataset", formatter_class=formatter_class)
 
-    parser.add_argument("--config", type=str, help="path to config file [required if RSP_CONFIG env var is not set]")
+    parser.add_argument("--config", type=str, help="path to config file [required]")
 
     data = parser.add_argument_group("Dataset")
     data.add_argument("dataset", type=str, help="training dataset path")

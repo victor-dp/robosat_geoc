@@ -24,7 +24,7 @@ def add_parser(subparser, formatter_class):
 
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("raster", type=str, help="path to the raster to tile [required]")
-    inp.add_argument("--config", type=str, help="path to config file [required if RSP_CONFIG env var is not set]")
+    inp.add_argument("--config", type=str, help="path to config file [required in label mode]")
     inp.add_argument("--no_data", type=int, help="no data value [0-255]. If set, skip tile with at least one no data border")
 
     out = parser.add_argument_group("Output")
@@ -44,9 +44,11 @@ def add_parser(subparser, formatter_class):
 
 def main(args):
 
-    config = load_config(args.config)
-    check_classes(config)
-    colors = [classe["color"] for classe in config["classes"]]
+    if args.type == "label":
+        config = load_config(args.config)
+        check_classes(config)
+        colors = [classe["color"] for classe in config["classes"]]
+
     tile_size = args.tile_size
     tiles_nodata = []
 
