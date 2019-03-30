@@ -85,7 +85,7 @@ Train
 Now to launch a first model training:
 
 ```
-rsp train --epochs 10 ~/rsp_dataset/pth
+rsp train --epochs 10 ~/rsp_dataset ~/rsp_dataset/pth
 ```
 
 After ten epochs only, the building IoU metric on validation dataset is about **0.82**. 
@@ -172,7 +172,7 @@ Train
 Having a cleaner training and validation dataset, we can launch a new and longer training:
 
 ```
-rsp train --epochs 100 ~/rsp_dataset/pth_clean
+rsp train --epochs 100 ~/rsp_dataset ~/rsp_dataset/pth_clean
 ```
 
 Building IoU metrics on validation dataset:
