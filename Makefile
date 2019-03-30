@@ -30,7 +30,7 @@ check: ut it doc
 
 # Python code beautifier
 pink:
-	black -l 125 *.py robosat_pink/*.py robosat_pink/*/*.py tests/*py
+	black -l 125 *.py robosat_pink/*.py robosat_pink/*/*.py tests/*py tests/*/*.py
 
 
 # Perform units tests, and linter checks
