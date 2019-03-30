@@ -13,20 +13,18 @@
 #
 # sub:		dataset subdirectory name
 # bands:	bands to keep from sub source. Order is meaningful
-# mean:		bands mean value
-# std:		bands std value
-# Nota: (default mean and std are based on ImageNet DataSet, cf pretrained model)
+# mean:		bands mean value [default, if model pretrained: [0.485, 0.456, 0.406] ]
+# std:		bands std value  [default, if model pretrained: [0.229, 0.224, 0.225] ]
+
 [[channels]]
   name   = "images"
   bands = [1, 2, 3]
-  mean  = [0.485, 0.456, 0.406]
-  std   = [0.229, 0.224, 0.225]
-
 
 
 # Output Classes configuration
 # Nota: available colors are either CSS3 colors names or #RRGGBB hexadecimal representation.
 # Nota: only support binary classification for now.
+
 [[classes]]
   title = "background"
   color = "white"
@@ -53,12 +51,15 @@
   # Learning rate for the optimizer
   lr = 0.000025
 
-  # Data augmentation
-  data_augmentation = 0.75
-
-  # Model input tile size
+  # Model internal input tile size
   tile_size = 512
 
   # Dataset loader name
   loader = "SemSegTiles"
+
+  # Kind of data augmentation to apply while training
+  da = "GeoSpatial"
+
+  # Data Augmentation probability
+  dap = 0.75
 ```

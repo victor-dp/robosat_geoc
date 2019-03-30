@@ -5,19 +5,21 @@ import numpy as np
 import torch.utils.data
 
 from robosat_pink.tiles import tiles_from_slippy_map, tile_image_buffer, tile_image_from_file, tile_label_from_file
+from robosat_pink.transforms.core import to_normalized_tensor
 
 
 class SemSegTiles(torch.utils.data.Dataset):
-    def __init__(self, config, root, transform, mode, overlap=0):
+    def __init__(self, config, root, mode, overlap=0):
         super().__init__()
 
         self.root = os.path.expanduser(root)
-        self.transform = transform
         self.overlap = overlap
         self.config = config
         self.mode = mode
 
         self.tiles = {}
+
+        assert mode == "train" or mode == "predict"
 
         for channel in config["channels"]:
             path = os.path.join(self.root, channel["name"])
@@ -63,12 +65,11 @@ class SemSegTiles(torch.utils.data.Dataset):
             mask = tile_label_from_file(self.tiles["labels"][i][1])
             assert mask is not None, "Dataset mask not retrieved"
 
-            image, mask = self.transform(image, mask)
+            image, mask = to_normalized_tensor(self.config, self.mode, image, mask)
             return image, mask, tile
 
         if self.mode == "predict":
-            image = self.transform(image)
-            return image, torch.IntTensor([tile.x, tile.y, tile.z])
+            return to_normalized_tensor(self.config, self.mode, image), torch.IntTensor([tile.x, tile.y, tile.z])
 
     def remove_overlap(self, probs):
         C, W, H = probs.shape

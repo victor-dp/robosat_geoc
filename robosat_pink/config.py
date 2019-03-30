@@ -43,9 +43,9 @@ def check_channels(config):
 
     # TODO Add name check
 
-    for channel in config["channels"]:
-        if not (len(channel["bands"]) == len(channel["mean"]) == len(channel["std"])):
-            sys.exit("CONFIG ERROR: Inconsistent channel bands, mean or std lenght in config file")
+    # for channel in config["channels"]:
+    #    if not (len(channel["bands"]) == len(channel["mean"]) == len(channel["std"])):
+    #        sys.exit("CONFIG ERROR: Inconsistent channel bands, mean or std lenght in config file")
 
 
 def check_classes(config):
@@ -74,7 +74,7 @@ def check_model(config):
         "batch_size": "int",
         "lr": "float",
         "tile_size": "int",
-        "data_augmentation": "float",
+        "da": "str",
     }
 
     for hp in hps:

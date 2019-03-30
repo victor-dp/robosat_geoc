@@ -234,8 +234,8 @@ Web UI:
 ```
 usage: rsp train [-h] [--config CONFIG] [--loader LOADER] [--workers WORKERS]
                  [--batch_size BATCH_SIZE] [--lr LR] [--model MODEL]
-                 [--loss LOSS] [--epochs EPOCHS] [--resume]
-                 [--checkpoint CHECKPOINT]
+                 [--loss LOSS] [--da DA] [--dap DAP] [--epochs EPOCHS]
+                 [--resume] [--checkpoint CHECKPOINT]
                  dataset out
 
 optional arguments:
@@ -252,6 +252,8 @@ Hyper Parameters [if set override config file value]:
  --lr LR                  learning rate
  --model MODEL            model name
  --loss LOSS              model loss
+ --da DA                  kind of data augmentation
+ --dap DAP                data augmentation probability
 
 Model Training:
  --epochs EPOCHS          number of epochs to train [default 10]

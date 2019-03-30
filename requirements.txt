@@ -1,5 +1,6 @@
 numpy
 pillow
+albumentations>=0.2.2
 opencv-python-headless
 torchvision>=0.2.2
 tqdm>=4.29.0

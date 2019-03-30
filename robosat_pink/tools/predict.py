@@ -8,7 +8,6 @@ import numpy as np
 import torch
 import torch.backends.cudnn
 from torch.utils.data import DataLoader
-from torchvision.transforms import Compose, Normalize
 
 from tqdm import tqdm
 from PIL import Image
@@ -16,7 +15,6 @@ from PIL import Image
 from robosat_pink.tiles import tiles_from_slippy_map
 from robosat_pink.config import load_config, check_model, check_classes, check_channels
 from robosat_pink.colors import make_palette
-from robosat_pink.transforms import ImageToTensor
 from robosat_pink.web_ui import web_ui
 from robosat_pink.logs import Logs
 
@@ -89,19 +87,9 @@ def main(args):
     except:
         sys.exit("ERROR: Unable to load {} in {} model.".format(args.checkpoint, config["model"]["name"]))
 
-    std = []
-    mean = []
-    for channel in config["channels"]:
-        std.extend(channel["std"])
-        mean.extend(channel["mean"])
-
     loader_module = import_module("robosat_pink.loaders.{}".format(config["model"]["loader"].lower()))
     loader_predict = getattr(loader_module, config["model"]["loader"])(
-        config,
-        args.tiles,
-        transform=Compose([ImageToTensor(), Normalize(mean=mean, std=std)]),
-        mode="predict",
-        overlap=args.tile_overlap,
+        config, args.tiles, mode="predict", overlap=args.tile_overlap
     )
     loader = DataLoader(loader_predict, batch_size=config["model"]["batch_size"], num_workers=args.workers)
     palette = make_palette(config["classes"][0]["color"], config["classes"][1]["color"])

@@ -1,24 +1,13 @@
 import os
 import sys
+from tqdm import tqdm
+from importlib import import_module
 
 import torch
 import torch.backends.cudnn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
-from torchvision.transforms import Normalize
 
-from tqdm import tqdm
-
-from importlib import import_module
-
-from robosat_pink.transforms import (
-    JointCompose,
-    JointResize,
-    JointTransform,
-    JointRandomFlipOrRotate,
-    ImageToTensor,
-    MaskToTensor,
-)
 from robosat_pink.metrics import Metrics
 from robosat_pink.config import load_config, check_model, check_channels, check_classes, check_dataset
 from robosat_pink.logs import Logs
@@ -39,6 +28,8 @@ def add_parser(subparser, formatter_class):
     hp.add_argument("--lr", type=float, help="learning rate")
     hp.add_argument("--model", type=str, help="model name")
     hp.add_argument("--loss", type=str, help="model loss")
+    hp.add_argument("--da", type=str, help="kind of data augmentation")
+    hp.add_argument("--dap", type=str, help="data augmentation probability")
 
     mt = parser.add_argument_group("Model Training")
     mt.add_argument("--epochs", type=int, default=10, help="number of epochs to train [default 10]")
@@ -61,6 +52,8 @@ def main(args):
     config["model"]["batch_size"] = args.batch_size if args.batch_size else config["model"]["batch_size"]
     config["model"]["name"] = args.model if args.model else config["model"]["name"]
     config["model"]["loss"] = args.loss if args.loss else config["model"]["loss"]
+    config["model"]["da"] = args.da if args.da else config["model"]["da"]
+    config["model"]["dap"] = args.dap if args.dap else config["model"]["dap"]
     check_dataset(config)
     check_classes(config)
     check_channels(config)
@@ -252,24 +245,9 @@ def validate(loader, config, device, net, criterion):
 
 def get_dataset_loaders(path, config, num_workers):
 
-    std = []
-    mean = []
-    for channel in config["channels"]:
-        std.extend(channel["std"])
-        mean.extend(channel["mean"])
-
-    transform = JointCompose(
-        [
-            JointResize(config["model"]["tile_size"]),
-            JointRandomFlipOrRotate(config["model"]["data_augmentation"]),
-            JointTransform(ImageToTensor(), MaskToTensor()),
-            JointTransform(Normalize(mean=mean, std=std), None),
-        ]
-    )
-
     loader = import_module("robosat_pink.loaders.{}".format(config["model"]["loader"].lower()))
-    loader_train = getattr(loader, config["model"]["loader"])(config, os.path.join(path, "training"), transform, "train")
-    loader_val = getattr(loader, config["model"]["loader"])(config, os.path.join(path, "validation"), transform, "train")
+    loader_train = getattr(loader, config["model"]["loader"])(config, os.path.join(path, "training"), "train")
+    loader_val = getattr(loader, config["model"]["loader"])(config, os.path.join(path, "validation"), "train")
 
     batch_size = config["model"]["batch_size"]
     train_loader = DataLoader(loader_train, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=num_workers)
