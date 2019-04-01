@@ -21,10 +21,6 @@
 # Nota: only support binary classification for now.
 
 [[classes]]
-  title = "background"
-  color = "white"
-
-[[classes]]
   title = "Building"
   color = "deeppink"
 

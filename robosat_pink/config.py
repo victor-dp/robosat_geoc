@@ -22,6 +22,8 @@ def load_config(path):
     except:
         sys.exit("CONFIG ERROR: Unable to load config file from: {}, check both path and syntax.".format(path))
 
+    config["classes"].insert(0, {"title": "Background", "color": "white"})  # Insert white Background
+
     return config
 
 
@@ -42,7 +44,7 @@ def check_classes(config):
     if "classes" not in config.keys():
         sys.exit("CONFIG ERROR: At least one class is mandatory.")
 
-    if len(config["classes"]) > 2:
+    if len(config["classes"]) != 2:
         sys.exit("CONFIG ERROR: For now, only binary classifications are available.")
 
     for classe in config["classes"]:
