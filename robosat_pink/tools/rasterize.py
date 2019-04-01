@@ -31,6 +31,7 @@ def add_parser(subparser, formatter_class):
 
     inp = parser.add_argument_group("Inputs [either --postgis or --geojson is required]")
     inp.add_argument("cover", type=str, help="path to csv tiles cover file [required]")
+    inp.add_argument("--pg_dsn", type=str, help="PostgreSQL connection dsn using psycopg2 syntax [required with --postgis]")
     inp.add_argument("--postgis", type=str, help="SELECT query to retrieve geometry features [e.g SELECT geom FROM table]")
     inp.add_argument("--geojson", type=str, help="path to GeoJSON features files [e.g /foo/bar/*.json] ")
     inp.add_argument("--config", type=str, help="path to config file [required]")
@@ -111,6 +112,9 @@ def main(args):
 
     if (args.geojson and args.postgis) or (not args.geojson and not args.postgis):
         sys.exit("ERROR: Input features to rasterize must be either GeoJSON or PostGIS")
+
+    if args.postgis and not args.pg_dsn:
+        sys.exit("ERROR: With PostGIS input features, --pg_dsn must be provided")
 
     config = load_config(args.config)
     check_classes(config)
@@ -208,10 +212,10 @@ def main(args):
     if args.postgis:
 
         try:
-            pg_conn = psycopg2.connect(config["dataset"]["pg_dsn"])
+            pg_conn = psycopg2.connect(args.pg_dsn)
             pg = pg_conn.cursor()
         except Exception:
-            sys.exit("Unable to connect PostgreSQL: {}".format(config["dataset"]["pg_dsn"]))
+            sys.exit("Unable to connect PostgreSQL: {}".format(args.pg_dsn))
 
         log.log("RoboSat.pink - rasterize - rasterizing tiles from PostGIS on cover {}".format(args.cover))
         log.log(" SQL {}".format(args.postgis))
@@ -261,7 +265,7 @@ SELECT ST_AsBinary(ST_MapAlgebra(rast_a.rast, rast_b.rast, '{}', NULL, 'FIRST'))
 
             except Exception:
                 log.log("Warning: Invalid geometries, skipping {}".format(tile))
-                pg_conn = psycopg2.connect(config["dataset"]["pg_dsn"])
+                pg_conn = psycopg2.connect(args.pg_dsn)
                 pg = pg_conn.cursor()
 
             try:

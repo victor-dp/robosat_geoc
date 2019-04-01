@@ -46,7 +46,6 @@ def main(args):
     config = load_config(args.config)
     args.out = os.path.expanduser(args.out)
     args.workers = torch.cuda.device_count() * 2 if torch.device("cuda") and not args.workers else args.workers
-    config["dataset"]["path"] = args.dataset if args.dataset else config["dataset"]["path"]
     config["model"]["loader"] = args.loader if args.loader else config["model"]["loader"]
     config["model"]["lr"] = args.lr if args.lr else config["model"]["lr"]
     config["model"]["batch_size"] = args.batch_size if args.batch_size else config["model"]["batch_size"]
@@ -54,10 +53,12 @@ def main(args):
     config["model"]["loss"] = args.loss if args.loss else config["model"]["loss"]
     config["model"]["da"] = args.da if args.da else config["model"]["da"]
     config["model"]["dap"] = args.dap if args.dap else config["model"]["dap"]
-    check_dataset(config)
     check_classes(config)
     check_channels(config)
     check_model(config)
+
+    if not os.path.isdir(os.path.expanduser(args.dataset)):
+        sys.exit("ERROR: dataset {} is not a directory".format(args.dataset))
 
     log = Logs(os.path.join(args.out, "log"))
 
@@ -115,11 +116,11 @@ def main(args):
         sys.exit("ERROR: Unable to load {} loss".format(config["model"]["loss"]))
 
     try:
-        train_loader, val_loader = get_dataset_loaders(config["dataset"]["path"], config, args.workers)
+        train_loader, val_loader = get_dataset_loaders(args.dataset, config, args.workers)
     except:
         sys.exit("ERROR: Unable to create data loaders")
 
-    log.log("--- Input tensor from Dataset: {} ---".format(config["dataset"]["path"]))
+    log.log("--- Input tensor from Dataset: {} ---".format(args.dataset))
     num_channel = 1
     for channel in config["channels"]:
         for band in channel["bands"]:

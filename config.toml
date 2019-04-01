@@ -1,10 +1,5 @@
 # RoboSat.pink Configuration
 
-[dataset]
-
-  # Optional PostgreSQL Database connection, using psycopg2 syntax (could be use by rasterize tool)
-  pg_dsn = "host=127.0.0.1 dbname=rsp user=postgres"
-
 
 # Input channels configuration
 # You can, add several channels blocks to compose your input Tensor. Order is meaningful.

@@ -153,8 +153,9 @@ Web UI:
 ```
 ## rsp rasterize
 ```
-usage: rsp rasterize [-h] [--postgis POSTGIS] [--geojson GEOJSON]
-                     [--config CONFIG] [--tile_size TILE_SIZE]
+usage: rsp rasterize [-h] [--pg_dsn PG_DSN] [--postgis POSTGIS]
+                     [--geojson GEOJSON] [--config CONFIG]
+                     [--tile_size TILE_SIZE]
                      [--web_ui_base_url WEB_UI_BASE_URL]
                      [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                      cover out
@@ -164,6 +165,7 @@ optional arguments:
 
 Inputs [either --postgis or --geojson is required]:
  cover                              path to csv tiles cover file [required]
+ --pg_dsn PG_DSN                    PostgreSQL connection dsn using psycopg2 syntax [required with --postgis]
  --postgis POSTGIS                  SELECT query to retrieve geometry features [e.g SELECT geom FROM table]
  --geojson GEOJSON                  path to GeoJSON features files [e.g /foo/bar/*.json] 
  --config CONFIG                    path to config file [required]
