@@ -34,15 +34,15 @@ def main(args):
     print("RoboSat.pink - export to {} - (Torch:{})".format(args.type, torch.__version__))
 
     try:
-        model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"].lower()))
+        model_module = import_module("robosat_pink.models.{}".format(config["model"]["nn"].lower()))
     except:
-        sys.exit("ERROR: Unknown {} model.".format(config["model"]["name"]))
+        sys.exit("ERROR: Unknown {} model.".format(config["model"]["nn"]))
 
     try:
-        net = getattr(model_module, config["model"]["name"])(config).to("cpu")
+        net = getattr(model_module, config["model"]["nn"])(config).to("cpu")
         chkpt = torch.load(args.checkpoint, map_location=map_location)
     except:
-        sys.exit("ERROR: Unable to load {} in {} model.".format(args.checkpoint, config["model"]["name"]))
+        sys.exit("ERROR: Unable to load {} in {} model.".format(args.checkpoint, config["model"]["nn"]))
 
     try:  # https://github.com/pytorch/pytorch/issues/9176
         net.module.state_dict(chkpt["state_dict"])
@@ -63,4 +63,4 @@ def main(args):
         if args.type == "jit":
             torch.jit.trace(net, batch).save(args.out)
     except:
-        sys.exit("ERROR: Unable to export model {} in {}.".format(config["model"]["name"]), args.type)
+        sys.exit("ERROR: Unable to export model {} in {}.".format(config["model"]["nn"]), args.type)

@@ -119,12 +119,27 @@ WorkFlows:
  
 <img alt="Minimal Example" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/minimal.png" />
 
+
+Create a `~/.rsp_config` file:
 ```
-# Configuration
-wget -O ~/.rsp_config https://raw.githubusercontent.com/datapink/robosat.pink/master/config.toml
+[[channels]]
+  name   = "images"
+  bands = [1, 2, 3]
 
-# Data Preparation
+[[classes]]
+  title = "Building"
+  color = "deeppink"
 
+[model]
+  nn = "Albunet"
+  da = "Strong"
+  loss = "Lovasz"
+  loader = "SemSegTiles"
+
+```
+
+Data Preparation:
+```
 rsp cover --bbox 4.8,45.7,4.83,45.73 --zoom 18 cover
 rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' cover images
 
@@ -136,15 +151,14 @@ rsp subset --dir images --filter ds/training/cover ds/training/images
 rsp subset --dir labels --filter ds/training/cover ds/training/labels
 rsp subset --dir images --filter ds/validation/cover ds/validation/images
 rsp subset --dir labels --filter ds/validation/cover ds/validation/labels
+```
 
-
-# Model Training and Prediction
-
-rsp train  --epochs 5 ds models
+Model Training and Prediction:
+```
+rsp train  --epochs 5 --lr 0.000025 --bs 4 ds models
 rsp subset --dir images --filter ds/prediction/cover ds/prediction/images
 rsp predict --checkpoint models/checkpoint-00005-of-00005.pth ds/prediction ds/prediction/masks
 rsp compare --images ds/prediction/images ds/prediction/masks --mode side ds/prediction/compare
-
 ```
 
 DataSet:

@@ -120,9 +120,8 @@ Output:
 ```
 ## rsp predict
 ```
-usage: rsp predict [-h] --checkpoint CHECKPOINT [--config CONFIG]
-                   [--model MODEL] [--ts TS] [--overlap OVERLAP]
-                   [--workers WORKERS] [--bs BS]
+usage: rsp predict [-h] --checkpoint CHECKPOINT [--config CONFIG] [--nn NN]
+                   [--ts TS] [--overlap OVERLAP] [--workers WORKERS] [--bs BS]
                    [--web_ui_base_url WEB_UI_BASE_URL]
                    [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                    tiles out
@@ -134,7 +133,7 @@ Inputs:
  tiles                              tiles directory path [required]
  --checkpoint CHECKPOINT            path to the trained model to use [required]
  --config CONFIG                    path to config file [required]
- --model MODEL                      if set, override model name from config file
+ --nn NN                            if set, override neurals network name from config file
  --ts TS                            if set, override tile size value from config file
  --overlap OVERLAP                  tile pixels overlap [default: 64]
 
@@ -233,7 +232,7 @@ Web UI:
 ## rsp train
 ```
 usage: rsp train [-h] [--config CONFIG] [--loader LOADER] [--workers WORKERS]
-                 [--bs BS] [--lr LR] [--model MODEL] [--loss LOSS] [--da DA]
+                 [--bs BS] [--lr LR] [--nn NN] [--loss LOSS] [--da DA]
                  [--dap DAP] [--epochs EPOCHS] [--resume]
                  [--checkpoint CHECKPOINT]
                  dataset out
@@ -250,7 +249,7 @@ Dataset:
 Hyper Parameters [if set override config file value]:
  --bs BS                  batch_size
  --lr LR                  learning rate
- --model MODEL            model name
+ --nn NN                  neurals network name
  --loss LOSS              model loss
  --da DA                  kind of data augmentation
  --dap DAP                data augmentation probability [default: 1.0]

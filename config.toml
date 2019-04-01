@@ -25,29 +25,29 @@
 
 
 [model]
-  # Model name
-  name = "Albunet"
+  # Neurals Network name
+  nn = "Albunet"
 
   # Pretrained on ImageNet
-  pretrained = true
+  #pretrained = true
 
   # Loss function name
   loss = "Lovasz"
   
   # Batch size for training
-  bs = 4
+  #bs = 4
 
   # Learning rate for the optimizer
-  lr = 0.000025
+  #lr = 0.000025
 
   # Model internal input tile size
-  ts = 512
+  #ts = 512
 
   # Dataset loader name
   loader = "SemSegTiles"
 
   # Kind of data augmentation to apply while training
-  da = "GeoSpatial"
+  da = "Strong"
 
   # Data Augmentation probability
-  dap = 0.75
+  #dap = 0.75

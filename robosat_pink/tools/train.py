@@ -25,7 +25,7 @@ def add_parser(subparser, formatter_class):
     hp = parser.add_argument_group("Hyper Parameters [if set override config file value]")
     hp.add_argument("--bs", type=int, help="batch_size")
     hp.add_argument("--lr", type=float, help="learning rate")
-    hp.add_argument("--model", type=str, help="model name")
+    hp.add_argument("--nn", type=str, help="neurals network name")
     hp.add_argument("--loss", type=str, help="model loss")
     hp.add_argument("--da", type=str, help="kind of data augmentation")
     hp.add_argument("--dap", type=float, default=1.0, help="data augmentation probability [default: 1.0]")
@@ -48,7 +48,7 @@ def main(args):
     config["model"]["loader"] = args.loader if args.loader else config["model"]["loader"]
     config["model"]["bs"] = args.bs if args.bs else config["model"]["bs"]
     config["model"]["lr"] = args.lr if args.lr else config["model"]["lr"]
-    config["model"]["name"] = args.model if args.model else config["model"]["name"]
+    config["model"]["nn"] = args.nn if args.nn else config["model"]["nn"]
     config["model"]["loss"] = args.loss if args.loss else config["model"]["loss"]
     config["model"]["da"] = args.da if args.da else config["model"]["da"]
     config["model"]["dap"] = args.dap if args.dap else config["model"]["dap"]
@@ -72,11 +72,11 @@ def main(args):
         device = torch.device("cpu")
 
     try:
-        model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"].lower()))
+        model_module = import_module("robosat_pink.models.{}".format(config["model"]["nn"].lower()))
     except:
-        sys.exit("ERROR: Unable to load {} model".format(config["model"]["name"]))
+        sys.exit("ERROR: Unable to load {} model".format(config["model"]["nn"]))
 
-    net = getattr(model_module, config["model"]["name"])(config).to(device)
+    net = getattr(model_module, config["model"]["nn"])(config).to(device)
     net = torch.nn.DataParallel(net)
     optimizer = Adam(net.parameters(), lr=config["model"]["lr"])
 

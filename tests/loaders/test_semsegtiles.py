@@ -11,7 +11,7 @@ class TestSemSegTiles(unittest.TestCase):
         path = "tests/fixtures"
         config = {
             "channels": [{"name": "images", "bands": [1, 2, 3]}],
-            "model": {"pretrained": True, "da": "geospatial", "ts": 512},
+            "model": {"pretrained": True, "da": "Strong", "ts": 512},
         }
 
         # mode train
@@ -26,7 +26,7 @@ class TestSemSegTiles(unittest.TestCase):
         path = "tests/fixtures"
         config = {
             "channels": [{"name": "images", "bands": [1, 2, 3]}],
-            "model": {"pretrained": True, "da": "geospatial", "ts": 512},
+            "model": {"pretrained": True, "da": "Strong", "ts": 512},
         }
 
         # mode train

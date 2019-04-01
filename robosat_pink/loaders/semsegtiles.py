@@ -5,7 +5,7 @@ import numpy as np
 import torch.utils.data
 
 from robosat_pink.tiles import tiles_from_slippy_map, tile_image_buffer, tile_image_from_file, tile_label_from_file
-from robosat_pink.transforms.core import to_normalized_tensor
+from robosat_pink.da.core import to_normalized_tensor
 
 
 class SemSegTiles(torch.utils.data.Dataset):

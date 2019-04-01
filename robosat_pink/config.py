@@ -24,6 +24,16 @@ def load_config(path):
 
     config["classes"].insert(0, {"title": "Background", "color": "white"})  # Insert white Background
 
+    # Set default values
+    if "model" not in config.keys():
+        config["model"] = {}
+
+    if "ts" not in config["model"].keys():
+        config["model"]["ts"] = 512
+
+    if "pretrained" not in config["model"].keys():
+        config["model"]["pretrained"] = True
+
     return config
 
 
@@ -57,7 +67,7 @@ def check_classes(config):
 
 def check_model(config):
 
-    hps = {"name": "str", "pretrained": "bool", "loss": "str", "bs": "int", "lr": "float", "ts": "int", "da": "str"}
+    hps = {"nn": "str", "pretrained": "bool", "loss": "str", "ts": "int", "da": "str"}
 
     for hp in hps:
         if hp not in config["model"].keys() or type(config["model"][hp]).__name__ != hps[hp]:

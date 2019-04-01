@@ -28,7 +28,7 @@ def add_parser(subparser, formatter_class):
     inp.add_argument("tiles", type=str, help="tiles directory path [required]")
     inp.add_argument("--checkpoint", type=str, required=True, help="path to the trained model to use [required]")
     inp.add_argument("--config", type=str, help="path to config file [required]")
-    inp.add_argument("--model", type=str, help="if set, override model name from config file")
+    inp.add_argument("--nn", type=str, help="if set, override neurals network name from config file")
     inp.add_argument("--ts", type=int, help="if set, override tile size value from config file")
     inp.add_argument("--overlap", type=int, default=64, help="tile pixels overlap [default: 64]")
 
@@ -55,7 +55,7 @@ def main(args):
     args.workers = torch.cuda.device_count() * 2 if torch.device("cuda") and not args.workers else args.workers
     config["model"]["bs"] = args.bs if args.bs else config["model"]["bs"]
     config["model"]["ts"] = args.ts if args.ts else config["model"]["ts"]
-    config["model"]["name"] = args.model if args.model else config["model"]["name"]
+    config["model"]["nn"] = args.nn if args.nn else config["model"]["nn"]
 
     log = Logs(os.path.join(args.out, "log"))
 
@@ -72,20 +72,20 @@ def main(args):
         return storage.cuda() if torch.cuda.is_available() else storage.cpu()
 
     try:
-        model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"].lower()))
+        model_module = import_module("robosat_pink.models.{}".format(config["model"]["nn"].lower()))
     except:
-        sys.exit("ERROR: Unknown {} model.".format(config["model"]["name"]))
+        sys.exit("ERROR: Unknown {} model.".format(config["model"]["nn"]))
 
     try:
         # FIXME https://github.com/pytorch/pytorch/issues/7178
         chkpt = torch.load(args.checkpoint, map_location=map_location)
 
-        net = getattr(model_module, config["model"]["name"])(config).to(device)
+        net = getattr(model_module, config["model"]["nn"])(config).to(device)
         net = torch.nn.DataParallel(net)
         net.load_state_dict(chkpt["state_dict"])
         net.eval()
     except:
-        sys.exit("ERROR: Unable to load {} in {} model.".format(args.checkpoint, config["model"]["name"]))
+        sys.exit("ERROR: Unable to load {} in {} model.".format(args.checkpoint, config["model"]["nn"]))
 
     loader_module = import_module("robosat_pink.loaders.{}".format(config["model"]["loader"].lower()))
     loader_predict = getattr(loader_module, config["model"]["loader"])(
