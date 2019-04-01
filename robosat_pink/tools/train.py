@@ -15,7 +15,6 @@ from robosat_pink.logs import Logs
 
 def add_parser(subparser, formatter_class):
     parser = subparser.add_parser("train", help="Trains a model on a dataset", formatter_class=formatter_class)
-
     parser.add_argument("--config", type=str, help="path to config file [required]")
 
     data = parser.add_argument_group("Dataset")
@@ -74,19 +73,15 @@ def main(args):
 
     try:
         model_module = import_module("robosat_pink.models.{}".format(config["model"]["name"].lower()))
-        net = getattr(model_module, config["model"]["name"])(config).to(device)
-        net = torch.nn.DataParallel(net)
     except:
         sys.exit("ERROR: Unable to load {} model".format(config["model"]["name"]))
 
-    try:
-        optimizer = Adam(net.parameters(), lr=config["model"]["lr"])
-    except:
-        sys.exit("ERROR: Unable to load optimizer")
+    net = getattr(model_module, config["model"]["name"])(config).to(device)
+    net = torch.nn.DataParallel(net)
+    optimizer = Adam(net.parameters(), lr=config["model"]["lr"])
 
     resume = 0
     if args.checkpoint:
-
         try:
 
             def map_location(storage, _):  # FIXME
@@ -94,20 +89,16 @@ def main(args):
 
             chkpt = torch.load(os.path.expanduser(args.checkpoint), map_location=map_location)
             net.load_state_dict(chkpt["state_dict"])
-
             log.log("Using checkpoint: {}".format(args.checkpoint))
 
-            if args.resume:
-                optimizer.load_state_dict(chkpt["optimizer"])
-                resume = chkpt["epoch"]
-                if resume >= args.epochs:
-                    sys.exit(
-                        "ERROR: Epoch {} set in {} already reached by the checkpoint provided".format(
-                            config["model"]["epochs"], args.config
-                        )
-                    )
         except:
             sys.exit("ERROR: Unable to load {} checkpoint".format(args.checkpoint))
+
+        if args.resume:
+            optimizer.load_state_dict(chkpt["optimizer"])
+            resume = chkpt["epoch"]
+            if resume >= args.epochs:
+                sys.exit("ERROR: Epoch {} already reached by the given checkpoint".format(config["model"]["epochs"]))
 
     try:
         loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"].lower()))
@@ -116,12 +107,18 @@ def main(args):
         sys.exit("ERROR: Unable to load {} loss".format(config["model"]["loss"]))
 
     try:
-        train_loader, val_loader = get_dataset_loaders(args.dataset, config, args.workers)
+        loader = import_module("robosat_pink.loaders.{}".format(config["model"]["loader"].lower()))
+        loader_train = getattr(loader, config["model"]["loader"])(config, os.path.join(args.dataset, "training"), "train")
+        loader_val = getattr(loader, config["model"]["loader"])(config, os.path.join(args.dataset, "validation"), "train")
     except:
-        sys.exit("ERROR: Unable to create data loaders")
+        sys.exit("ERROR: Unable to load data loaders")
+
+    bs = config["model"]["bs"]
+    train_loader = DataLoader(loader_train, batch_size=bs, shuffle=True, drop_last=True, num_workers=args.workers)
+    val_loader = DataLoader(loader_val, batch_size=bs, shuffle=False, drop_last=True, num_workers=args.workers)
 
     log.log("--- Input tensor from Dataset: {} ---".format(args.dataset))
-    num_channel = 1
+    num_channel = 1  # 1-based numerotation
     for channel in config["channels"]:
         for band in channel["bands"]:
             log.log("Channel {}:\t\t {}[band: {}]".format(num_channel, channel["name"], band))
@@ -132,44 +129,25 @@ def main(args):
         log.log("{}{}".format(hp.ljust(25, " "), config["model"][hp]))
 
     for epoch in range(resume, args.epochs):
-        log.log("---")
-        log.log("Epoch: {}/{}".format(epoch + 1, args.epochs))
+        log.log("---{}Epoch: {}/{}".format(os.linesep, epoch + 1, args.epochs))
 
-        train_hist = train(train_loader, config, device, net, optimizer, criterion)
-        log.log(
-            "Train    loss: {:.4f}, mIoU: {:.3f}, {} IoU: {:.3f}, MCC: {:.3f}".format(
-                train_hist["loss"],
-                train_hist["miou"],
-                config["classes"][1]["title"],
-                train_hist["fg_iou"],
-                train_hist["mcc"],
-            )
-        )
+        train(train_loader, config, log, device, net, optimizer, criterion)
+        validate(val_loader, config, log, device, net, criterion)
 
+        states = {"epoch": epoch + 1, "state_dict": net.state_dict(), "optimizer": optimizer.state_dict()}
+        checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}-of-{:05d}.pth".format(epoch + 1, args.epochs))
         try:
-            val_hist = validate(val_loader, config, device, net, criterion)
-        except:
-            sys.exit("ERROR: train error")
-        log.log(
-            "Validate loss: {:.4f}, mIoU: {:.3f}, {} IoU: {:.3f}, MCC: {:.3f}".format(
-                val_hist["loss"], val_hist["miou"], config["classes"][1]["title"], val_hist["fg_iou"], val_hist["mcc"]
-            )
-        )
-
-        try:
-            states = {"epoch": epoch + 1, "state_dict": net.state_dict(), "optimizer": optimizer.state_dict()}
-            checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}-of-{:05d}.pth".format(epoch + 1, args.epochs))
             torch.save(states, checkpoint_path)
         except:
             sys.exit("ERROR: Unable to save checkpoint {}".format(checkpoint_path))
 
 
-def train(loader, config, device, net, optimizer, criterion):
+def train(loader, config, log, device, net, optimizer, criterion):
+
     num_samples = 0
     running_loss = 0
 
     metrics = Metrics()
-
     net.train()
 
     for images, masks, tiles in tqdm(loader, desc="Train", unit="batch", ascii=True):
@@ -177,7 +155,6 @@ def train(loader, config, device, net, optimizer, criterion):
         masks = masks.to(device)
 
         assert images.size()[2:] == masks.size()[1:], "resolutions for images and masks are in sync"
-
         num_samples += int(images.size(0))
 
         optimizer.zero_grad()
@@ -188,9 +165,7 @@ def train(loader, config, device, net, optimizer, criterion):
 
         loss = criterion(outputs, masks, config)
         loss.backward()
-
         optimizer.step()
-
         running_loss += loss.item()
 
         for mask, output in zip(masks, outputs):
@@ -199,15 +174,12 @@ def train(loader, config, device, net, optimizer, criterion):
 
     assert num_samples > 0, "dataset contains training images and labels"
 
-    return {
-        "loss": running_loss / num_samples,
-        "miou": metrics.get_miou(),
-        "fg_iou": metrics.get_fg_iou(),
-        "mcc": metrics.get_mcc(),
-    }
+    log.log("{}{:.3f}".format("Loss:".ljust(25, " "), running_loss / num_samples))
+    for classe in config["classes"][1:]:
+        log.log("{}{:.3f}".format((classe["title"] + " IoU:").ljust(25, " "), metrics.get_fg_iou()))
 
 
-def validate(loader, config, device, net, criterion):
+def validate(loader, config, log, device, net, criterion):
 
     num_samples = 0
     running_loss = 0
@@ -221,8 +193,8 @@ def validate(loader, config, device, net, criterion):
             masks = masks.to(device)
 
             assert images.size()[2:] == masks.size()[1:], "resolutions for images and masks are in sync"
-
             num_samples += int(images.size(0))
+
             outputs = net(images)
 
             assert outputs.size()[2:] == masks.size()[1:], "resolutions for predictions and masks are in sync"
@@ -236,22 +208,6 @@ def validate(loader, config, device, net, criterion):
 
     assert num_samples > 0, "dataset contains validation images and labels"
 
-    return {
-        "loss": running_loss / num_samples,
-        "miou": metrics.get_miou(),
-        "fg_iou": metrics.get_fg_iou(),
-        "mcc": metrics.get_mcc(),
-    }
-
-
-def get_dataset_loaders(path, config, num_workers):
-
-    loader = import_module("robosat_pink.loaders.{}".format(config["model"]["loader"].lower()))
-    loader_train = getattr(loader, config["model"]["loader"])(config, os.path.join(path, "training"), "train")
-    loader_val = getattr(loader, config["model"]["loader"])(config, os.path.join(path, "validation"), "train")
-
-    bs = config["model"]["bs"]
-    train_loader = DataLoader(loader_train, batch_size=bs, shuffle=True, drop_last=True, num_workers=num_workers)
-    val_loader = DataLoader(loader_val, batch_size=bs, shuffle=False, drop_last=True, num_workers=num_workers)
-
-    return train_loader, val_loader
+    log.log("{}{:.3f}".format("Loss:".ljust(25, " "), running_loss / num_samples))
+    for classe in config["classes"][1:]:
+        log.log("{}{:.3f}".format((classe["title"] + " IoU:").ljust(25, " "), metrics.get_fg_iou()))
