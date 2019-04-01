@@ -117,9 +117,13 @@ WorkFlows:
 
 ### A Minimal example ###
  
+ 
+ <img alt="Minimal Example" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/minimal.png" />
+
+ 
 
 1) Config file, in `~/.rsp_config`:
---------------------------------
+
 
 ```
 [[channels]]
@@ -138,7 +142,7 @@ WorkFlows:
 ```
 
 2) Data Preparation:
-------------------
+
 
 ```
 rsp cover --bbox 4.8,45.7,4.83,45.73 --zoom 18 cover
@@ -155,7 +159,7 @@ rsp subset --dir labels --filter ds/validation/cover ds/validation/labels
 ```
 
 3) Model Training and Prediction:
--------------
+
 
 ```
 rsp train  --epochs 5 --lr 0.000025 --bs 4 ds models
@@ -163,9 +167,6 @@ rsp subset --dir images --filter ds/prediction/cover ds/prediction/images
 rsp predict --checkpoint models/checkpoint-00005-of-00005.pth ds/prediction ds/prediction/masks
 rsp compare --images ds/prediction/images ds/prediction/masks --mode side ds/prediction/compare
 ```
-
-
-<img alt="Minimal Example" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/minimal.png" />
 
 
 
