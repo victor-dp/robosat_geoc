@@ -121,9 +121,8 @@ Output:
 ## rsp predict
 ```
 usage: rsp predict [-h] --checkpoint CHECKPOINT [--config CONFIG]
-                   [--model MODEL] [--tile_size TILE_SIZE]
-                   [--tile_overlap TILE_OVERLAP] [--workers WORKERS]
-                   [--batch_size BATCH_SIZE]
+                   [--model MODEL] [--ts TS] [--overlap OVERLAP]
+                   [--workers WORKERS] [--bs BS]
                    [--web_ui_base_url WEB_UI_BASE_URL]
                    [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                    tiles out
@@ -136,15 +135,15 @@ Inputs:
  --checkpoint CHECKPOINT            path to the trained model to use [required]
  --config CONFIG                    path to config file [required]
  --model MODEL                      if set, override model name from config file
- --tile_size TILE_SIZE              if set, override tile size value from config file
- --tile_overlap TILE_OVERLAP        tile pixels overlap [default: 64]
+ --ts TS                            if set, override tile size value from config file
+ --overlap OVERLAP                  tile pixels overlap [default: 64]
 
 Outputs:
  out                                output directory path [required]
 
-Performances:
+Data Loaders:
  --workers WORKERS                  number of workers to load images [default: GPU x 2]
- --batch_size BATCH_SIZE            if set, override batch_size value from config file
+ --bs BS                            if set, override batch size value from config file
 
 Web UI:
  --web_ui_base_url WEB_UI_BASE_URL  alternate Web UI base URL
@@ -154,8 +153,7 @@ Web UI:
 ## rsp rasterize
 ```
 usage: rsp rasterize [-h] [--pg_dsn PG_DSN] [--postgis POSTGIS]
-                     [--geojson GEOJSON] [--config CONFIG]
-                     [--tile_size TILE_SIZE]
+                     [--geojson GEOJSON] [--config CONFIG] [--ts TS]
                      [--web_ui_base_url WEB_UI_BASE_URL]
                      [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                      cover out
@@ -172,7 +170,7 @@ Inputs [either --postgis or --geojson is required]:
 
 Outputs:
  out                                output directory path [required]
- --tile_size TILE_SIZE              output tile size [default: 512]
+ --ts TS                            output tile size [default: 512]
 
 Web UI:
  --web_ui_base_url WEB_UI_BASE_URL  alternate Web UI base URL
@@ -208,7 +206,7 @@ Web UI:
 ## rsp tile
 ```
 usage: rsp tile [-h] [--config CONFIG] [--no_data NO_DATA]
-                [--type {image,label}] --zoom ZOOM [--tile_size TILE_SIZE]
+                [--type {image,label}] --zoom ZOOM [--ts TS]
                 [--web_ui_base_url WEB_UI_BASE_URL]
                 [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                 raster out
@@ -225,7 +223,7 @@ Output:
  out                                output directory path [required]
  --type {image,label}               image or label tiling [default: image]
  --zoom ZOOM                        zoom level of tiles [required]
- --tile_size TILE_SIZE              tile size in pixels [default: 512]
+ --ts TS                            tile size in pixels [default: 512]
 
 Web UI:
  --web_ui_base_url WEB_UI_BASE_URL  alternate Web UI base URL
@@ -235,9 +233,9 @@ Web UI:
 ## rsp train
 ```
 usage: rsp train [-h] [--config CONFIG] [--loader LOADER] [--workers WORKERS]
-                 [--batch_size BATCH_SIZE] [--lr LR] [--model MODEL]
-                 [--loss LOSS] [--da DA] [--dap DAP] [--epochs EPOCHS]
-                 [--resume] [--checkpoint CHECKPOINT]
+                 [--bs BS] [--lr LR] [--model MODEL] [--loss LOSS] [--da DA]
+                 [--dap DAP] [--epochs EPOCHS] [--resume]
+                 [--checkpoint CHECKPOINT]
                  dataset out
 
 optional arguments:
@@ -250,12 +248,12 @@ Dataset:
  --workers WORKERS        number of pre-processing images workers [default: GPUs x 2]
 
 Hyper Parameters [if set override config file value]:
- --batch_size BATCH_SIZE  batch_size
+ --bs BS                  batch_size
  --lr LR                  learning rate
  --model MODEL            model name
  --loss LOSS              model loss
  --da DA                  kind of data augmentation
- --dap DAP                data augmentation probability
+ --dap DAP                data augmentation probability [default: 1.0]
 
 Model Training:
  --epochs EPOCHS          number of epochs to train [default 10]

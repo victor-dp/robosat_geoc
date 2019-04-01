@@ -54,7 +54,7 @@ def main(args):
         for band in channel["bands"]:
             num_channels += 1
 
-    batch = torch.rand(1, num_channels, config["model"]["tile_size"], config["model"]["tile_size"])
+    batch = torch.rand(1, num_channels, config["model"]["ts"], config["model"]["ts"])
 
     try:
         if args.type == "onnx":

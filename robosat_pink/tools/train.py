@@ -9,7 +9,7 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 
 from robosat_pink.metrics import Metrics
-from robosat_pink.config import load_config, check_model, check_channels, check_classes, check_dataset
+from robosat_pink.config import load_config, check_model, check_channels, check_classes
 from robosat_pink.logs import Logs
 
 
@@ -24,12 +24,12 @@ def add_parser(subparser, formatter_class):
     data.add_argument("--workers", type=int, help="number of pre-processing images workers [default: GPUs x 2]")
 
     hp = parser.add_argument_group("Hyper Parameters [if set override config file value]")
-    hp.add_argument("--batch_size", type=int, help="batch_size")
+    hp.add_argument("--bs", type=int, help="batch_size")
     hp.add_argument("--lr", type=float, help="learning rate")
     hp.add_argument("--model", type=str, help="model name")
     hp.add_argument("--loss", type=str, help="model loss")
     hp.add_argument("--da", type=str, help="kind of data augmentation")
-    hp.add_argument("--dap", type=str, help="data augmentation probability")
+    hp.add_argument("--dap", type=float, default=1.0, help="data augmentation probability [default: 1.0]")
 
     mt = parser.add_argument_group("Model Training")
     mt.add_argument("--epochs", type=int, default=10, help="number of epochs to train [default 10]")
@@ -47,8 +47,8 @@ def main(args):
     args.out = os.path.expanduser(args.out)
     args.workers = torch.cuda.device_count() * 2 if torch.device("cuda") and not args.workers else args.workers
     config["model"]["loader"] = args.loader if args.loader else config["model"]["loader"]
+    config["model"]["bs"] = args.bs if args.bs else config["model"]["bs"]
     config["model"]["lr"] = args.lr if args.lr else config["model"]["lr"]
-    config["model"]["batch_size"] = args.batch_size if args.batch_size else config["model"]["batch_size"]
     config["model"]["name"] = args.model if args.model else config["model"]["name"]
     config["model"]["loss"] = args.loss if args.loss else config["model"]["loss"]
     config["model"]["da"] = args.da if args.da else config["model"]["da"]
@@ -250,8 +250,8 @@ def get_dataset_loaders(path, config, num_workers):
     loader_train = getattr(loader, config["model"]["loader"])(config, os.path.join(path, "training"), "train")
     loader_val = getattr(loader, config["model"]["loader"])(config, os.path.join(path, "validation"), "train")
 
-    batch_size = config["model"]["batch_size"]
-    train_loader = DataLoader(loader_train, batch_size=batch_size, shuffle=True, drop_last=True, num_workers=num_workers)
-    val_loader = DataLoader(loader_val, batch_size=batch_size, shuffle=False, drop_last=True, num_workers=num_workers)
+    bs = config["model"]["bs"]
+    train_loader = DataLoader(loader_train, batch_size=bs, shuffle=True, drop_last=True, num_workers=num_workers)
+    val_loader = DataLoader(loader_val, batch_size=bs, shuffle=False, drop_last=True, num_workers=num_workers)
 
     return train_loader, val_loader

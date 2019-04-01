@@ -25,18 +25,6 @@ def load_config(path):
     return config
 
 
-def check_dataset(config):
-    """Check if config file classes subpart is consistent. Exit on error if not."""
-
-    try:
-        assert os.path.isdir(os.path.expanduser(config["dataset"]["path"]))
-    except:
-        sys.exit("CONFIG ERROR: Missing or invalid dataset.path value.")
-
-    check_channels(config)
-    # TODO: check consistency on images/labels (including cover, tile size, bands and no empty tile)
-
-
 def check_channels(config):
     if "channels" not in config.keys():
         sys.exit("CONFIG ERROR: At least one channel is mandatory.")
@@ -67,15 +55,7 @@ def check_classes(config):
 
 def check_model(config):
 
-    hps = {
-        "name": "str",
-        "pretrained": "bool",
-        "loss": "str",
-        "batch_size": "int",
-        "lr": "float",
-        "tile_size": "int",
-        "da": "str",
-    }
+    hps = {"name": "str", "pretrained": "bool", "loss": "str", "bs": "int", "lr": "float", "ts": "int", "da": "str"}
 
     for hp in hps:
         if hp not in config["model"].keys() or type(config["model"][hp]).__name__ != hps[hp]:

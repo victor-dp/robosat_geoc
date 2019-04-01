@@ -32,7 +32,7 @@ def add_parser(subparser, formatter_class):
     out.add_argument("out", type=str, help="output directory path [required]")
     out.add_argument("--type", type=str, choices=choices, default="image", help="image or label tiling [default: image]")
     out.add_argument("--zoom", type=int, required=True, help="zoom level of tiles [required]")
-    out.add_argument("--tile_size", type=int, default=512, help="tile size in pixels [default: 512]")
+    out.add_argument("--ts", type=int, default=512, help="tile size in pixels [default: 512]")
 
     ui = parser.add_argument_group("Web UI")
     ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
@@ -49,7 +49,6 @@ def main(args):
         check_classes(config)
         colors = [classe["color"] for classe in config["classes"]]
 
-    tile_size = args.tile_size
     tiles_nodata = []
 
     print("RoboSat.pink - tile raster {}".format(args.raster))
@@ -73,11 +72,11 @@ def main(args):
                 crs="epsg:3857",
                 resampling=Resampling.bilinear,
                 add_alpha=False,
-                transform=from_bounds(w, s, e, n, args.tile_size, args.tile_size),
+                transform=from_bounds(w, s, e, n, args.ts, args.ts),
                 width=math.ceil((e - w) / transform.a),
                 height=math.ceil((s - n) / transform.e),
             )
-            data = warp_vrt.read(out_shape=(len(raster.indexes), tile_size, tile_size), window=warp_vrt.window(w, s, e, n))
+            data = warp_vrt.read(out_shape=(len(raster.indexes), args.ts, args.ts), window=warp_vrt.window(w, s, e, n))
 
         except:
             sys.exit("Error: Unable to tile {} from raster {}.".format(str(tile), args.raster))

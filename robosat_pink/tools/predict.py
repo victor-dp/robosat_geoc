@@ -29,15 +29,15 @@ def add_parser(subparser, formatter_class):
     inp.add_argument("--checkpoint", type=str, required=True, help="path to the trained model to use [required]")
     inp.add_argument("--config", type=str, help="path to config file [required]")
     inp.add_argument("--model", type=str, help="if set, override model name from config file")
-    inp.add_argument("--tile_size", type=int, help="if set, override tile size value from config file")
-    inp.add_argument("--tile_overlap", type=int, default=64, help="tile pixels overlap [default: 64]")
+    inp.add_argument("--ts", type=int, help="if set, override tile size value from config file")
+    inp.add_argument("--overlap", type=int, default=64, help="tile pixels overlap [default: 64]")
 
     out = parser.add_argument_group("Outputs")
     out.add_argument("out", type=str, help="output directory path [required]")
 
-    perf = parser.add_argument_group("Performances")
+    perf = parser.add_argument_group("Data Loaders")
     perf.add_argument("--workers", type=int, help="number of workers to load images [default: GPU x 2]")
-    perf.add_argument("--batch_size", type=int, help="if set, override batch_size value from config file")
+    perf.add_argument("--bs", type=int, help="if set, override batch size value from config file")
 
     ui = parser.add_argument_group("Web UI")
     ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
@@ -53,8 +53,8 @@ def main(args):
     check_classes(config)
     check_model(config)
     args.workers = torch.cuda.device_count() * 2 if torch.device("cuda") and not args.workers else args.workers
-    config["model"]["batch_size"] = args.batch_size if args.batch_size else config["model"]["batch_size"]
-    config["model"]["tile_size"] = args.tile_size if args.tile_size else config["model"]["tile_size"]
+    config["model"]["bs"] = args.bs if args.bs else config["model"]["bs"]
+    config["model"]["ts"] = args.ts if args.ts else config["model"]["ts"]
     config["model"]["name"] = args.model if args.model else config["model"]["name"]
 
     log = Logs(os.path.join(args.out, "log"))
@@ -89,9 +89,9 @@ def main(args):
 
     loader_module = import_module("robosat_pink.loaders.{}".format(config["model"]["loader"].lower()))
     loader_predict = getattr(loader_module, config["model"]["loader"])(
-        config, args.tiles, mode="predict", overlap=args.tile_overlap
+        config, args.tiles, mode="predict", overlap=args.overlap
     )
-    loader = DataLoader(loader_predict, batch_size=config["model"]["batch_size"], num_workers=args.workers)
+    loader = DataLoader(loader_predict, batch_size=config["model"]["bs"], num_workers=args.workers)
     palette = make_palette(config["classes"][0]["color"], config["classes"][1]["color"])
 
     with torch.no_grad():  # don't track tensors with autograd during prediction

@@ -38,7 +38,7 @@ def add_parser(subparser, formatter_class):
 
     out = parser.add_argument_group("Outputs")
     out.add_argument("out", type=str, help="output directory path [required]")
-    out.add_argument("--tile_size", type=int, default=512, help="output tile size [default: 512]")
+    out.add_argument("--ts", type=int, default=512, help="output tile size [default: 512]")
 
     ui = parser.add_argument_group("Web UI")
     ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
@@ -60,15 +60,15 @@ def geojson_reproject(feature, srid_in, srid_out):
         yield {"coordinates": list(xys), "type": "Polygon"}
 
 
-def geojson_tile_burn(tile, features, srid, tile_size, burn_value=1):
+def geojson_tile_burn(tile, features, srid, ts, burn_value=1):
     """Burn tile with GeoJSON features."""
 
     shapes = ((geometry, burn_value) for feature in features for geometry in geojson_reproject(feature, srid, 3857))
 
     bounds = mercantile.xy_bounds(tile)
-    transform = from_bounds(*bounds, tile_size, tile_size)
+    transform = from_bounds(*bounds, ts, ts)
 
-    return rasterize(shapes, out_shape=(tile_size, tile_size), transform=transform)
+    return rasterize(shapes, out_shape=(ts, ts), transform=transform)
 
 
 def wkb_to_numpy(wkb):
@@ -200,10 +200,10 @@ def main(args):
                 try:
                     if tile in feature_map:
                         cover.write("{},{},{}  {}{}".format(tile.x, tile.y, tile.z, len(feature_map[tile]), os.linesep))
-                        out = geojson_tile_burn(tile, feature_map[tile], 4326, args.tile_size, burn_value)
+                        out = geojson_tile_burn(tile, feature_map[tile], 4326, args.ts, burn_value)
                     else:
                         cover.write("{},{},{}  {}{}".format(tile.x, tile.y, tile.z, 0, os.linesep))
-                        out = np.zeros(shape=(args.tile_size, args.tile_size), dtype=np.uint8)
+                        out = np.zeros(shape=(args.ts, args.ts), dtype=np.uint8)
 
                     tile_label_to_file(args.out, tile, colors, out)
                 except:
@@ -228,8 +228,7 @@ def main(args):
         for tile in tqdm(list(tiles_from_csv(args.cover)), ascii=True, unit="tile"):
 
             s, w, e, n = mercantile.bounds(tile)
-            raster = np.zeros((args.tile_size, args.tile_size))
-            tile_size = args.tile_size
+            raster = np.zeros((args.ts, args.ts))
 
             query = """
 WITH
@@ -254,7 +253,7 @@ WITH
 SELECT ST_AsBinary(ST_MapAlgebra(rast_a.rast, rast_b.rast, '{}', NULL, 'FIRST')) AS wkb FROM rast_a, rast_b
 
 """.format(
-                s, w, e, n, srid, s, w, e, n, tile_size, tile_size, tile_size, args.postgis, burn_value, burn_value
+                s, w, e, n, srid, s, w, e, n, args.ts, args.ts, args.ts, args.postgis, burn_value, burn_value
             )
 
             try:

@@ -39,13 +39,13 @@
   loss = "Lovasz"
   
   # Batch size for training
-  batch_size = 4
+  bs = 4
 
   # Learning rate for the optimizer
   lr = 0.000025
 
   # Model internal input tile size
-  tile_size = 512
+  ts = 512
 
   # Dataset loader name
   loader = "SemSegTiles"

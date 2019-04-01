@@ -146,7 +146,7 @@ def tile_image_buffer(tile, path, overlap=64, bands=None):
     o = overlap
     oo = overlap * 2
     ts = cc.shape[1]
-    assert 0 <= overlap <= ts, "Overlap value can't be either negative or bigger than tile_size"
+    assert 0 <= overlap <= ts, "Overlap value can't be either negative or bigger than tile size"
 
     img = np.zeros((ts + oo, ts + oo, 3)).astype(np.uint8)
 
