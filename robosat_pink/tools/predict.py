@@ -4,15 +4,15 @@ import sys
 from importlib import import_module
 
 import numpy as np
+import mercantile
 
 import torch
 import torch.backends.cudnn
 from torch.utils.data import DataLoader
 
 from tqdm import tqdm
-from PIL import Image
 
-from robosat_pink.tiles import tiles_from_slippy_map
+from robosat_pink.tiles import tiles_from_slippy_map, tile_label_to_file
 from robosat_pink.config import load_config, check_model, check_classes, check_channels
 from robosat_pink.colors import make_palette
 from robosat_pink.web_ui import web_ui
@@ -110,16 +110,12 @@ def main(args):
                 continue
 
             for tile, prob in zip(tiles, probs):
-                x, y, z = list(map(int, tile))
 
                 try:
+                    x, y, z = list(map(int, tile))
                     prob = loader_predict.remove_overlap(prob)  # as we predicted on buffered tiles
-                    image = np.around(prob[1:, :, :]).astype(np.uint8).squeeze()
-
-                    os.makedirs(os.path.join(args.out, str(z), str(x)), exist_ok=True)
-                    out = Image.fromarray(image, mode="P")
-                    out.putpalette(palette)
-                    out.save(os.path.join(args.out, str(z), str(x), str(y) + ".png"), optimize=True)
+                    mask = np.around(prob[1:, :, :]).astype(np.uint8).squeeze()
+                    tile_label_to_file(args.out, mercantile.Tile(x, y, z), palette, mask)
                 except:
                     log.log("WARNING: Skipping tile {}".format(str(tile)))
 

@@ -4,13 +4,11 @@ import time
 import math
 import concurrent.futures as futures
 
-import cv2
-import numpy as np
 import requests
 from tqdm import tqdm
 from mercantile import xy_bounds
 
-from robosat_pink.tiles import tiles_from_csv, tile_image_from_url
+from robosat_pink.tiles import tiles_from_csv, tile_image_from_url, tile_image_to_file
 from robosat_pink.web_ui import web_ui
 from robosat_pink.logs import Logs
 
@@ -93,13 +91,14 @@ def main(args):
                     url = args.url.format(xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
 
                 res = tile_image_from_url(session, url, args.timeout)
-                if not res:  # let's retry once
+                if res is None:  # let's retry once
                     res = tile_image_from_url(session, url, args.timeout)
-                    if not res:
+                    if res is None:
                         return tile, url, False
 
                 try:
-                    cv2.imwrite(path, cv2.imdecode(np.fromstring(res.read(), np.uint8), cv2.IMREAD_COLOR))
+                    tile_image_to_file(args.out, tile, res)
+                    # cv2.imwrite(path, cv2.imdecode(np.fromstring(res.read(), np.uint8), cv2.IMREAD_COLOR))
                 except OSError:
                     return tile, url, False
 

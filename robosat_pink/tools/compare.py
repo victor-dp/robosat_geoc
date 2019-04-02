@@ -8,11 +8,10 @@ import concurrent.futures as futures
 from PIL import Image
 from tqdm import tqdm
 import numpy as np
-import cv2
 
 from mercantile import feature
 
-from robosat_pink.tiles import tiles_from_slippy_map, tile_from_slippy_map, tile_image_from_file
+from robosat_pink.tiles import tiles_from_slippy_map, tile_from_slippy_map, tile_image_from_file, tile_image_to_file
 from robosat_pink.metrics import Metrics
 from robosat_pink.web_ui import web_ui
 from robosat_pink.logs import Logs
@@ -146,8 +145,7 @@ def main(args):
                     else:
                         side[:, i * image_shape[0] : (i + 1) * image_shape[0], :] = img
 
-                os.makedirs(os.path.join(args.out, z, x), exist_ok=True)
-                cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.format), np.uint8(side))
+                tile_image_to_file(args.out, tile, np.uint8(side))
 
             elif args.mode == "stack":
                 for i, root in enumerate(args.images):
@@ -160,8 +158,7 @@ def main(args):
                         assert image_shape == tile_image.shape[0:2], "Unconsistent image size to compare"
                         stack = stack + (tile_image / len(args.images))
 
-                os.makedirs(os.path.join(args.out, str(z), str(x)), exist_ok=True)
-                cv2.imwrite(os.path.join(args.out, str(z), str(x), "{}.{}").format(y, args.format), np.uint8(stack))
+                tile_image_to_file(args.out, tile, np.uint8(stack))
 
             elif args.mode == "list":
                 tiles_list.append([tile, fg_ratio, qod])

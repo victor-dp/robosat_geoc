@@ -11,11 +11,10 @@ import warnings
 import numpy as np
 from PIL import Image
 from rasterio import open as rasterio_open
+import cv2
 
 import csv
 import mercantile
-
-from robosat_pink.colors import make_palette, complementary_palette
 
 warnings.simplefilter("ignore", UserWarning)  # To prevent rasterio NotGeoreferencedWarning
 
@@ -90,6 +89,20 @@ def tile_image_from_file(path, bands=None):
     return image
 
 
+def tile_image_to_file(root, tile, image):
+    """ Write an image tile on disk. """
+
+    out_path = os.path.join(os.path.expanduser(root), str(tile.z), str(tile.x))
+    os.makedirs(out_path, exist_ok=True)
+
+    if image.shape[2] > 3:
+        ext = "tiff"
+    else:
+        ext = "webp"
+
+    cv2.imwrite(os.path.join(out_path, "{}.{}").format(str(tile.y), ext), cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+
+
 def tile_label_from_file(path):
     """Return a numpy array, from a label file path, or None."""
 
@@ -99,15 +112,15 @@ def tile_label_from_file(path):
         return None
 
 
-def tile_label_to_file(root, tile, colors, label):
+def tile_label_to_file(root, tile, palette, label):
     """ Write a label tile on disk. """
 
     out_path = os.path.join(os.path.expanduser(root), str(tile.z), str(tile.x))
     os.makedirs(out_path, exist_ok=True)
 
     out = Image.fromarray(label, mode="P")
-    out.putpalette(complementary_palette(make_palette(colors[0], colors[1])))
-    out.save(os.path.join(out_path, "{}.png".format(tile.y)), optimize=True)
+    out.putpalette(palette)
+    out.save(os.path.join(out_path, "{}.png".format(str(tile.y))), optimize=True)
 
 
 def tile_image_from_url(requests_session, url, timeout=10):
@@ -116,7 +129,8 @@ def tile_image_from_url(requests_session, url, timeout=10):
     try:
         resp = requests_session.get(url, timeout=timeout)
         resp.raise_for_status()
-        return io.BytesIO(resp.content)
+        image = np.fromstring(io.BytesIO(resp.content).read(), np.uint8)
+        return cv2.cvtColor(cv2.imdecode(image, cv2.IMREAD_ANYCOLOR), cv2.COLOR_BGR2RGB)
 
     except Exception:
         return None

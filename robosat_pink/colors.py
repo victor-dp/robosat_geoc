@@ -5,15 +5,16 @@ import colorsys
 import webcolors
 
 
-def make_palette(*colors):
+def make_palette(*colors, complementary=False):
     """Builds a PIL color palette from CSS3 color names, or hex values patterns as #RRGGBB."""
 
     assert 0 < len(colors) <= 256
 
     hex_colors = [webcolors.CSS3_NAMES_TO_HEX[color] if color[0] != "#" else color for color in colors]
     rgb_colors = [(int(h[1:3], 16), int(h[3:5], 16), int(h[5:7], 16)) for h in hex_colors]
+    palette = list(sum(rgb_colors, ()))
 
-    return list(sum(rgb_colors, ()))
+    return palette if not complementary else complementary_palette(palette)
 
 
 def complementary_palette(palette):

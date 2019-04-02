@@ -79,10 +79,12 @@ it_post:
 	@echo "==================================================================================="
 	@rsp export --checkpoint it/pth/checkpoint-00005-of-00005.pth --config config.toml --type jit it/pth/export.jit
 	@rsp export --checkpoint it/pth/checkpoint-00005-of-00005.pth --config config.toml --type onnx it/pth/export.onnx
-	@rsp predict --config config.toml --bs 4 --checkpoint it/pth/checkpoint-00005-of-00005.pth it/prediction it/masks
-	@rsp compare --images it/prediction/images it/prediction/labels it/masks --mode stack --labels it/prediction/labels --masks it/masks it/compare
-	@rsp compare --mode list --labels it/prediction/labels --maximum_qod 75 --minimum_fg 5 --masks it/masks --geojson it/compare/tiles.json
-	@rsp vectorize --type Building --config config.toml it/masks it/vector.json
+	@rsp predict --config config.toml --bs 4 --checkpoint it/pth/checkpoint-00005-of-00005.pth it/prediction it/prediction/masks
+	@rsp compare --images it/prediction/images it/prediction/labels it/prediction/masks --mode stack --labels it/prediction/labels --masks it/prediction/masks it/prediction/compare
+	@rsp compare --images it/prediction/images it/prediction/compare --mode side it/prediction/compare_side
+	@rsp compare --mode list --labels it/prediction/labels --maximum_qod 75 --minimum_fg 5 --masks it/prediction/masks --geojson it/prediction/compare/tiles.json
+	@cp it/prediction/compare/tiles.json it/prediction/compare_side/tiles.json
+	@rsp vectorize --type Building --config config.toml it/prediction/masks it/prediction/vector.json
 
 
 # Documentation generation (tools and config file)

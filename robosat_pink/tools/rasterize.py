@@ -17,6 +17,7 @@ from rasterio.warp import transform
 from supermercado import burntiles
 
 from robosat_pink.config import load_config, check_classes
+from robosat_pink.colors import make_palette
 from robosat_pink.tiles import tiles_from_csv, tile_label_to_file
 from robosat_pink.web_ui import web_ui
 from robosat_pink.logs import Logs
@@ -118,7 +119,7 @@ def main(args):
 
     config = load_config(args.config)
     check_classes(config)
-    colors = [classe["color"] for classe in config["classes"]]
+    palette = make_palette(*[classe["color"] for classe in config["classes"]], complementary=True)
     burn_value = 1
 
     args.out = os.path.expanduser(args.out)
@@ -205,7 +206,7 @@ def main(args):
                         cover.write("{},{},{}  {}{}".format(tile.x, tile.y, tile.z, 0, os.linesep))
                         out = np.zeros(shape=(args.ts, args.ts), dtype=np.uint8)
 
-                    tile_label_to_file(args.out, tile, colors, out)
+                    tile_label_to_file(args.out, tile, palette, out)
                 except:
                     log.log("Warning: Unable to rasterize tile. Skipping {}".format(str(tile)))
 
@@ -268,7 +269,7 @@ SELECT ST_AsBinary(ST_MapAlgebra(rast_a.rast, rast_b.rast, '{}', NULL, 'FIRST'))
                 pg = pg_conn.cursor()
 
             try:
-                tile_label_to_file(args.out, tile, colors, raster)
+                tile_label_to_file(args.out, tile, palette, raster)
             except:
                 log.log("Warning: Unable to rasterize tile. Skipping {}".format(str(tile)))
 
