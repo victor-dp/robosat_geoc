@@ -6,6 +6,7 @@ import concurrent.futures as futures
 
 import numpy as np
 
+import shutil
 import glob
 import mercantile
 
@@ -222,7 +223,7 @@ def main(args):
 
         # Delete suffixes dir
         assert splits_path and os.path.isdir(splits_path)
-        # shutil.rmtree(splits_path)
+        shutil.rmtree(splits_path)
 
     if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
