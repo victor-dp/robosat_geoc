@@ -83,7 +83,7 @@ def tile_image_from_file(path, bands=None):
     image = None
     for i in raster.indexes if bands is None else bands:
         data_band = raster.read(i)
-        data_band = data_band.reshape(data_band.shape[0], data_band.shape[1], 1)  # H, W -> H, W, C
+        data_band = data_band.reshape(data_band.shape[0], data_band.shape[1], 1)  # H,W -> H,W,C
         image = np.concatenate((image, data_band), axis=2) if image is not None else data_band
 
     return image
@@ -100,7 +100,7 @@ def tile_image_to_file(root, tile, image):
     else:
         ext = "webp"
 
-    cv2.imwrite(os.path.join(out_path, "{}.{}").format(str(tile.y), ext), cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+    return cv2.imwrite(os.path.join(out_path, "{}.{}").format(str(tile.y), ext), cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
 
 
 def tile_label_from_file(path):
@@ -118,9 +118,18 @@ def tile_label_to_file(root, tile, palette, label):
     out_path = os.path.join(os.path.expanduser(root), str(tile.z), str(tile.x))
     os.makedirs(out_path, exist_ok=True)
 
+    if len(label.shape) == 3:  # H,W,C -> H,W
+        assert label.shape[2] == 1
+        label = label.reshape((label.shape[0], label.shape[1]))
+
     out = Image.fromarray(label, mode="P")
     out.putpalette(palette)
-    out.save(os.path.join(out_path, "{}.png".format(str(tile.y))), optimize=True)
+
+    try:
+        out.save(os.path.join(out_path, "{}.png".format(str(tile.y))), optimize=True)
+        return True
+    except:
+        return False
 
 
 def tile_image_from_url(requests_session, url, timeout=10):

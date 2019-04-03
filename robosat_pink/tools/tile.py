@@ -2,10 +2,11 @@ import os
 import sys
 import math
 from tqdm import tqdm
+import concurrent.futures as futures
 
 import numpy as np
-from PIL import Image
 
+import glob
 import mercantile
 
 from rasterio import open as rasterio_open
@@ -15,24 +16,31 @@ from rasterio.warp import transform_bounds, calculate_default_transform
 from rasterio.transform import from_bounds
 
 from robosat_pink.config import load_config, check_classes
+from robosat_pink.tiles import (
+    tile_image_to_file,
+    tile_label_to_file,
+    tile_from_slippy_map,
+    tile_image_from_file,
+    tile_label_from_file,
+)
 from robosat_pink.colors import make_palette
 from robosat_pink.web_ui import web_ui
 
 
 def add_parser(subparser, formatter_class):
-    parser = subparser.add_parser("tile", help="Tile a raster", formatter_class=formatter_class)
+    parser = subparser.add_parser("tile", help="Tile a raster, or a rasters coverage", formatter_class=formatter_class)
 
     inp = parser.add_argument_group("Inputs")
-    inp.add_argument("raster", type=str, help="path to the raster to tile [required]")
+    inp.add_argument("rasters", type=str, help="path to raster files to tile [required]")
     inp.add_argument("--config", type=str, help="path to config file [required in label mode]")
-    inp.add_argument("--no_data", type=int, help="no data value [0-255]. If set, skip tile with at least one no data border")
+    inp.add_argument("--workers", type=int, help="number of workers [default: CPU / 2]")
 
     out = parser.add_argument_group("Output")
     choices = ["image", "label"]
-    out.add_argument("out", type=str, help="output directory path [required]")
-    out.add_argument("--type", type=str, choices=choices, default="image", help="image or label tiling [default: image]")
     out.add_argument("--zoom", type=int, required=True, help="zoom level of tiles [required]")
+    out.add_argument("--mode", type=str, choices=choices, default="image", help="image or label tiling [default: image]")
     out.add_argument("--ts", type=int, default=512, help="tile size in pixels [default: 512]")
+    out.add_argument("out", type=str, help="output directory path [required]")
 
     ui = parser.add_argument_group("Web UI")
     ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
@@ -42,89 +50,181 @@ def add_parser(subparser, formatter_class):
     parser.set_defaults(func=main)
 
 
+def is_border(image, no_data=0):
+    """ Return a Boolean upon if at least one pixel border from the image is no_data, on all bands."""
+    return (
+        np.all(image[0, :, :] == no_data)
+        or np.all(image[-1, :, :] == no_data)
+        or np.all(image[:, 0, :] == no_data)
+        or np.all(image[:, -1, :] == no_data)
+    )
+
+
 def main(args):
 
-    if args.type == "label":
+    if not args.workers:
+        args.workers = max(1, math.floor(os.cpu_count() * 0.5))
+
+    if args.mode == "label":
         config = load_config(args.config)
         check_classes(config)
         colors = [classe["color"] for classe in config["classes"]]
+        palette = make_palette(*colors)
 
-    tiles_nodata = []
+    paths = glob.glob(os.path.expanduser(args.rasters))
+    splits_path = os.path.join(os.path.expanduser(args.out), ".splits")
+    tiles_map = {}
 
-    print("RoboSat.pink - tile raster {}".format(args.raster))
+    print("RoboSat.pink - tile on CPU, with {} workers".format(args.workers))
 
-    try:
-        raster = rasterio_open(args.raster)
-        w, s, e, n = bounds = transform_bounds(raster.crs, "EPSG:4326", *raster.bounds)
-        transform, _, _ = calculate_default_transform(raster.crs, "EPSG:3857", raster.width, raster.height, *bounds)
+    bands = -1
+    for path in paths:
+        try:
+            raster = rasterio_open(path)
+            w, s, e, n = transform_bounds(raster.crs, "EPSG:4326", *raster.bounds)
+        except:
+            sys.exit("Error: Unable to load raster {} or deal with it's projection".format(args.raster))
+
+        if bands != -1:
+            assert bands == len(raster.indexes), "Coverage must be bands consistent"
+        bands = len(raster.indexes)
+
         tiles = [mercantile.Tile(x=x, y=y, z=z) for x, y, z in mercantile.tiles(w, s, e, n, args.zoom)]
-    except:
-        sys.exit("Error: Unable to load raster {} or deal with it's projection".format(args.raster))
+        for tile in tiles:
+            tile_key = (str(tile.x), str(tile.y), str(tile.z))
+            if tile_key not in tiles_map.keys():
+                tiles_map[tile_key] = []
+            tiles_map[tile_key].append(path)
 
-    for tile in tqdm(tiles, desc="Tiling", unit="tile", ascii=True):
+    if args.mode == "label":
+        ext = "png"
+        bands = 1
+    if args.mode == "image":
+        if bands == 1:
+            ext = "png"
+        if bands == 3:
+            ext = "webp"
+        if bands > 3:
+            ext = "tiff"
 
-        try:
-            w, s, e, n = mercantile.xy_bounds(tile)
+    tiles = []
+    progress = tqdm(total=len(tiles_map), ascii=True, unit="tile")
+    # Begin to tile plain tiles
+    with futures.ThreadPoolExecutor(args.workers) as executor:
 
-            # inspired by rio-tiler, cf: https://github.com/mapbox/rio-tiler/pull/45
-            warp_vrt = WarpedVRT(
-                raster,
-                crs="epsg:3857",
-                resampling=Resampling.bilinear,
-                add_alpha=False,
-                transform=from_bounds(w, s, e, n, args.ts, args.ts),
-                width=math.ceil((e - w) / transform.a),
-                height=math.ceil((s - n) / transform.e),
-            )
-            data = warp_vrt.read(out_shape=(len(raster.indexes), args.ts, args.ts), window=warp_vrt.window(w, s, e, n))
+        def worker(path):
 
-        except:
-            sys.exit("Error: Unable to tile {} from raster {}.".format(str(tile), args.raster))
+            raster = rasterio_open(path)
+            w, s, e, n = transform_bounds(raster.crs, "EPSG:4326", *raster.bounds)
+            transform, _, _ = calculate_default_transform(raster.crs, "EPSG:3857", raster.width, raster.height, w, s, e, n)
+            tiles = [mercantile.Tile(x=x, y=y, z=z) for x, y, z in mercantile.tiles(w, s, e, n, args.zoom)]
+            tiled = []
 
-        # If no_data is set, remove all tiles with at least one whole border filled only with no_data (on all bands)
-        if type(args.no_data) is not None and (
-            np.all(data[:, 0, :] == args.no_data)
-            or np.all(data[:, -1, :] == args.no_data)
-            or np.all(data[:, :, 0] == args.no_data)
-            or np.all(data[:, :, -1] == args.no_data)
-        ):
-            tiles_nodata.append(tile)
-            continue
+            for tile in tiles:
 
-        path = os.path.join(args.out, str(args.zoom), str(tile.x), str(tile.y))
-        try:
-            os.makedirs(os.path.join(args.out, str(args.zoom), str(tile.x)), exist_ok=True)
+                try:
+                    w, s, e, n = mercantile.xy_bounds(tile)
 
-            C, W, H = data.shape
+                    # inspired by rio-tiler, cf: https://github.com/mapbox/rio-tiler/pull/45
+                    warp_vrt = WarpedVRT(
+                        raster,
+                        crs="epsg:3857",
+                        resampling=Resampling.bilinear,
+                        add_alpha=False,
+                        transform=from_bounds(w, s, e, n, args.ts, args.ts),
+                        width=math.ceil((e - w) / transform.a),
+                        height=math.ceil((s - n) / transform.e),
+                    )
+                    data = warp_vrt.read(
+                        out_shape=(len(raster.indexes), args.ts, args.ts), window=warp_vrt.window(w, s, e, n)
+                    )
+                    image = np.moveaxis(data, 0, 2)  # C,H,W -> H,W,C
+                except:
+                    sys.exit("Error: Unable to tile {} from raster {}.".format(str(tile), raster))
 
-            if args.type == "label":
-                assert C == 1, "Error: Label raster input should be 1 band"  # FIXME: cf #8
+                tile_key = (str(tile.x), str(tile.y), str(tile.z))
+                if args.mode == "image" and len(tiles_map[tile_key]) == 1 and is_border(image):
+                    progress.update()
+                    continue
 
-                ext = "png"
-                img = Image.fromarray(np.squeeze(data, axis=0), mode="P")
-                img.putpalette(make_palette(colors[0], colors[1]))
-                img.save("{}.{}".format(path, ext), optimize=True)
+                if len(tiles_map[tile_key]) > 1:
+                    out = os.path.join(splits_path, str(tiles_map[tile_key].index(path)))
+                else:
+                    out = args.out
 
-            elif args.type == "image":
-                assert C == 1 or C == 3, "Error: Image raster input should be either 1 or 3 bands"
+                x, y, z = map(int, tile)
 
-                # GeoTiff could be 16 or 32bits
-                if data.dtype == "uint16":
-                    data = np.uint8(data / 256)
-                elif data.dtype == "uint32":
-                    data = np.uint8(data / (256 * 256))
+                if args.mode == "image":
+                    ret = tile_image_to_file(out, mercantile.Tile(x=x, y=y, z=z), image)
 
-                if C == 1:
-                    ext = "png"
-                    Image.fromarray(np.squeeze(data, axis=0), mode="L").save("{}.{}".format(path, ext), optimize=True)
-                elif C == 3:
-                    ext = "webp"
-                    Image.fromarray(np.moveaxis(data, 0, 2), mode="RGB").save("{}.{}".format(path, ext), optimize=True)
-        except:
-            sys.exit("Error: Unable to write tile {}".format(path))
+                if args.mode == "label":
+                    ret = tile_label_to_file(out, mercantile.Tile(x=x, y=y, z=z), palette, image)
+
+                if not ret:
+                    sys.exit("Error: Unable to write tile {} from raster {}.".format(str(tile), raster))
+
+                if len(tiles_map[tile_key]) == 1:
+                    progress.update()
+                    tiled.append(mercantile.Tile(x=x, y=y, z=z))
+
+            return tiled
+
+        for tiled in executor.map(worker, paths):
+            if tiled is not None:
+                tiles.extend(tiled)
+
+    # Aggregate remaining tiles splits
+    with futures.ThreadPoolExecutor(args.workers) as executor:
+
+        def worker(tile_key):
+
+            if len(tiles_map[tile_key]) == 1:
+                return
+
+            image = np.zeros((args.ts, args.ts, bands), np.uint8)
+
+            x, y, z = map(int, tile_key)
+            for i in range(len(tiles_map[tile_key])):
+                root = os.path.join(splits_path, str(i))
+                _, path = tile_from_slippy_map(root, x, y, z)
+
+                if args.mode == "image":
+                    split = tile_image_from_file(path)
+
+                if args.mode == "label":
+                    split = tile_label_from_file(path)
+                    split = split.reshape((args.ts, args.ts, 1))  # H,W -> H,W,C
+
+                assert image.shape == split.shape
+                image[:, :, :] += split[:, :, :]
+
+            if args.mode == "image" and is_border(image):
+                progress.update()
+                return
+
+            tile = mercantile.Tile(x=x, y=y, z=z)
+
+            if args.mode == "image":
+                ret = tile_image_to_file(args.out, tile, image)
+
+            if args.mode == "label":
+                ret = tile_label_to_file(args.out, tile, palette, image)
+
+            if not ret:
+                sys.exit("Error: Unable to write tile {}.".format(str(tile_key)))
+
+            progress.update()
+            return tile
+
+        for tiled in executor.map(worker, tiles_map.keys()):
+            if tiled is not None:
+                tiles.append(tiled)
+
+        # Delete suffixes dir
+        assert splits_path and os.path.isdir(splits_path)
+        # shutil.rmtree(splits_path)
 
     if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
-        tiles = [tile for tile in tiles if tile not in tiles_nodata]
         base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
         web_ui(args.out, base_url, tiles, tiles, ext, template)

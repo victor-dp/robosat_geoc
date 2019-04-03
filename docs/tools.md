@@ -204,25 +204,25 @@ Web UI:
 ```
 ## rsp tile
 ```
-usage: rsp tile [-h] [--config CONFIG] [--no_data NO_DATA]
-                [--type {image,label}] --zoom ZOOM [--ts TS]
+usage: rsp tile [-h] [--config CONFIG] [--workers WORKERS] --zoom ZOOM
+                [--mode {image,label}] [--ts TS]
                 [--web_ui_base_url WEB_UI_BASE_URL]
                 [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
-                raster out
+                rasters out
 
 optional arguments:
  -h, --help                         show this help message and exit
 
 Inputs:
- raster                             path to the raster to tile [required]
+ rasters                            path to raster files to tile [required]
  --config CONFIG                    path to config file [required in label mode]
- --no_data NO_DATA                  no data value [0-255]. If set, skip tile with at least one no data border
+ --workers WORKERS                  number of workers [default: CPU / 2]
 
 Output:
- out                                output directory path [required]
- --type {image,label}               image or label tiling [default: image]
  --zoom ZOOM                        zoom level of tiles [required]
+ --mode {image,label}               image or label tiling [default: image]
  --ts TS                            tile size in pixels [default: 512]
+ out                                output directory path [required]
 
 Web UI:
  --web_ui_base_url WEB_UI_BASE_URL  alternate Web UI base URL
