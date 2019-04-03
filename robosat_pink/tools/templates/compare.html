@@ -9,7 +9,7 @@
   <div id="main" style="height:100vh; position:relative; text-align:center">
     <p>Right Arrow: next image to compare, if any.</p>
     <p>Left Arrow: previous image to compare, if any.</p>
-    <p>SpaceBar: select, or unselect, the current image.</p>
+    <p>Shift: select, or unselect, the current image.</p>
     <p>Esc: ask to copy selected images, as a text cover, to clipboard.</p>
   </div>
   <script>
@@ -45,10 +45,10 @@ HINT: If any issue with your browser, use instead, from JS console: console.log(
 load_json("{{tiles}}", function(json)
   { xyz = new XYZ(json); document.addEventListener("keydown", (e) =>
     {
-      if (e.key == "ArrowRight")     { xyz.next() ; display_img(xyz) }
-      if (e.key == "ArrowLeft")      { xyz.prev() ; display_img(xyz) }
-      if (e.key == " " /* Space */ ) { xyz.ping() ; display_img(xyz) }
-      if (e.key == "Escape" )        { window.prompt(msg_sel, xyz.get_sel()) }
+      if (e.key == "ArrowRight") { xyz.next() ; display_img(xyz) }
+      if (e.key == "ArrowLeft")  { xyz.prev() ; display_img(xyz) }
+      if (e.key == "Shift")      { xyz.ping() ; display_img(xyz) }
+      if (e.key == "Escape" )    { window.prompt(msg_sel, xyz.get_sel()) }
     })
   }
 )
