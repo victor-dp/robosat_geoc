@@ -13,7 +13,7 @@ def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
         if os.path.isfile(os.path.expanduser(template)):
             web_ui = open(os.path.expanduser(template), "r").read()
         else:
-            web_ui = open(os.path.join(Path(__file__).parent, "tools", "templates", template), "r").read()
+            web_ui = open(os.path.join(Path(__file__).parent, "templates", template), "r").read()
     except:
         sys.exit("Unable to open Web UI template {}".format(template))
 
