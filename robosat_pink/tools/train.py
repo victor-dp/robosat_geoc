@@ -83,11 +83,7 @@ def main(args):
     resume = 0
     if args.checkpoint:
         try:
-
-            def map_location(storage, _):  # FIXME
-                return storage.cuda() if torch.cuda.is_available() else storage.cpu()
-
-            chkpt = torch.load(os.path.expanduser(args.checkpoint), map_location=map_location)
+            chkpt = torch.load(os.path.expanduser(args.checkpoint), map_location=device)
             net.load_state_dict(chkpt["state_dict"])
             log.log("Using checkpoint: {}".format(args.checkpoint))
 

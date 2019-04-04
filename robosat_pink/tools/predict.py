@@ -68,18 +68,13 @@ def main(args):
         log.log("RoboSat.pink - predict on CPU, with {} workers".format(args.workers))
         device = torch.device("cpu")
 
-    def map_location(storage, _):
-        return storage.cuda() if torch.cuda.is_available() else storage.cpu()
-
     try:
         model_module = import_module("robosat_pink.models.{}".format(config["model"]["nn"].lower()))
     except:
         sys.exit("ERROR: Unknown {} model.".format(config["model"]["nn"]))
 
     try:
-        # FIXME https://github.com/pytorch/pytorch/issues/7178
-        chkpt = torch.load(args.checkpoint, map_location=map_location)
-
+        chkpt = torch.load(args.checkpoint, map_location=device)
         net = getattr(model_module, config["model"]["nn"])(config).to(device)
         net = torch.nn.DataParallel(net)
         net.load_state_dict(chkpt["state_dict"])

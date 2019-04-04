@@ -27,10 +27,6 @@ def main(args):
     check_classes(config)
     check_model(config)
 
-    # FIXME
-    def map_location(storage, _):
-        return storage.cpu()
-
     print("RoboSat.pink - export to {} - (Torch:{})".format(args.type, torch.__version__))
 
     try:
@@ -40,7 +36,7 @@ def main(args):
 
     try:
         net = getattr(model_module, config["model"]["nn"])(config).to("cpu")
-        chkpt = torch.load(args.checkpoint, map_location=map_location)
+        chkpt = torch.load(args.checkpoint, map_location=torch.device("cpu"))
     except:
         sys.exit("ERROR: Unable to load {} in {} model.".format(args.checkpoint, config["model"]["nn"]))
 
