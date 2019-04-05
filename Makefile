@@ -58,7 +58,7 @@ it_pre:
 	@echo "Download PBF" && wget --show-progress -q -O it/lyon.pbf http://datapink.tools/rsp/it/lyon.pbf
 	@rsp extract --type Building it/lyon.pbf it/osm_lyon_footprint.json
 	@rsp rasterize --geojson it/lyon_roofprint.json --config config.toml it/cover it/labels_osm
-	@rsp cover --dir it/images --splits 70,15,15 it/training/cover it/validation/cover it/prediction/cover
+	@rsp cover --dir it/images --splits 70/15/15 it/training/cover it/validation/cover it/prediction/cover
 	@rsp subset --dir it/images --filter it/training/cover it/training/images
 	@rsp subset --dir it/labels --filter it/training/cover it/training/labels
 	@rsp subset --dir it/images --filter it/validation/cover it/validation/images
