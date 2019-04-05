@@ -33,15 +33,18 @@ def add_parser(subparser, formatter_class):
 
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("rasters", type=str, help="path to raster files to tile [required]")
-    inp.add_argument("--config", type=str, help="path to config file [required in label mode]")
-    inp.add_argument("--workers", type=int, help="number of workers [default: CPU / 2]")
 
     out = parser.add_argument_group("Output")
-    choices = ["image", "label"]
     out.add_argument("--zoom", type=int, required=True, help="zoom level of tiles [required]")
-    out.add_argument("--mode", type=str, choices=choices, default="image", help="image or label tiling [default: image]")
     out.add_argument("--ts", type=int, default=512, help="tile size in pixels [default: 512]")
     out.add_argument("out", type=str, help="output directory path [required]")
+
+    lab = parser.add_argument_group("Labels")
+    lab.add_argument("--label", action="store_true", help="if set, generate label tiles")
+    lab.add_argument("--config", type=str, help="path to config file [required in label mode]")
+
+    perf = parser.add_argument_group("Performances")
+    perf.add_argument("--workers", type=int, help="number of workers [default: CPU / 2]")
 
     ui = parser.add_argument_group("Web UI")
     ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
@@ -66,7 +69,7 @@ def main(args):
     if not args.workers:
         args.workers = max(1, math.floor(os.cpu_count() * 0.5))
 
-    if args.mode == "label":
+    if args.label:
         config = load_config(args.config)
         check_classes(config)
         colors = [classe["color"] for classe in config["classes"]]
@@ -97,10 +100,10 @@ def main(args):
                 tiles_map[tile_key] = []
             tiles_map[tile_key].append(path)
 
-    if args.mode == "label":
+    if args.label:
         ext = "png"
         bands = 1
-    if args.mode == "image":
+    if not args.label:
         if bands == 1:
             ext = "png"
         if bands == 3:
@@ -144,7 +147,7 @@ def main(args):
                     sys.exit("Error: Unable to tile {} from raster {}.".format(str(tile), raster))
 
                 tile_key = (str(tile.x), str(tile.y), str(tile.z))
-                if args.mode == "image" and len(tiles_map[tile_key]) == 1 and is_border(image):
+                if not args.label and len(tiles_map[tile_key]) == 1 and is_border(image):
                     progress.update()
                     continue
 
@@ -155,10 +158,9 @@ def main(args):
 
                 x, y, z = map(int, tile)
 
-                if args.mode == "image":
+                if not args.label:
                     ret = tile_image_to_file(out, mercantile.Tile(x=x, y=y, z=z), image)
-
-                if args.mode == "label":
+                if args.label:
                     ret = tile_label_to_file(out, mercantile.Tile(x=x, y=y, z=z), palette, image)
 
                 if not ret:
@@ -189,26 +191,25 @@ def main(args):
                 root = os.path.join(splits_path, str(i))
                 _, path = tile_from_slippy_map(root, x, y, z)
 
-                if args.mode == "image":
+                if not args.label:
                     split = tile_image_from_file(path)
-
-                if args.mode == "label":
+                if args.label:
                     split = tile_label_from_file(path)
                     split = split.reshape((args.ts, args.ts, 1))  # H,W -> H,W,C
 
                 assert image.shape == split.shape
                 image[:, :, :] += split[:, :, :]
 
-            if args.mode == "image" and is_border(image):
+            if not args.label and is_border(image):
                 progress.update()
                 return
 
             tile = mercantile.Tile(x=x, y=y, z=z)
 
-            if args.mode == "image":
+            if not args.label:
                 ret = tile_image_to_file(args.out, tile, image)
 
-            if args.mode == "label":
+            if args.label:
                 ret = tile_label_to_file(args.out, tile, palette, image)
 
             if not ret:
