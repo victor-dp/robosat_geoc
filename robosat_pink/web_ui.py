@@ -26,7 +26,6 @@ def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
         tile = list(coverage_tiles)[0]
         x, y, z = map(int, [tile.x, tile.y, tile.z])
         web_ui = re.sub("{{zoom}}", str(z), web_ui)
-        web_ui = re.sub("{{max_zoom}}", str(z + 3), web_ui)
         web_ui = re.sub("{{center}}", str(list(tile_pixel_to_location(tile, 0.5, 0.5))[::-1]), web_ui)
 
     with open(os.path.join(out, "index.html"), "w", encoding="utf-8") as fp:
