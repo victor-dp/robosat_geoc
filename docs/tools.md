@@ -40,7 +40,8 @@ Web UI:
 ## rsp cover
 ```
 usage: rsp cover [-h] [--dir DIR] [--bbox BBOX] [--geojson GEOJSON]
-                 [--raster RASTER] [--zoom ZOOM] [--splits SPLITS]
+                 [--cover COVER] [--raster RASTER] [--zoom ZOOM]
+                 [--splits SPLITS]
                  out [out ...]
 
 optional arguments:
@@ -50,11 +51,12 @@ Input [one among the following is required]:
  --dir DIR          XYZ tiles dir path
  --bbox BBOX        a lat/lon bbox: xmin,ymin,xmax,ymax or a bbox: xmin,xmin,xmax,xmax,EPSG:xxxx
  --geojson GEOJSON  a geojson file path
+ --cover COVER      a cover file path
  --raster RASTER    a raster file path
 
 Outputs:
  --zoom ZOOM        zoom level of tiles [required with --geojson or --bbox]
- --splits SPLITS    if set, shuffle and split in several cover subpieces. [e.g 50,15,35]
+ --splits SPLITS    if set, shuffle and split in several cover subpieces. [e.g 50/15/35]
  out                cover csv output paths [required]
 ```
 ## rsp download

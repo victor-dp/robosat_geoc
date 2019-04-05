@@ -151,7 +151,7 @@ rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVI
 wget -nc -O lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&BBOX=4.79,45.69,4.84,45.74&outputFormat=application/json; subtype=geojson'
 rsp rasterize --geojson lyon_roofprint.json cover labels
 
-rsp cover --dir images --splits 70,20,10 ds/training/cover ds/validation/cover ds/prediction/cover
+rsp cover --dir images --splits 70/20/10 ds/training/cover ds/validation/cover ds/prediction/cover
 rsp subset --dir images --filter ds/training/cover ds/training/images
 rsp subset --dir labels --filter ds/training/cover ds/training/labels
 rsp subset --dir images --filter ds/validation/cover ds/validation/images

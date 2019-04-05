@@ -11,7 +11,7 @@ from supermercado import burntiles
 from rasterio import open as rasterio_open
 from rasterio.warp import transform_bounds
 
-from robosat_pink.tiles import tiles_from_slippy_map
+from robosat_pink.tiles import tiles_from_slippy_map, tiles_from_csv
 
 
 def add_parser(subparser, formatter_class):
@@ -24,11 +24,12 @@ def add_parser(subparser, formatter_class):
     inp.add_argument("--dir", type=str, help="XYZ tiles dir path")
     inp.add_argument("--bbox", type=str, help="a lat/lon bbox: xmin,ymin,xmax,ymax or a bbox: xmin,xmin,xmax,xmax,EPSG:xxxx")
     inp.add_argument("--geojson", type=str, help="a geojson file path")
+    inp.add_argument("--cover", type=str, help="a cover file path")
     inp.add_argument("--raster", type=str, help="a raster file path")
 
     out = parser.add_argument_group("Outputs")
     out.add_argument("--zoom", type=int, help="zoom level of tiles [required with --geojson or --bbox]")
-    out.add_argument("--splits", type=str, help="if set, shuffle and split in several cover subpieces. [e.g 50,15,35]")
+    out.add_argument("--splits", type=str, help="if set, shuffle and split in several cover subpieces. [e.g 50/15/35]")
     out.add_argument("out", type=str, nargs="+", help="cover csv output paths [required]")
 
     parser.set_defaults(func=main)
@@ -37,10 +38,14 @@ def add_parser(subparser, formatter_class):
 def main(args):
 
     if (
-        int(args.bbox is not None) + int(args.geojson is not None) + int(args.dir is not None) + int(args.raster is not None)
+        int(args.bbox is not None)
+        + int(args.geojson is not None)
+        + int(args.dir is not None)
+        + int(args.raster is not None)
+        + int(args.cover is not None)
         != 1
     ):
-        sys.exit("ERROR: One, and only one, input type must be provided, among: --dir, --bbox or --geojson.")
+        sys.exit("ERROR: One, and only one, input type must be provided, among: --dir, --bbox, --cover or --geojson.")
 
     if args.bbox:
         try:
@@ -56,7 +61,7 @@ def main(args):
     if args.splits:
 
         try:
-            splits = [int(split) for split in args.splits.split(",")]
+            splits = [int(split) for split in args.splits.split("/")]
             assert len(splits) == len(args.out)
             assert sum(splits) == 100
         except:
@@ -105,6 +110,10 @@ def main(args):
     if args.dir:
         print("RoboSat.pink - cover from {}".format(args.dir))
         cover = [tile for tile, _ in tiles_from_slippy_map(args.dir)]
+
+    if args.cover:
+        print("RoboSat.pink - cover from {}".format(args.cover))
+        cover = [tile for tile in tiles_from_csv(args.cover)]
 
     if args.splits:
         shuffle(cover)  # in-place

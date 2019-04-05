@@ -67,7 +67,7 @@ rsp rasterize --geojson ~/rsp_dataset/lyon_roofprint.json ~/rsp_dataset/cover ~/
 Then to create a training / validation dataset, with imagery and related roofprint labels:
 
 ```
-rsp cover --dir ~/rsp_dataset/images --split 70,30 ~/rsp_dataset/training/cover ~/rsp_dataset/validation/cover
+rsp cover --dir ~/rsp_dataset/images --splits 70/30 ~/rsp_dataset/training/cover ~/rsp_dataset/validation/cover
 rsp subset --dir ~/rsp_dataset/images --filter ~/rsp_dataset/training/cover  ~/rsp_dataset/training/images
 rsp subset --dir ~/rsp_dataset/labels --filter ~/rsp_dataset/training/cover  ~/rsp_dataset/training/labels
 rsp subset --dir ~/rsp_dataset/images --filter ~/rsp_dataset/validation/cover  ~/rsp_dataset/validation/images
