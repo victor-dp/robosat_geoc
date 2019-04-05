@@ -134,8 +134,9 @@ def main(args):
             for i, ring in enumerate(polygon["coordinates"]):  # GeoJSON coordinates could be N dimensionals
                 polygon["coordinates"][i] = [[x, y] for point in ring for x, y in zip([point[0]], [point[1]])]
 
-            for tile in burntiles.burn([{"type": "feature", "geometry": polygon}], zoom=zoom):
-                feature_map[mercantile.Tile(*tile)].append({"type": "feature", "geometry": polygon})
+            if polygon["coordinates"]:
+                for tile in burntiles.burn([{"type": "feature", "geometry": polygon}], zoom=zoom):
+                    feature_map[mercantile.Tile(*tile)].append({"type": "feature", "geometry": polygon})
 
         except ValueError:
             log.log("Warning: invalid feature {}, skipping".format(i))
@@ -191,7 +192,7 @@ def main(args):
                         else:
                             feature_map = geojson_parse_geometry(zoom, srid, feature_map, feature["geometry"], i)
                     except:
-                        sys.exit("ERROR: Unable to parse {}. seems not a valid GEOJSON file.".format(geojson_file))
+                        sys.exit("ERROR: Unable to parse {} file. Seems not a valid GEOJSON file.".format(geojson_file))
 
         log.log("RoboSat.pink - rasterize - rasterizing tiles from {} on cover {}".format(args.geojson, args.cover))
         with open(os.path.join(os.path.expanduser(args.out), "instances.cover"), mode="w") as cover:
