@@ -123,7 +123,7 @@ Output:
 ## rsp predict
 ```
 usage: rsp predict [-h] --checkpoint CHECKPOINT [--config CONFIG] [--nn NN]
-                   [--ts TS] [--overlap OVERLAP] [--workers WORKERS] [--bs BS]
+                   [--ts TS] [--workers WORKERS] [--bs BS]
                    [--web_ui_base_url WEB_UI_BASE_URL]
                    [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                    tiles out
@@ -137,14 +137,13 @@ Inputs:
  --config CONFIG                    path to config file [required]
  --nn NN                            if set, override neurals network name from config file
  --ts TS                            if set, override tile size value from config file
- --overlap OVERLAP                  tile pixels overlap [default: 64]
 
 Outputs:
  out                                output directory path [required]
 
 Data Loaders:
  --workers WORKERS                  number of workers to load images [default: GPU x 2]
- --bs BS                            if set, override batch size value from config file
+ --bs BS                            batch size value for data loader [default: 4]
 
 Web UI:
  --web_ui_base_url WEB_UI_BASE_URL  alternate Web UI base URL

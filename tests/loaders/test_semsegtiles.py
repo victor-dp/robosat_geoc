@@ -19,7 +19,7 @@ class TestSemSegTiles(unittest.TestCase):
         self.assertEqual(len(dataset), 3)
 
         # mode predict
-        dataset = SemSegTiles(config, path, "predict", 64)
+        dataset = SemSegTiles(config, path, "predict")
         self.assertEqual(len(dataset), 3)
 
     def test_getitem(self):
@@ -37,7 +37,7 @@ class TestSemSegTiles(unittest.TestCase):
         self.assertEqual(image.shape, torch.Size([3, 512, 512]))
 
         # mode predict
-        dataset = SemSegTiles(config, path, "predict", 64)
+        dataset = SemSegTiles(config, path, "predict")
         images, tiles = dataset[0]
 
         self.assertEqual(type(images), torch.Tensor)

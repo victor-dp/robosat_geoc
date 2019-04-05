@@ -4,16 +4,15 @@ import os
 import numpy as np
 import torch.utils.data
 
-from robosat_pink.tiles import tiles_from_slippy_map, tile_image_buffer, tile_image_from_file, tile_label_from_file
+from robosat_pink.tiles import tiles_from_slippy_map, tile_image_from_file, tile_label_from_file
 from robosat_pink.da.core import to_normalized_tensor
 
 
 class SemSegTiles(torch.utils.data.Dataset):
-    def __init__(self, config, root, mode, overlap=0):
+    def __init__(self, config, root, mode):
         super().__init__()
 
         self.root = os.path.expanduser(root)
-        self.overlap = overlap
         self.config = config
         self.mode = mode
 
@@ -51,11 +50,7 @@ class SemSegTiles(torch.utils.data.Dataset):
                 assert tile == self.tiles[channel["name"]][i][0], "Dataset channel inconsistency"
                 tile, path = self.tiles[channel["name"]][i]
 
-            if self.mode == "predict":
-                image_channel = tile_image_buffer(tile, path, self.overlap, bands)
-
-            if self.mode == "train":
-                image_channel = tile_image_from_file(path, bands)
+            image_channel = tile_image_from_file(path, bands)
 
             assert image_channel is not None, "Dataset channel {} not retrieved: {}".format(channel["name"], path)
             image = np.concatenate((image, image_channel), axis=2) if image is not None else image_channel
@@ -70,9 +65,3 @@ class SemSegTiles(torch.utils.data.Dataset):
 
         if self.mode == "predict":
             return to_normalized_tensor(self.config, self.mode, image), torch.IntTensor([tile.x, tile.y, tile.z])
-
-    def remove_overlap(self, probs):
-        C, W, H = probs.shape
-        o = self.overlap
-
-        return probs[:, o : W - o, o : H - o]
