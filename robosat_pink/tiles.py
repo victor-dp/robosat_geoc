@@ -14,6 +14,7 @@ from rasterio import open as rasterio_open
 import cv2
 
 import csv
+import json
 import mercantile
 
 warnings.simplefilter("ignore", UserWarning)  # To prevent rasterio NotGeoreferencedWarning
@@ -67,6 +68,21 @@ def tiles_from_csv(path):
                 continue
 
             yield mercantile.Tile(*map(int, row))
+
+
+def tiles_to_geojson(tiles):
+    """Convert tiles to their footprint GeoJSON."""
+
+    geojson = '{"type":"FeatureCollection","features":['
+    first = True
+    for tile in tiles:
+        prop = '"properties":{{"x":{},"y":{},"z":{}}}'.format(tile.x, tile.y, tile.z)
+        geom = '"geometry":{}'.format(json.dumps(mercantile.feature(tile, precision=6)["geometry"]))
+        geojson += '{}{{"type":"Feature",{},{}}}'.format("," if not first else "", geom, prop)
+        first = False
+    geojson += "]}"
+
+    return geojson
 
 
 def tile_image_from_file(path, bands=None):

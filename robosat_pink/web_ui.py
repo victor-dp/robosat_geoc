@@ -1,10 +1,8 @@
 import re
 import os
 import sys
-import json
 from pathlib import Path
-from mercantile import feature
-from robosat_pink.tiles import tile_pixel_to_location
+from robosat_pink.tiles import tile_pixel_to_location, tiles_to_geojson
 
 
 def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
@@ -33,11 +31,4 @@ def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
 
     if selected_tiles:
         with open(os.path.join(out, "tiles.json"), "w", encoding="utf-8") as fp:
-            fp.write('{"type":"FeatureCollection","features":[')
-            first = True
-            for tile in selected_tiles:
-                prop = '"properties":{{"x":{},"y":{},"z":{}}}'.format(int(tile.x), int(tile.y), int(tile.z))
-                geom = '"geometry":{}'.format(json.dumps(feature(tile, precision=6)["geometry"]))
-                fp.write('{}{{"type":"Feature",{},{}}}'.format("," if not first else "", geom, prop))
-                first = False
-            fp.write("]}")
+            fp.write(tiles_to_geojson(selected_tiles))
