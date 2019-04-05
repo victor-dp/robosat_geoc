@@ -1,7 +1,6 @@
 import io
 import os
 import sys
-import glob
 import json
 import struct
 import collections
@@ -34,7 +33,7 @@ def add_parser(subparser, formatter_class):
     inp.add_argument("cover", type=str, help="path to csv tiles cover file [required]")
     inp.add_argument("--pg_dsn", type=str, help="PostgreSQL connection dsn using psycopg2 syntax [required with --postgis]")
     inp.add_argument("--postgis", type=str, help="SELECT query to retrieve geometry features [e.g SELECT geom FROM table]")
-    inp.add_argument("--geojson", type=str, help="path to GeoJSON features files [e.g /foo/bar/*.json] ")
+    inp.add_argument("--geojson", type=str, nargs="+", help="path to GeoJSON features files")
     inp.add_argument("--config", type=str, help="path to config file [required]")
 
     out = parser.add_argument_group("Outputs")
@@ -168,9 +167,9 @@ def main(args):
         feature_map = collections.defaultdict(list)
 
         log.log("RoboSat.pink - rasterize - Compute spatial index")
-        for geojson_file in glob.glob(os.path.expanduser(args.geojson)):
+        for geojson_file in args.geojson:
 
-            with open(geojson_file) as geojson:
+            with open(os.path.expanduser(geojson_file)) as geojson:
                 try:
                     feature_collection = json.load(geojson)
                 except:

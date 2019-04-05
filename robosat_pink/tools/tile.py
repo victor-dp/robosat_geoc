@@ -7,7 +7,6 @@ import concurrent.futures as futures
 import numpy as np
 
 import shutil
-import glob
 import mercantile
 
 from rasterio import open as rasterio_open
@@ -32,7 +31,7 @@ def add_parser(subparser, formatter_class):
     parser = subparser.add_parser("tile", help="Tile a raster, or a rasters coverage", formatter_class=formatter_class)
 
     inp = parser.add_argument_group("Inputs")
-    inp.add_argument("rasters", type=str, help="path to raster files to tile [required]")
+    inp.add_argument("rasters", type=str, nargs="+", help="path to raster files to tile [required]")
 
     out = parser.add_argument_group("Output")
     out.add_argument("--zoom", type=int, required=True, help="zoom level of tiles [required]")
@@ -75,14 +74,13 @@ def main(args):
         colors = [classe["color"] for classe in config["classes"]]
         palette = make_palette(*colors)
 
-    paths = glob.glob(os.path.expanduser(args.rasters))
     splits_path = os.path.join(os.path.expanduser(args.out), ".splits")
     tiles_map = {}
 
     print("RoboSat.pink - tile on CPU, with {} workers".format(args.workers))
 
     bands = -1
-    for path in paths:
+    for path in args.rasters:
         try:
             raster = rasterio_open(path)
             w, s, e, n = transform_bounds(raster.crs, "EPSG:4326", *raster.bounds)
@@ -172,7 +170,7 @@ def main(args):
 
             return tiled
 
-        for tiled in executor.map(worker, paths):
+        for tiled in executor.map(worker, args.rasters):
             if tiled is not None:
                 tiles.extend(tiled)
 
