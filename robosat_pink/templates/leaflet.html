@@ -18,11 +18,11 @@ function load_json(url, callback) {
   x.send(null);
 };
 var m = L.map("mapid").setView({{center}}, {{zoom}});
-L.tileLayer("{{base_url}}/{z}/{x}/{y}.{{ext}}").addTo(m);
+L.tileLayer("{{base_url}}/{z}/{x}/{y}.{{ext}}", {maxZoom: {{max_zoom}}, maxNativeZoom: {{zoom}}}).addTo(m);
 
 var grid_style = { "color": "deeppink", "opacity": 0.3, "fill": false }
 load_json("{{tiles}}", function(grid){
-    L.vectorGrid.slicer( grid, { maxZoom: {{zoom}},
+    L.vectorGrid.slicer( grid, { maxZoom: {{max_zoom}},
                                  rendererFactory: L.canvas.tile,
                                  vectorTileLayerStyles: { sliced: grid_style } } ).addTo(m) })
   </script>
