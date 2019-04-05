@@ -18,8 +18,8 @@ function load_json(url, callback) {
   x.send(null);
 };
 var m = L.map("mapid").setView({{center}}, {{zoom}});
+L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png", {opacity: 0.3}).addTo(m);
 L.tileLayer("{{base_url}}/{z}/{x}/{y}.{{ext}}", {maxZoom: {{zoom}}+3, maxNativeZoom: {{zoom}}}).addTo(m);
-L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png", {maxZoom: {{zoom}}-1}).addTo(m);
 
 var grid_style = { "color": "deeppink", "opacity": 0.3, "fill": false }
 load_json("{{tiles}}", function(grid){
