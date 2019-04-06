@@ -29,7 +29,7 @@ def load_config(path):
         config["model"] = {}
 
     if "ts" not in config["model"].keys():
-        config["model"]["ts"] = 512
+        config["model"]["ts"] = (512, 512)
 
     if "pretrained" not in config["model"].keys():
         config["model"]["pretrained"] = True
@@ -67,7 +67,7 @@ def check_classes(config):
 
 def check_model(config):
 
-    hps = {"nn": "str", "pretrained": "bool", "loss": "str", "ts": "int", "da": "str"}
+    hps = {"nn": "str", "pretrained": "bool", "loss": "str", "da": "str"}
 
     for hp in hps:
         if hp not in config["model"].keys() or type(config["model"][hp]).__name__ != hps[hp]:

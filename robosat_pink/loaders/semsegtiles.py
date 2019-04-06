@@ -9,21 +9,25 @@ from robosat_pink.da.core import to_normalized_tensor
 
 
 class SemSegTiles(torch.utils.data.Dataset):
-    def __init__(self, config, root, mode):
+    def __init__(self, config, ts, root, mode):
         super().__init__()
 
         self.root = os.path.expanduser(root)
         self.config = config
         self.mode = mode
 
-        self.tiles = {}
-
         assert mode == "train" or mode == "predict"
 
+        num_channels = 0
+        self.tiles = {}
         for channel in config["channels"]:
             path = os.path.join(self.root, channel["name"])
             self.tiles[channel["name"]] = [(tile, path) for tile, path in tiles_from_slippy_map(path)]
             self.tiles[channel["name"]].sort(key=lambda tile: tile[0])
+            num_channels += len(channel["bands"])
+
+        self.shape_in = (num_channels,) + ts  # C,W,H
+        self.shape_out = (len(config["classes"]),) + ts  # C,W,H
 
         if self.mode == "train":
             path = os.path.join(self.root, "labels")
@@ -60,8 +64,9 @@ class SemSegTiles(torch.utils.data.Dataset):
             mask = tile_label_from_file(self.tiles["labels"][i][1])
             assert mask is not None, "Dataset mask not retrieved"
 
-            image, mask = to_normalized_tensor(self.config, self.mode, image, mask)
+            image, mask = to_normalized_tensor(self.config, self.shape_in[1:3], self.mode, image, mask)
             return image, mask, tile
 
         if self.mode == "predict":
-            return to_normalized_tensor(self.config, self.mode, image), torch.IntTensor([tile.x, tile.y, tile.z])
+            image = to_normalized_tensor(self.config, self.shape_in[1:3], self.mode, image)
+            return image, torch.IntTensor([tile.x, tile.y, tile.z])

@@ -26,21 +26,19 @@ class DecoderBlock(nn.Module):
 
 
 class Albunet(nn.Module):
-    """U-Net inspired encoder-decoder architecture with a ResNet encoder as proposed by Alexander Buslaev.
+    def __init__(self, shape_in, shape_out, pretrained=False):
+        self.doc = """
+            U-Net inspired encoder-decoder architecture with a ResNet encoder as proposed by Alexander Buslaev.
 
-        - https://arxiv.org/abs/1505.04597 - U-Net: Convolutional Networks for Biomedical Image Segmentation
-        - https://arxiv.org/pdf/1804.08024 - Angiodysplasia Detection and Localization Using DCNN
-        - https://arxiv.org/abs/1806.00844 - TernausNetV2: Fully Convolutional Network for Instance Segmentation
-    """
+            - https://arxiv.org/abs/1505.04597 - U-Net: Convolutional Networks for Biomedical Image Segmentation
+            - https://arxiv.org/pdf/1804.08024 - Angiodysplasia Detection and Localization Using DCNN
+            - https://arxiv.org/abs/1806.00844 - TernausNetV2: Fully Convolutional Network for Instance Segmentation
+        """
+        self.version = 1
 
-    def __init__(self, config):
-
-        num_classes = len(config["classes"])
-        pretrained = config["model"]["pretrained"]
         num_filters = 32
-        num_channels = 0
-        for channel in config["channels"]:
-            num_channels += len(channel["bands"])
+        num_channels = shape_in[0]
+        num_classes = shape_out[0]
 
         super().__init__()
 

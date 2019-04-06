@@ -6,8 +6,6 @@ import torch
 import torch.onnx
 import torch.autograd
 
-from robosat_pink.config import load_config, check_classes, check_model
-
 
 def add_parser(subparser, formatter_class):
     parser = subparser.add_parser("export", help="Export a model to ONNX or Torch JIT", formatter_class=formatter_class)
@@ -15,7 +13,6 @@ def add_parser(subparser, formatter_class):
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("--checkpoint", type=str, required=True, help="model checkpoint to load [required]")
     inp.add_argument("--type", type=str, choices=["onnx", "jit"], default="jit", help="output type [default: jit]")
-    inp.add_argument("--config", type=str, help="path to config file [required]")
     out = parser.add_argument_group("Output")
     out.add_argument("out", type=str, help="path to save export model to [required]")
 
@@ -23,40 +20,30 @@ def add_parser(subparser, formatter_class):
 
 
 def main(args):
-    config = load_config(args.config)
-    check_classes(config)
-    check_model(config)
-
-    print("RoboSat.pink - export to {} - (Torch:{})".format(args.type, torch.__version__))
 
     try:
-        model_module = import_module("robosat_pink.models.{}".format(config["model"]["nn"].lower()))
-    except:
-        sys.exit("ERROR: Unknown {} model.".format(config["model"]["nn"]))
-
-    try:
-        net = getattr(model_module, config["model"]["nn"])(config).to("cpu")
         chkpt = torch.load(args.checkpoint, map_location=torch.device("cpu"))
+        assert chkpt["producer_name"] == "RoboSat.pink"
+        model_module = import_module("robosat_pink.models.{}".format(chkpt["nn"].lower()))
+        nn = getattr(model_module, chkpt["nn"])(chkpt["shape_in"], chkpt["shape_out"]).to("cpu")
     except:
-        sys.exit("ERROR: Unable to load {} in {} model.".format(args.checkpoint, config["model"]["nn"]))
+        sys.exit("ERROR: Unable to load checkpoint: {}".format(args.checkpoint))
+
+    print("RoboSat.pink - export model to {}".format(args.type))
+    print("Model: {} - UUID: {} - Torch {}".format(chkpt["nn"], chkpt["uuid"], torch.__version__))
+    print(chkpt["doc_string"])
 
     try:  # https://github.com/pytorch/pytorch/issues/9176
-        net.module.state_dict(chkpt["state_dict"])
+        nn.module.state_dict(chkpt["state_dict"])
     except AttributeError:
-        net.state_dict(chkpt["state_dict"])
-
-    num_channels = 0
-    for channel in config["channels"]:
-        for band in channel["bands"]:
-            num_channels += 1
-
-    batch = torch.rand(1, num_channels, config["model"]["ts"], config["model"]["ts"])
+        nn.state_dict(chkpt["state_dict"])
 
     try:
+        batch = torch.rand(1, *chkpt["shape_in"])
         if args.type == "onnx":
-            torch.onnx.export(net, torch.autograd.Variable(batch), args.out)
+            torch.onnx.export(nn, torch.autograd.Variable(batch), args.out)
 
         if args.type == "jit":
-            torch.jit.trace(net, batch).save(args.out)
+            torch.jit.trace(nn, batch).save(args.out)
     except:
-        sys.exit("ERROR: Unable to export model {} in {}.".format(config["model"]["nn"]), args.type)
+        sys.exit("ERROR: Unable to export model {} in {}.".format(chkpt["uuid"]), args.type)

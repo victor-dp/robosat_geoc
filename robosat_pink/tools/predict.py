@@ -1,6 +1,6 @@
 import os
 import sys
-
+from tqdm import tqdm
 from importlib import import_module
 
 import numpy as np
@@ -10,10 +10,8 @@ import torch
 import torch.backends.cudnn
 from torch.utils.data import DataLoader
 
-from tqdm import tqdm
-
 from robosat_pink.tiles import tiles_from_slippy_map, tile_label_to_file
-from robosat_pink.config import load_config, check_model, check_classes, check_channels
+from robosat_pink.config import load_config, check_classes, check_channels
 from robosat_pink.colors import make_palette
 from robosat_pink.web_ui import web_ui
 from robosat_pink.logs import Logs
@@ -28,8 +26,6 @@ def add_parser(subparser, formatter_class):
     inp.add_argument("tiles", type=str, help="tiles directory path [required]")
     inp.add_argument("--checkpoint", type=str, required=True, help="path to the trained model to use [required]")
     inp.add_argument("--config", type=str, help="path to config file [required]")
-    inp.add_argument("--nn", type=str, help="if set, override neurals network name from config file")
-    inp.add_argument("--ts", type=int, help="if set, override tile size value from config file")
 
     out = parser.add_argument_group("Outputs")
     out.add_argument("out", type=str, help="output directory path [required]")
@@ -51,9 +47,6 @@ def main(args):
     check_channels(config)
     check_classes(config)
     args.workers = torch.cuda.device_count() * 2 if torch.device("cuda") and not args.workers else args.workers
-    config["model"]["ts"] = args.ts if args.ts else config["model"]["ts"]
-    config["model"]["nn"] = args.nn if args.nn else config["model"]["nn"]
-    check_model(config)
 
     log = Logs(os.path.join(args.out, "log"))
 
@@ -67,21 +60,24 @@ def main(args):
         device = torch.device("cpu")
 
     try:
-        model_module = import_module("robosat_pink.models.{}".format(config["model"]["nn"].lower()))
+        chkpt = torch.load(args.checkpoint, map_location=device)
+        assert chkpt["producer_name"] == "RoboSat.pink"
+        model_module = import_module("robosat_pink.models.{}".format(chkpt["nn"].lower()))
+        nn = getattr(model_module, chkpt["nn"])(chkpt["shape_in"], chkpt["shape_out"]).to(device)
+        nn = torch.nn.DataParallel(nn)
+        nn.load_state_dict(chkpt["state_dict"])
+        nn.eval()
     except:
-        sys.exit("ERROR: Unknown {} model.".format(config["model"]["nn"]))
+        sys.exit("ERROR: Unable to load {} checkpoint.".format(args.checkpoint))
+
+    log.log("Model {} - UUID: {}".format(chkpt["nn"], chkpt["uuid"]))
 
     try:
-        chkpt = torch.load(args.checkpoint, map_location=device)
-        net = getattr(model_module, config["model"]["nn"])(config).to(device)
-        net = torch.nn.DataParallel(net)
-        net.load_state_dict(chkpt["state_dict"])
-        net.eval()
+        loader_module = import_module("robosat_pink.loaders.{}".format(chkpt["loader"].lower()))
+        loader_predict = getattr(loader_module, chkpt["loader"])(config, chkpt["shape_in"][1:3], args.tiles, mode="predict")
     except:
-        sys.exit("ERROR: Unable to load {} in {} model.".format(args.checkpoint, config["model"]["nn"]))
+        sys.exit("ERROR: Unable to load {} data loader.".format(chkpt["loader"]))
 
-    loader_module = import_module("robosat_pink.loaders.{}".format(config["model"]["loader"].lower()))
-    loader_predict = getattr(loader_module, config["model"]["loader"])(config, args.tiles, mode="predict")
     loader = DataLoader(loader_predict, batch_size=args.bs, num_workers=args.workers)
     palette = make_palette(config["classes"][0]["color"], config["classes"][1]["color"])
 
@@ -92,7 +88,7 @@ def main(args):
             images = images.to(device)
 
             try:
-                outputs = net(images)
+                outputs = nn(images)
                 probs = torch.nn.functional.softmax(outputs, dim=1).data.cpu().numpy()
             except:
                 log.log("WARNING: Skipping batch:")

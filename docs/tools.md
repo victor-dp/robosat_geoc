@@ -91,9 +91,7 @@ Web UI:
 ```
 ## rsp export
 ```
-usage: rsp export [-h] --checkpoint CHECKPOINT [--type {onnx,jit}]
-                  [--config CONFIG]
-                  out
+usage: rsp export [-h] --checkpoint CHECKPOINT [--type {onnx,jit}] out
 
 optional arguments:
  -h, --help               show this help message and exit
@@ -101,7 +99,6 @@ optional arguments:
 Inputs:
  --checkpoint CHECKPOINT  model checkpoint to load [required]
  --type {onnx,jit}        output type [default: jit]
- --config CONFIG          path to config file [required]
 
 Output:
  out                      path to save export model to [required]
@@ -122,8 +119,8 @@ Output:
 ```
 ## rsp predict
 ```
-usage: rsp predict [-h] --checkpoint CHECKPOINT [--config CONFIG] [--nn NN]
-                   [--ts TS] [--workers WORKERS] [--bs BS]
+usage: rsp predict [-h] --checkpoint CHECKPOINT [--config CONFIG]
+                   [--workers WORKERS] [--bs BS]
                    [--web_ui_base_url WEB_UI_BASE_URL]
                    [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                    tiles out
@@ -135,8 +132,6 @@ Inputs:
  tiles                              tiles directory path [required]
  --checkpoint CHECKPOINT            path to the trained model to use [required]
  --config CONFIG                    path to config file [required]
- --nn NN                            if set, override neurals network name from config file
- --ts TS                            if set, override tile size value from config file
 
 Outputs:
  out                                output directory path [required]
@@ -236,8 +231,8 @@ Web UI:
 ## rsp train
 ```
 usage: rsp train [-h] [--config CONFIG] [--loader LOADER] [--workers WORKERS]
-                 [--bs BS] [--lr LR] [--nn NN] [--loss LOSS] [--da DA]
-                 [--dap DAP] [--epochs EPOCHS] [--resume]
+                 [--bs BS] [--lr LR] [--ts TS] [--nn NN] [--loss LOSS]
+                 [--da DA] [--dap DAP] [--epochs EPOCHS] [--resume]
                  [--checkpoint CHECKPOINT]
                  dataset out
 
@@ -251,8 +246,9 @@ Dataset:
  --workers WORKERS        number of pre-processing images workers [default: GPUs x 2]
 
 Hyper Parameters [if set override config file value]:
- --bs BS                  batch_size
+ --bs BS                  batch size
  --lr LR                  learning rate
+ --ts TS                  tile size
  --nn NN                  neurals network name
  --loss LOSS              model loss
  --da DA                  kind of data augmentation

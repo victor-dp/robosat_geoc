@@ -11,33 +11,35 @@ class TestSemSegTiles(unittest.TestCase):
         path = "tests/fixtures"
         config = {
             "channels": [{"name": "images", "bands": [1, 2, 3]}],
+            "classes": [{"title": "Building", "color": "deeppink"}],
             "model": {"pretrained": True, "da": "Strong", "ts": 512},
         }
 
         # mode train
-        dataset = SemSegTiles(config, path, "train")
+        dataset = SemSegTiles(config, (512, 512), path, "train")
         self.assertEqual(len(dataset), 3)
 
         # mode predict
-        dataset = SemSegTiles(config, path, "predict")
+        dataset = SemSegTiles(config, (512, 512), path, "predict")
         self.assertEqual(len(dataset), 3)
 
     def test_getitem(self):
         path = "tests/fixtures"
         config = {
             "channels": [{"name": "images", "bands": [1, 2, 3]}],
+            "classes": [{"title": "Building", "color": "deeppink"}],
             "model": {"pretrained": True, "da": "Strong", "ts": 512},
         }
 
         # mode train
-        dataset = SemSegTiles(config, path, "train")
+        dataset = SemSegTiles(config, (512, 512), path, "train")
         image, mask, tile = dataset[0]
 
         assert tile == mercantile.Tile(69105, 105093, 18)
         self.assertEqual(image.shape, torch.Size([3, 512, 512]))
 
         # mode predict
-        dataset = SemSegTiles(config, path, "predict")
+        dataset = SemSegTiles(config, (512, 512), path, "predict")
         images, tiles = dataset[0]
 
         self.assertEqual(type(images), torch.Tensor)

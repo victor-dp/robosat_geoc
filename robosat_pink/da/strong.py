@@ -1,6 +1,5 @@
 from albumentations import (
     Compose,
-    Resize,
     IAAAdditiveGaussianNoise,
     GaussNoise,
     OneOf,
@@ -25,12 +24,10 @@ def transform(config, image, mask):
         p = 1
 
     assert 0 <= p <= 1
-    assert 64 < config["model"]["ts"]
 
     # Inspire by: https://albumentations.readthedocs.io/en/latest/examples.html
     return Compose(
         [
-            Resize(config["model"]["ts"], config["model"]["ts"]),
             Flip(),
             Transpose(),
             OneOf([IAAAdditiveGaussianNoise(), GaussNoise()], p=0.2),

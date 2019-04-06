@@ -1,5 +1,6 @@
 import os
 import sys
+import uuid
 from tqdm import tqdm
 from importlib import import_module
 
@@ -23,8 +24,9 @@ def add_parser(subparser, formatter_class):
     data.add_argument("--workers", type=int, help="number of pre-processing images workers [default: GPUs x 2]")
 
     hp = parser.add_argument_group("Hyper Parameters [if set override config file value]")
-    hp.add_argument("--bs", type=int, help="batch_size")
+    hp.add_argument("--bs", type=int, help="batch size")
     hp.add_argument("--lr", type=float, help="learning rate")
+    hp.add_argument("--ts", type=int, help="tile size")
     hp.add_argument("--nn", type=str, help="neurals network name")
     hp.add_argument("--loss", type=str, help="model loss")
     hp.add_argument("--da", type=str, help="kind of data augmentation")
@@ -48,6 +50,7 @@ def main(args):
     config["model"]["loader"] = args.loader if args.loader else config["model"]["loader"]
     config["model"]["bs"] = args.bs if args.bs else config["model"]["bs"]
     config["model"]["lr"] = args.lr if args.lr else config["model"]["lr"]
+    config["model"]["ts"] = args.ts if args.ts else config["model"]["ts"]
     config["model"]["nn"] = args.nn if args.nn else config["model"]["nn"]
     config["model"]["loss"] = args.loss if args.loss else config["model"]["loss"]
     config["model"]["da"] = args.da if args.da else config["model"]["da"]
@@ -72,19 +75,32 @@ def main(args):
         device = torch.device("cpu")
 
     try:
+        loader = import_module("robosat_pink.loaders.{}".format(config["model"]["loader"].lower()))
+        loader_train = getattr(loader, config["model"]["loader"])(
+            config, config["model"]["ts"], os.path.join(args.dataset, "training"), "train"
+        )
+        loader_val = getattr(loader, config["model"]["loader"])(
+            config, config["model"]["ts"], os.path.join(args.dataset, "validation"), "train"
+        )
+    except:
+        sys.exit("ERROR: Unable to load data loaders")
+
+    try:
         model_module = import_module("robosat_pink.models.{}".format(config["model"]["nn"].lower()))
     except:
         sys.exit("ERROR: Unable to load {} model".format(config["model"]["nn"]))
 
-    net = getattr(model_module, config["model"]["nn"])(config).to(device)
-    net = torch.nn.DataParallel(net)
-    optimizer = Adam(net.parameters(), lr=config["model"]["lr"])
+    nn = getattr(model_module, config["model"]["nn"])(
+        loader_train.shape_in, loader_train.shape_out, config["model"]["pretrained"]
+    ).to(device)
+    nn = torch.nn.DataParallel(nn)
+    optimizer = Adam(nn.parameters(), lr=config["model"]["lr"])
 
     resume = 0
     if args.checkpoint:
         try:
             chkpt = torch.load(os.path.expanduser(args.checkpoint), map_location=device)
-            net.load_state_dict(chkpt["state_dict"])
+            nn.load_state_dict(chkpt["state_dict"])
             log.log("Using checkpoint: {}".format(args.checkpoint))
 
         except:
@@ -102,13 +118,6 @@ def main(args):
     except:
         sys.exit("ERROR: Unable to load {} loss".format(config["model"]["loss"]))
 
-    try:
-        loader = import_module("robosat_pink.loaders.{}".format(config["model"]["loader"].lower()))
-        loader_train = getattr(loader, config["model"]["loader"])(config, os.path.join(args.dataset, "training"), "train")
-        loader_val = getattr(loader, config["model"]["loader"])(config, os.path.join(args.dataset, "validation"), "train")
-    except:
-        sys.exit("ERROR: Unable to load data loaders")
-
     bs = config["model"]["bs"]
     train_loader = DataLoader(loader_train, batch_size=bs, shuffle=True, drop_last=True, num_workers=args.workers)
     val_loader = DataLoader(loader_val, batch_size=bs, shuffle=False, drop_last=True, num_workers=args.workers)
@@ -125,12 +134,35 @@ def main(args):
         log.log("{}{}".format(hp.ljust(25, " "), config["model"][hp]))
 
     for epoch in range(resume, args.epochs):
-        log.log("---{}Epoch: {}/{}".format(os.linesep, epoch + 1, args.epochs))
+        UUID = uuid.uuid1()
+        log.log("---{}Epoch: {}/{} -- UUID: {}".format(os.linesep, epoch + 1, args.epochs, UUID))
 
-        train(train_loader, config, log, device, net, optimizer, criterion)
-        validate(val_loader, config, log, device, net, criterion)
+        train(train_loader, config, log, device, nn, optimizer, criterion)
+        validate(val_loader, config, log, device, nn, criterion)
 
-        states = {"epoch": epoch + 1, "state_dict": net.state_dict(), "optimizer": optimizer.state_dict()}
+        try:  # https://github.com/pytorch/pytorch/issues/9176
+            nn_doc = nn.module.doc
+            nn_version = nn.module.version
+        except AttributeError:
+            nn_version = nn.version
+            nn_doc == nn.doc
+
+        states = {
+            "uuid": UUID,
+            "model_version": nn_version,
+            "producer_name": "RoboSat.pink",
+            "producer_version": "0.4.0",
+            "model_licence": "MIT",
+            "domain": "pink.RoboSat",  # reverse-DNS
+            "doc_string": nn_doc,
+            "shape_in": loader_train.shape_in,
+            "shape_out": loader_train.shape_out,
+            "state_dict": nn.state_dict(),
+            "epoch": epoch + 1,
+            "nn": config["model"]["nn"],
+            "optimizer": optimizer.state_dict(),
+            "loader": config["model"]["loader"],
+        }
         checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}-of-{:05d}.pth".format(epoch + 1, args.epochs))
         try:
             torch.save(states, checkpoint_path)
@@ -138,13 +170,13 @@ def main(args):
             sys.exit("ERROR: Unable to save checkpoint {}".format(checkpoint_path))
 
 
-def train(loader, config, log, device, net, optimizer, criterion):
+def train(loader, config, log, device, nn, optimizer, criterion):
 
     num_samples = 0
     running_loss = 0
 
     metrics = Metrics()
-    net.train()
+    nn.train()
 
     for images, masks, tiles in tqdm(loader, desc="Train", unit="batch", ascii=True):
         images = images.to(device)
@@ -154,7 +186,7 @@ def train(loader, config, log, device, net, optimizer, criterion):
         num_samples += int(images.size(0))
 
         optimizer.zero_grad()
-        outputs = net(images)
+        outputs = nn(images)
 
         assert outputs.size()[2:] == masks.size()[1:], "resolutions for predictions and masks are in sync"
         assert outputs.size()[1] == len(config["classes"]), "classes for predictions and dataset are in sync"
@@ -175,13 +207,13 @@ def train(loader, config, log, device, net, optimizer, criterion):
         log.log("{}{:.3f}".format((classe["title"] + " IoU:").ljust(25, " "), metrics.get_fg_iou()))
 
 
-def validate(loader, config, log, device, net, criterion):
+def validate(loader, config, log, device, nn, criterion):
 
     num_samples = 0
     running_loss = 0
 
     metrics = Metrics()
-    net.eval()
+    nn.eval()
 
     with torch.no_grad():
         for images, masks, tiles in tqdm(loader, desc="Validate", unit="batch", ascii=True):
@@ -191,7 +223,7 @@ def validate(loader, config, log, device, net, criterion):
             assert images.size()[2:] == masks.size()[1:], "resolutions for images and masks are in sync"
             num_samples += int(images.size(0))
 
-            outputs = net(images)
+            outputs = nn(images)
 
             assert outputs.size()[2:] == masks.size()[1:], "resolutions for predictions and masks are in sync"
             assert outputs.size()[1] == len(config["classes"]), "classes for predictions and dataset are in sync"
