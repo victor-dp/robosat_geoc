@@ -30,7 +30,7 @@ def add_parser(subparser, formatter_class):
     )
 
     inp = parser.add_argument_group("Inputs [either --postgis or --geojson is required]")
-    inp.add_argument("cover", type=str, help="path to csv tiles cover file [required]")
+    inp.add_argument("--cover", type=str, help="path to csv tiles cover file [required]")
     inp.add_argument("--pg_dsn", type=str, help="PostgreSQL connection dsn using psycopg2 syntax [required with --postgis]")
     inp.add_argument("--postgis", type=str, help="SELECT query to retrieve geometry features [e.g SELECT geom FROM table]")
     inp.add_argument("--geojson", type=str, nargs="+", help="path to GeoJSON features files")

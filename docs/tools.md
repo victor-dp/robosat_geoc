@@ -147,17 +147,18 @@ Web UI:
 ```
 ## rsp rasterize
 ```
-usage: rsp rasterize [-h] [--pg_dsn PG_DSN] [--postgis POSTGIS]
-                     [--geojson GEOJSON [GEOJSON ...]] [--config CONFIG]
-                     [--ts TS] [--web_ui_base_url WEB_UI_BASE_URL]
+usage: rsp rasterize [-h] [--cover COVER] [--pg_dsn PG_DSN]
+                     [--postgis POSTGIS] [--geojson GEOJSON [GEOJSON ...]]
+                     [--config CONFIG] [--ts TS]
+                     [--web_ui_base_url WEB_UI_BASE_URL]
                      [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
-                     cover out
+                     out
 
 optional arguments:
  -h, --help                         show this help message and exit
 
 Inputs [either --postgis or --geojson is required]:
- cover                              path to csv tiles cover file [required]
+ --cover COVER                      path to csv tiles cover file [required]
  --pg_dsn PG_DSN                    PostgreSQL connection dsn using psycopg2 syntax [required with --postgis]
  --postgis POSTGIS                  SELECT query to retrieve geometry features [e.g SELECT geom FROM table]
  --geojson GEOJSON [GEOJSON ...]    path to GeoJSON features files
@@ -174,8 +175,8 @@ Web UI:
 ```
 ## rsp subset
 ```
-usage: rsp subset [-h] --dir DIR --filter FILTER [--move MOVE]
-                  [--delete DELETE] [--web_ui_base_url WEB_UI_BASE_URL]
+usage: rsp subset [-h] --dir DIR --cover COVER [--move MOVE] [--delete DELETE]
+                  [--web_ui_base_url WEB_UI_BASE_URL]
                   [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                   [out]
 
@@ -184,11 +185,11 @@ optional arguments:
 
 Inputs:
  --dir DIR                          to XYZ tiles input dir path [required]
- --filter FILTER                    path to csv cover file to filter dir by [required]
+ --cover COVER                      path to csv cover file to filter dir by [required]
 
 Alternate modes, as default is to copy.:
- --move MOVE                        move filtered tiles from input to output
- --delete DELETE                    delete filtered tiles
+ --move MOVE                        move tiles from input to output
+ --delete DELETE                    delete tiles listed in cover
 
 Output:
  out                                output dir path [required for copy or move]

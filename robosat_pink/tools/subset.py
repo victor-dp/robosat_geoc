@@ -15,11 +15,11 @@ def add_parser(subparser, formatter_class):
     )
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("--dir", type=str, required=True, help="to XYZ tiles input dir path [required]")
-    inp.add_argument("--filter", type=str, required=True, help="path to csv cover file to filter dir by [required]")
+    inp.add_argument("--cover", type=str, required=True, help="path to csv cover file to filter dir by [required]")
 
     mode = parser.add_argument_group("Alternate modes, as default is to copy.")
-    mode.add_argument("--move", type=str, help="move filtered tiles from input to output")
-    mode.add_argument("--delete", type=str, help="delete filtered tiles")
+    mode.add_argument("--move", type=str, help="move tiles from input to output")
+    mode.add_argument("--delete", type=str, help="delete tiles listed in cover")
 
     out = parser.add_argument_group("Output")
     out.add_argument("out", type=str, nargs="?", default=os.getcwd(), help="output dir path [required for copy or move]")
@@ -39,9 +39,9 @@ def main(args):
     args.out = os.path.expanduser(args.out)
     extension = ""
 
-    print("RoboSat.pink - subset {} with filter {}".format(args.dir, args.filter))
+    print("RoboSat.pink - subset {} with cover {}".format(args.dir, args.cover))
 
-    tiles = set(tiles_from_csv(os.path.expanduser(args.filter)))
+    tiles = set(tiles_from_csv(os.path.expanduser(args.cover)))
     for tile in tqdm(tiles, desc="Subset", unit="tiles", ascii=True):
 
         paths = glob(os.path.join(os.path.expanduser(args.dir), str(tile.z), str(tile.x), "{}.*".format(tile.y)))
