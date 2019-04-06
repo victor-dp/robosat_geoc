@@ -12,6 +12,7 @@ So how can we load and qualify OpenData sets in order to create our own training
 
 
 
+
 Retrieve OpenData:
 ------------------
 
@@ -25,6 +26,26 @@ The first step is to set the spatial extent and the <a href="https://wiki.openst
 rsp cover --bbox 4.795,45.628,4.935,45.853 --zoom 18 ds/cover
 ```
 
+Not to forget to create an ad hoc RoboSat.pink config file:
+```bash
+echo '
+[[channels]]
+  name   = "images"
+  bands = [1, 2, 3]
+
+[[classes]]
+  title = "Building"
+  color = "deeppink"
+
+[model]
+  nn = "Albunet"
+  loss = "Lovasz"
+  loader = "SemSegTiles"
+  da = "Strong"
+  bs = 4
+  lr = 0.000025
+' > ~/.rsp_config
+```
 
 To download imagery using <a href="https://www.opengeospatial.org/standards/wms">WMS</a>:
 
@@ -41,13 +62,15 @@ NOTA:
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/images/"><img src="img/from_opendata_to_opendataset/images.png" /></a>
 
 
+
+
 Then to download buildings vector roofprints with <a href="https://www.opengeospatial.org/standards/wfs">WFS</a>, 
 
 ```bash
 wget -O ds/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&outputFormat=application/json; subtype=geojson'
 ```
 
-Roofprint choice is important here, as we use aerial imagery to retrieve patterns. If we used the buildings' footprints instead, the training accuracy would be poorer.
+Roofprint choice is important here, as we use aerial imagery to retrieve patterns. If we used the building's footprints instead, the training accuracy would be poorer.
 
 
 
