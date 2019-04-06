@@ -125,7 +125,9 @@ WorkFlows:
 1) Config file, in `~/.rsp_config`:
 
 
-```
+```bash
+echo '
+
 [[channels]]
   name   = "images"
   bands = [1, 2, 3]
@@ -139,39 +141,41 @@ WorkFlows:
   da = "Strong"
   loss = "Lovasz"
   loader = "SemSegTiles"
+
+' > ~/.rsp_config
 ```
 
 2) Data Preparation:
 
 
-```
-rsp cover --bbox 4.8,45.7,4.83,45.73 --zoom 18 cover
-rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' cover images
+```bash
+rsp cover --bbox 4.8,45.7,4.83,45.73 --zoom 18 ds/cover
+rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' ds/cover ds/images
 
-wget -nc -O lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&BBOX=4.79,45.69,4.84,45.74&outputFormat=application/json; subtype=geojson'
-rsp rasterize --geojson lyon_roofprint.json cover labels
+wget -nc -O ds/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&BBOX=4.79,45.69,4.84,45.74&outputFormat=application/json; subtype=geojson'
+rsp rasterize --geojson ds/lyon_roofprint.json --cover ds/cover ds/labels
 
-rsp cover --dir images --splits 70/20/10 ds/training/cover ds/validation/cover ds/prediction/cover
-rsp subset --dir images --filter ds/training/cover ds/training/images
-rsp subset --dir labels --filter ds/training/cover ds/training/labels
-rsp subset --dir images --filter ds/validation/cover ds/validation/images
-rsp subset --dir labels --filter ds/validation/cover ds/validation/labels
+rsp cover --dir ds/images --splits 70/20/10 ds/training/cover ds/validation/cover ds/prediction/cover
+rsp subset --dir ds/images --cover ds/training/cover ds/training/images
+rsp subset --dir ds/labels --cover ds/training/cover ds/training/labels
+rsp subset --dir ds/images --cover ds/validation/cover ds/validation/images
+rsp subset --dir ds/labels --cover ds/validation/cover ds/validation/labels
 ```
 
 3) Model Training and Prediction:
 
 
-```
-rsp train  --epochs 5 --lr 0.000025 --bs 4 ds models
-rsp subset --dir images --filter ds/prediction/cover ds/prediction/images
-rsp predict --checkpoint models/checkpoint-00005-of-00005.pth ds/prediction ds/prediction/masks
+```bash
+rsp train  --epochs 5 --lr 0.000025 --bs 4 ds ds/models
+rsp subset --dir ds/images --cover ds/prediction/cover ds/prediction/images
+rsp predict --checkpoint ds/models/checkpoint-00005-of-00005.pth ds/prediction ds/prediction/masks
 rsp compare --images ds/prediction/images ds/prediction/masks --mode side ds/prediction/compare
 ```
 
 
 
 DataSet:
---------
+-------
 
 - Training and validation datasets have to be tiled, using <a href="https://en.wikipedia.org/wiki/Tiled_web_map">XYZ tiles format</a>.
 - A Dataset directory, so containing XYZ tiles, can be split as:

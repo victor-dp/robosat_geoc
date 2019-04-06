@@ -21,15 +21,15 @@ We decided to use OpenData from <a href="https://rdata-grandlyon.readthedocs.io/
 
 The first step is to set the spatial extent and the <a href="https://wiki.openstreetmap.org/wiki/Zoom_levels">zoom level</a>:
 
-```
-rsp cover --zoom 18 --bbox 4.795,45.628,4.935,45.853  ~/rsp_dataset/cover
+```bash
+rsp cover --bbox 4.795,45.628,4.935,45.853 --zoom 18 ds/cover
 ```
 
 
 To download imagery using <a href="https://www.opengeospatial.org/standards/wms">WMS</a>:
 
-```
-rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' ~/rsp_dataset/cover ~/rsp_dataset/images
+```bash
+rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' ds/cover ds/images
 ```
 
 NOTA:
@@ -43,8 +43,8 @@ NOTA:
 
 Then to download buildings vector roofprints with <a href="https://www.opengeospatial.org/standards/wfs">WFS</a>, 
 
-```
-wget -O ~/rsp_dataset/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&outputFormat=application/json; subtype=geojson'
+```bash
+wget -O ds/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&outputFormat=application/json; subtype=geojson'
 ```
 
 Roofprint choice is important here, as we use aerial imagery to retrieve patterns. If we used the buildings' footprints instead, the training accuracy would be poorer.
@@ -57,8 +57,8 @@ Prepare DataSet
 
 Now to transform the vector roofprints and raster labels:
 
-```
-rsp rasterize --geojson ~/rsp_dataset/lyon_roofprint.json ~/rsp_dataset/cover ~/rsp_dataset/labels
+```bash
+rsp rasterize --geojson ds/lyon_roofprint.json --cover ds/cover ds/labels
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/labels/"><img src="img/from_opendata_to_opendataset/labels.png" /></a>
@@ -66,12 +66,12 @@ rsp rasterize --geojson ~/rsp_dataset/lyon_roofprint.json ~/rsp_dataset/cover ~/
 
 Then to create a training / validation dataset, with imagery and related roofprint labels:
 
-```
-rsp cover --dir ~/rsp_dataset/images --splits 70/30 ~/rsp_dataset/training/cover ~/rsp_dataset/validation/cover
-rsp subset --dir ~/rsp_dataset/images --filter ~/rsp_dataset/training/cover  ~/rsp_dataset/training/images
-rsp subset --dir ~/rsp_dataset/labels --filter ~/rsp_dataset/training/cover  ~/rsp_dataset/training/labels
-rsp subset --dir ~/rsp_dataset/images --filter ~/rsp_dataset/validation/cover  ~/rsp_dataset/validation/images
-rsp subset --dir ~/rsp_dataset/labels --filter ~/rsp_dataset/validation/cover  ~/rsp_dataset/validation/labels
+```bash
+rsp cover --dir ds/images --splits 70/30 ds/training/cover ds/validation/cover
+rsp subset --dir ds/images --cover ds/training/cover  ds/training/images
+rsp subset --dir ds/labels --cover ds/training/cover  ds/training/labels
+rsp subset --dir ds/images --cover ds/validation/cover  ds/validation/images
+rsp subset --dir ds/labels --cover ds/validation/cover  ds/validation/labels
 ```
 
 Two points to emphasise here:
@@ -84,8 +84,8 @@ Train
 
 Now to launch a first model training:
 
-```
-rsp train --epochs 10 ~/rsp_dataset ~/rsp_dataset/pth
+```bash
+rsp train --epochs 10 ds ds/model
 ```
 
 After ten epochs only, the building IoU metric on validation dataset is about **0.82**. 
@@ -99,8 +99,8 @@ Predictive masks
 
 To create predictive masks from our first model, on the entire coverage:
 
-```
-rsp predict --checkpoint ~/rsp_dataset/pth/checkpoint-00010-of-00010.pth ~/rsp_dataset/images ~/rsp_dataset/masks
+```bash
+rsp predict --checkpoint ds/model/checkpoint-00010-of-00010.pth ds ds/masks
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/masks/"><img src="img/from_opendata_to_opendataset/masks.png" /></a>
@@ -119,10 +119,10 @@ The colour of the patches means:
 
 
 
-```
-rsp compare --images ~/rsp_dataset/images ~/rsp_dataset/labels ~/rsp_dataset/masks --mode stack --labels ~/rsp_dataset/labels --masks ~/rsp_dataset/masks ~/rsp_dataset/compare
+```bash
+rsp compare --images ds/images ds/labels ds/masks --mode stack --labels ds/labels --masks ds/masks ds/compare
 
-rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks --geojson ~/rsp_dataset/compare/tiles.json
+rsp compare --mode list --labels ds/labels --maximum_qod 80 --minimum_fg 5 --masks ds/masks --geojson ds/compare/tiles.json
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare/"><img src="img/from_opendata_to_opendataset/compare.png" /></a>
@@ -140,8 +140,8 @@ It is obvious that some areas are not labelled correctly in the original OpenDat
 To do so, first step is to select the wrongly labelled tiles. The "compare" tool is again helpful,
 as it allows to check several tiles side by side, and to manually select those we want to keep.
 
-```
-rsp compare --mode side --images ~/rsp_dataset/images ~/rsp_dataset/compare --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks  ~/rsp_dataset/compare_side
+```bash
+rsp compare --mode side --images ds/images ds/compare --labels ds/labels --maximum_qod 80 --minimum_fg 5 --masks ds/masks  ds/compare_side
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_side/"><img src="img/from_opendata_to_opendataset/compare_side.png" /></a>
@@ -153,14 +153,17 @@ Filter
 ------
 
 The compare selection produces a csv cover list into the clipboard.
-We store the result in `~rsp_dataset/cover.to_remove`
+We store the result in `ds/to_remove.cover`
+```bash
+wget -O ds/to_remove.cover http://datapink.tools/rsp/opendata_to_opendataset/to_remove.cover
+```
 
 Then we just remove all the tiles from the dataset:
-```
-rsp subset --mode delete --dir ~/rsp_dataset/training/images --filter ~/rsp_dataset/cover.to_remove > /dev/null
-rsp subset --mode delete --dir ~/rsp_dataset/training/labels --filter ~/rsp_dataset/cover.to_remove > /dev/null
-rsp subset --mode delete --dir ~/rsp_dataset/validation/images --filter ~/rsp_dataset/cover.to_remove > /dev/null
-rsp subset --mode delete --dir ~/rsp_dataset/validation/labels --filter ~/rsp_dataset/cover.to_remove > /dev/null
+```bash
+rsp subset --delete --dir ds/training/images --cover ds/to_remove.cover
+rsp subset --delete --dir ds/training/labels --cover ds/to_remove.cover
+rsp subset --delete --dir ds/validation/images --cover ds/to_remove.cover
+rsp subset --delete --dir ds/validation/labels --cover ds/to_remove.cover
 ```
 
 For information, we remove about 500 tiles from this raw dataset in order to clean up obvious inconsistent labelling.
@@ -171,8 +174,8 @@ Train
 
 Having a cleaner training and validation dataset, we can launch a new and longer training:
 
-```
-rsp train --epochs 100 ~/rsp_dataset ~/rsp_dataset/pth_clean
+```bash
+rsp train --epochs 100 ds ds/model_clean
 ```
 
 Building IoU metrics on validation dataset:
@@ -186,12 +189,12 @@ Predict and compare
 
 And now to generate masks prediction, and compare composite images, as previously done:
 
-```
-rsp predict --checkpoint ~/rsp_dataset/pth_clean/checkpoint-00100-of-00100.pth ~/rsp_dataset/images ~/rsp_dataset/masks_clean
+```bash
+rsp predict --checkpoint ds/model_clean/checkpoint-00100-of-00100.pth ds ds/masks_clean
 
-rsp compare --images ~/rsp_dataset/images ~/rsp_dataset/labels ~/rsp_dataset/masks_clean --mode stack --labels ~/rsp_dataset/labels --masks ~/rsp_dataset/masks_clean ~/rsp_dataset/compare_clean
+rsp compare --images ds/images ds/labels ds/masks_clean --mode stack --labels ds/labels --masks ds/masks_clean ds/compare_clean
 
-rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum_fg 5 --masks ~/rsp_dataset/masks_clean --geojson ~/rsp_dataset/compare_clean/tiles.json
+rsp compare --mode list --labels ds/labels --maximum_qod 80 --minimum_fg 5 --masks ds/masks_clean --geojson ds/compare_clean/tiles.json
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_clean/"><img src="img/from_opendata_to_opendataset/compare_clean.png" /></a>
@@ -199,14 +202,14 @@ rsp compare --mode list --labels ~/rsp_dataset/labels --maximum_qod 80 --minimum
 
 And to compare only with filtered validation tiles, in side by side mode: 
 
-```
-rsp cover --type dir ~/rsp_dataset/validation/images  ~/rsp_dataset/validation/cover.clean
+```bash
+rsp cover --dir ds/validation/images  ds/validation/cover.clean
 
-rsp subset --dir ~/rsp_dataset/compare_clean --filter ~/rsp_dataset/validation/cover.clean ~/rsp_dataset/validation/compare_clean
+rsp subset --dir ds/compare_clean --cover ds/validation/cover.clean ds/validation/compare_clean
 
-rsp subset --dir ~/rsp_dataset/masks_clean --filter ~/rsp_dataset/validation/cover.clean ~/rsp_dataset/validation/masks_clean
+rsp subset --dir ds/masks_clean --cover ds/validation/cover.clean ds/validation/masks_clean
 
-rsp compare --mode side --images ~/rsp_dataset/validation/images ~/rsp_dataset/validation/compare_clean --labels ~/rsp_dataset/validation/labels --masks ~/rsp_dataset/validation/masks_clean ~/rsp_dataset/validation/compare_side_clean
+rsp compare --mode side --images ds/validation/images ds/validation/compare_clean --labels ds/validation/labels --masks ds/validation/masks_clean ds/validation/compare_side_clean
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_side_clean/"><img src="img/from_opendata_to_opendataset/compare_side_clean.png" /></a>
