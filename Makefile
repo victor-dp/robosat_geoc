@@ -112,11 +112,13 @@ doc:
 	echo '```'                    >> docs/makefile.md;
 
 
-# Documentation rsp commands check
+# Documentation rsp commands embeded check
 check_doc:
+	@echo "==================================================================================="
 	@echo "#Checking README:"
 	@rm -rf ds && sed -n -e '/```bash/,/```/ p' README.md | sed -e '/```/d' > CHECK && sh CHECK
-	@echo "#From OpenData to OpenDataset: (will take a while)"
+	@echo "==================================================================================="
+	@echo "#Checking OpenData to OpenDataset: (will take a while)"
 	@rm -rf ds && sed -n -e '/```bash/,/```/ p' docs/from_opendata_to_opendataset.md | sed -e '/```/d' > CHECK && sh CHECK
 
 
