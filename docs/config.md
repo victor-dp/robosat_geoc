@@ -52,5 +52,5 @@
   da = "Strong"
 
   # Data Augmentation probability
-  #dap = 0.75
+  #dap = 1.0
 ```
