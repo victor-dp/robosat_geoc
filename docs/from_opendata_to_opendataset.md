@@ -16,11 +16,11 @@ So how can we load and qualify OpenData sets in order to create our own training
 Retrieve OpenData:
 ------------------
 
-We decided to use OpenData from <a href="https://rdata-grandlyon.readthedocs.io/en/latest/">the Grand Lyon metropole</a> because it offers to download recent imagery and several vector layers through standard web services.
+We use OpenData from <a href="https://rdata-grandlyon.readthedocs.io/en/latest/">Grand Lyon metropole</a> because it offers recent imagery and several vector layers throught standard Web Services.
 
 
 
-The first step is to set the spatial extent and the <a href="https://wiki.openstreetmap.org/wiki/Zoom_levels">zoom level</a>:
+First step is to set the spatial extent and the <a href="https://wiki.openstreetmap.org/wiki/Zoom_levels">zoom level</a>:
 
 ```bash
 rsp cover --bbox 4.795,45.628,4.935,45.853 --zoom 18 ds/cover
@@ -47,7 +47,7 @@ echo '
 ' > ~/.rsp_config
 ```
 
-To download imagery using <a href="https://www.opengeospatial.org/standards/wms">WMS</a>:
+Download imagery using <a href="https://www.opengeospatial.org/standards/wms">WMS</a>:
 
 ```bash
 rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' ds/cover ds/images
@@ -78,7 +78,7 @@ Roofprint choice is important here, as we use aerial imagery to retrieve pattern
 Prepare DataSet
 ----------------
 
-Now to transform the vector roofprints and raster labels:
+To transform the vector roofprints to raster labels:
 
 ```bash
 rsp rasterize --geojson ds/lyon_roofprint.json --cover ds/cover ds/labels
@@ -87,7 +87,7 @@ rsp rasterize --geojson ds/lyon_roofprint.json --cover ds/cover ds/labels
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/labels/"><img src="img/from_opendata_to_opendataset/labels.png" /></a>
 
 
-Then to create a training / validation dataset, with imagery and related roofprint labels:
+Then to create a training and validation dataset, with imagery and related roofprint labels:
 
 ```bash
 rsp cover --dir ds/images --splits 70/30 ds/training/cover ds/validation/cover
@@ -96,10 +96,6 @@ rsp subset --dir ds/labels --cover ds/training/cover  ds/training/labels
 rsp subset --dir ds/images --cover ds/validation/cover  ds/validation/images
 rsp subset --dir ds/labels --cover ds/validation/cover  ds/validation/labels
 ```
-
-Two points to emphasise here:
- - It's a good idea to pick enough data for the validation part (here we took a 70/30 ratio).
- - The shuffle step helps to offset spatial bias in training/validation sets.
 
 
 Train
@@ -112,7 +108,7 @@ rsp train --epochs 10 ds ds/model
 ```
 
 After ten epochs only, the building IoU metric on validation dataset is about **0.82**. 
-It's already a fair result for the state of art processing with real world data, but we will see how to improve it.
+It's already a fair result with plain Open Data, but we will see below how to improve it again.
 
 
 
@@ -134,10 +130,10 @@ Compare
 
 Then to assess how our first model behaves with this raw data, we compute a composite stack image with imagery, label and predicted mask.
 
-The colour of the patches means:
- - pink: predicted by the model (but not present in the initial labels)
- - green: present in the labels (but not predicted by the model)
- - grey: both model prediction and labels agree.
+Pixel colors legend:
+ - pink: predicted by the model (but not present on the initial labels)
+ - green: present on the labels (but not predicted by the model)
+ - grey: both model prediction and labels are agree.
 
 
 
@@ -181,7 +177,7 @@ We store the result in `ds/to_remove.cover`
 wget -O ds/to_remove.cover http://datapink.tools/rsp/opendata_to_opendataset/to_remove.cover
 ```
 
-Then we just remove all the tiles from the dataset:
+Then we just remove all the related tiles from the dataset:
 ```bash
 rsp subset --delete --dir ds/training/images --cover ds/to_remove.cover
 rsp subset --delete --dir ds/training/labels --cover ds/to_remove.cover
@@ -189,13 +185,13 @@ rsp subset --delete --dir ds/validation/images --cover ds/to_remove.cover
 rsp subset --delete --dir ds/validation/labels --cover ds/to_remove.cover
 ```
 
-For information, we remove about 500 tiles from this raw dataset in order to clean up obvious inconsistent labelling.
+For information, we remove about 500 tiles from this raw dataset in order to clean it up.
 
 
 Train 
 -----
 
-Having a cleaner training and validation dataset, we can launch a new and longer training:
+Having a cleaner training and validation dataset, we can launch a second and longer training:
 
 ```bash
 rsp train --epochs 100 ds ds/model_clean
@@ -223,7 +219,7 @@ rsp compare --mode list --labels ds/labels --maximum_qod 80 --minimum_fg 5 --mas
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_clean/"><img src="img/from_opendata_to_opendataset/compare_clean.png" /></a>
 
 
-And to compare only with filtered validation tiles, in side by side mode: 
+And to compare only with filtered validation tiles, in side by side mode:
 
 ```bash
 rsp cover --dir ds/validation/images  ds/validation/cover.clean
