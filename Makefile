@@ -3,18 +3,19 @@ help:
 	@echo "For plain user installation follow README.md instructions, instead."
 	@echo ""
 	@echo ""
-	@echo " make install   To install, few Python dev tools and RoboSat.pink in editable mode."
-	@echo "                So any further RoboSat.pink Python code modification will be usable at once,"
-	@echo "                throught either rsp tools commands or robosat_pink.* modules."
+	@echo " make install     To install, few Python dev tools and RoboSat.pink in editable mode."
+	@echo "                  So any further RoboSat.pink Python code modification will be usable at once,"
+	@echo "                  throught either rsp tools commands or robosat_pink.* modules."
 	@echo ""
-	@echo " make check     Launchs code tests, and tools doc updating."
-	@echo "                Do it, at least, before sending a Pull Request."
+	@echo " make check       Launchs code tests, and tools doc updating."
+	@echo "                  Do it, at least, before sending a Pull Request."
 	@echo ""
-	@echo " make check_doc Launchs rsp commands embeded in documentation, to be sure still up to date."
-	@echo "                It takes a while."
+	@echo " make check_tuto  Launchs rsp commands embeded in tutorials, to be sure everything still up to date."
+	@echo "                  Do it, at least, on each CLI modifications, and before a release."
+	@echo "                  NOTA: It takes a while."
 	@echo ""
-	@echo " make pink      Python code beautifier,"
-	@echo "                as Pink is the new Black ^^"
+	@echo " make pink        Python code beautifier,"
+	@echo "                  as Pink is the new Black ^^"
 
 
 # Dev install
@@ -116,19 +117,21 @@ doc:
 	echo '```'                    >> docs/makefile.md;
 
 
-# Documentation rsp commands embeded check
+# Check rsp commands embeded in Documentation
 check_doc:
 	@echo "==================================================================================="
 	@echo "Checking README:"
 	@echo "==================================================================================="
 	@rm -rf ds && sed -n -e '/```bash/,/```/ p' README.md | sed -e '/```/d' > .CHECK && sh .CHECK
 	@echo "==================================================================================="
+
+
+# Check rsp commands embeded in Tutorials
+check_tuto:
 	@echo "Checking Tutorial OpenData to OpenDataset:"
 	@echo "NOTICE: will take quite a while"
 	@echo "==================================================================================="
 	@rm -rf ds && sed -n -e '/```bash/,/```/ p' docs/from_opendata_to_opendataset.md | sed -e '/```/d' > .CHECK && sh .CHECK
-	@echo "==================================================================================="
-	@echo "Whole doc checked !"
 	@echo "==================================================================================="
 
 
