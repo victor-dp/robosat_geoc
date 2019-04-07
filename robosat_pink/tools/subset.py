@@ -18,8 +18,8 @@ def add_parser(subparser, formatter_class):
     inp.add_argument("--cover", type=str, required=True, help="path to csv cover file to filter dir by [required]")
 
     mode = parser.add_argument_group("Alternate modes, as default is to copy.")
-    mode.add_argument("--move", type=str, help="move tiles from input to output")
-    mode.add_argument("--delete", type=str, help="delete tiles listed in cover")
+    mode.add_argument("--move", action="store_true", help="move tiles from input to output")
+    mode.add_argument("--delete", action="store_true", help="delete tiles listed in cover")
 
     out = parser.add_argument_group("Output")
     out.add_argument("out", type=str, nargs="?", default=os.getcwd(), help="output dir path [required for copy or move]")

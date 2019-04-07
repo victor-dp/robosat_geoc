@@ -175,7 +175,7 @@ Web UI:
 ```
 ## rsp subset
 ```
-usage: rsp subset [-h] --dir DIR --cover COVER [--move MOVE] [--delete DELETE]
+usage: rsp subset [-h] --dir DIR --cover COVER [--move] [--delete]
                   [--web_ui_base_url WEB_UI_BASE_URL]
                   [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                   [out]
@@ -188,8 +188,8 @@ Inputs:
  --cover COVER                      path to csv cover file to filter dir by [required]
 
 Alternate modes, as default is to copy.:
- --move MOVE                        move tiles from input to output
- --delete DELETE                    delete tiles listed in cover
+ --move                             move tiles from input to output
+ --delete                           delete tiles listed in cover
 
 Output:
  out                                output dir path [required for copy or move]
