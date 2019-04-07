@@ -60,28 +60,32 @@ it_pre:
 	@echo "Download PBF" && wget --show-progress -q -O it/lyon.pbf http://datapink.tools/rsp/it/lyon.pbf
 	@rsp extract --type Building it/lyon.pbf it/osm_lyon_footprint.json
 	@rsp rasterize --geojson it/lyon_roofprint.json --config config.toml --cover it/cover it/labels_osm
-	@rsp cover --dir it/images --splits 70/15/15 it/training/cover it/validation/cover it/prediction/cover
+	@rsp cover --dir it/images --splits 80/20 it/training/cover it/validation/cover
 	@rsp subset --dir it/images --cover it/training/cover it/training/images
 	@rsp subset --dir it/labels --cover it/training/cover it/training/labels
 	@rsp subset --dir it/images --cover it/validation/cover it/validation/images
 	@rsp subset --dir it/labels --cover it/validation/cover it/validation/labels
-	@rsp subset --dir it/images --cover it/prediction/cover it/prediction/images
-	@rsp subset --dir it/labels --cover it/prediction/cover it/prediction/labels
+	@wget -nc -O it/tanzania.tif http://datapink.tools/rsp/it/tanzania.tif
+	@rsp tile --zoom 18 it/tanzania.tif it/prediction/images
+	@rsp cover --zoom 18 --dir it/prediction/images it/prediction/cover
+	@wget -nc -O it/tanzania.geojson http://datapink.tools/rsp/it/tanzania.geojson
+	@rsp rasterize --geojson it/tanzania.geojson --config config.toml --cover it/prediction/cover it/prediction/labels
+
 
 
 # Integration Tests: Training
 it_train:
 	@echo "==================================================================================="
-	@rsp train --config config.toml --bs 2 --lr 0.00025 --epochs 3 it it/pth
-	@rsp train --config config.toml --bs 2 --lr 0.00025 --epochs 5 --resume --checkpoint it/pth/checkpoint-00003-of-00003.pth it it/pth
+	@rsp train --config config.toml --bs 2 --lr 0.00025 --epochs 2 it it/pth
+	@rsp train --config config.toml --bs 2 --lr 0.00025 --epochs 3 --resume --checkpoint it/pth/checkpoint-00002-of-00002.pth it it/pth
 
 
 # Integration Tests: Post Training
 it_post:
 	@echo "==================================================================================="
-	@rsp export --checkpoint it/pth/checkpoint-00005-of-00005.pth --type jit it/pth/export.jit
-	@rsp export --checkpoint it/pth/checkpoint-00005-of-00005.pth --type onnx it/pth/export.onnx
-	@rsp predict --config config.toml --bs 4 --checkpoint it/pth/checkpoint-00005-of-00005.pth it/prediction it/prediction/masks
+	@rsp export --checkpoint it/pth/checkpoint-00003-of-00003.pth --type jit it/pth/export.jit
+	@rsp export --checkpoint it/pth/checkpoint-00003-of-00003.pth --type onnx it/pth/export.onnx
+	@rsp predict --config config.toml --bs 4 --checkpoint it/pth/checkpoint-00003-of-00003.pth it/prediction it/prediction/masks
 	@rsp compare --images it/prediction/images it/prediction/labels it/prediction/masks --mode stack --labels it/prediction/labels --masks it/prediction/masks it/prediction/compare
 	@rsp compare --images it/prediction/images it/prediction/compare --mode side it/prediction/compare_side
 	@rsp compare --mode list --labels it/prediction/labels --maximum_qod 75 --minimum_fg 5 --masks it/prediction/masks --geojson it/prediction/compare/tiles.json
