@@ -42,9 +42,9 @@ function help(on)
 { if (on) { document.getElementById("help").style.display = "block"; document.getElementById("image").style.opacity = 0.1 }
   else    { document.getElementById("help").style.display = "none";  document.getElementById("image").style.opacity = 1.0 } }
 
-var msg_sel = `
-Copy selected tiles to clipboard: Ctrl+C, Enter.
-HINT: If any issue with your browser, use instead, from JS console: console.log(xyz.get_sel())`
+function copy_to_clipboard(cover) {
+   var e = document.createElement('textarea'); e.value = cover;
+   document.body.appendChild(e); e.select(); document.execCommand('copy'); }
 
 load_json("tiles.json", function(json)
   { xyz = new XYZ(json); document.addEventListener("keydown", (e) =>
@@ -52,8 +52,8 @@ load_json("tiles.json", function(json)
       if (e.key == "ArrowRight") { xyz.next() ; display(xyz, false) }
       if (e.key == "ArrowLeft")  { xyz.prev() ; display(xyz, false) }
       if (e.key == "Shift")      { xyz.ping() ; display(xyz, false) }
+      if (e.key == "Escape" )    { copy_to_clipboard(xyz.get_sel()) }
       if (e.key == "h")      	 { document.getElementById("help").style.display == "none" ? help(true) : help(false) }
-      if (e.key == "Escape" )    { window.prompt(msg_sel, xyz.get_sel()) }
     }); display(xyz, true)
   }
 )
