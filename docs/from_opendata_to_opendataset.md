@@ -179,10 +179,10 @@ wget -O ds/to_remove.cover http://datapink.tools/rsp/opendata_to_opendataset/to_
 
 Then we just remove all the related tiles from the dataset:
 ```bash
-rsp subset --delete --dir ds/training/images --cover ds/to_remove.cover
-rsp subset --delete --dir ds/training/labels --cover ds/to_remove.cover
-rsp subset --delete --dir ds/validation/images --cover ds/to_remove.cover
-rsp subset --delete --dir ds/validation/labels --cover ds/to_remove.cover
+rsp subset --dir ds/training/images --cover ds/to_remove.cover --delete > /dev/null
+rsp subset --dir ds/training/labels --cover ds/to_remove.cover --delete > /dev/null
+rsp subset --dir ds/validation/images --cover ds/to_remove.cover --delete > /dev/null
+rsp subset --dir ds/validation/labels --cover ds/to_remove.cover --delete > /dev/null
 ```
 
 For information, we remove about 500 tiles from this raw dataset in order to clean it up.
