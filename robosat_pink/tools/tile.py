@@ -221,7 +221,7 @@ def main(args):
                 tiles.append(tiled)
 
         if splits_path and os.path.isdir(splits_path):
-            shutil.rmtree(splits_path) # Delete suffixes dir if any
+            shutil.rmtree(splits_path)  # Delete suffixes dir if any
 
     if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
