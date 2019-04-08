@@ -78,15 +78,15 @@ it_pre:
 it_train:
 	@echo "==================================================================================="
 	@rsp train --config config.toml --bs 2 --lr 0.00025 --epochs 2 it it/pth
-	@rsp train --config config.toml --bs 2 --lr 0.00025 --epochs 3 --resume --checkpoint it/pth/checkpoint-00002-of-00002.pth it it/pth
+	@rsp train --config config.toml --bs 2 --lr 0.00025 --epochs 3 --resume --checkpoint it/pth/checkpoint-00002.pth it it/pth
 
 
 # Integration Tests: Post Training
 it_post:
 	@echo "==================================================================================="
-	@rsp export --checkpoint it/pth/checkpoint-00003-of-00003.pth --type jit it/pth/export.jit
-	@rsp export --checkpoint it/pth/checkpoint-00003-of-00003.pth --type onnx it/pth/export.onnx
-	@rsp predict --config config.toml --bs 4 --checkpoint it/pth/checkpoint-00003-of-00003.pth it/prediction it/prediction/masks
+	@rsp export --checkpoint it/pth/checkpoint-00003.pth --type jit it/pth/export.jit
+	@rsp export --checkpoint it/pth/checkpoint-00003.pth --type onnx it/pth/export.onnx
+	@rsp predict --config config.toml --bs 4 --checkpoint it/pth/checkpoint-00003.pth it/prediction it/prediction/masks
 	@rsp compare --images it/prediction/images it/prediction/labels it/prediction/masks --mode stack --labels it/prediction/labels --masks it/prediction/masks it/prediction/compare
 	@rsp compare --images it/prediction/images it/prediction/compare --mode side it/prediction/compare_side
 	@rsp compare --mode list --labels it/prediction/labels --maximum_qod 75 --minimum_fg 5 --masks it/prediction/masks --geojson it/prediction/compare/tiles.json

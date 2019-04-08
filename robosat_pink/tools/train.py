@@ -163,7 +163,7 @@ def main(args):
             "optimizer": optimizer.state_dict(),
             "loader": config["model"]["loader"],
         }
-        checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}-of-{:05d}.pth".format(epoch + 1, args.epochs))
+        checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}.pth".format(epoch + 1))
         try:
             torch.save(states, checkpoint_path)
         except:

@@ -168,7 +168,7 @@ rsp subset --dir ds/labels --cover ds/validation/cover ds/validation/labels
 ```bash
 rsp train  --epochs 5 --lr 0.000025 --bs 4 ds ds/models
 rsp subset --dir ds/images --cover ds/prediction/cover ds/prediction/images
-rsp predict --checkpoint ds/models/checkpoint-00005-of-00005.pth ds/prediction ds/prediction/masks
+rsp predict --checkpoint ds/models/checkpoint-00005.pth ds/prediction ds/prediction/masks
 rsp compare --images ds/prediction/images ds/prediction/masks --mode side ds/prediction/compare
 ```
 
