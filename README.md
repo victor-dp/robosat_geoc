@@ -26,8 +26,7 @@ Main Features:
 - Support either RGB or multibands imagery (as multispectral or hyperspectral)
 - Allows Data Fusion (from imagery or rasterized vectors)
 - Web-UI tools to easily display, hilight or select results
-- High performances, PyTorch based, and native multi GPUs support
-
+- High performances
 
 
 
@@ -38,7 +37,6 @@ Documentation:
 
 ### Tutorials:
 - <a href="./docs/from_opendata_to_opendataset.md">How to use plain OpenData to create a decent training OpenDataSet</a>
-- <a href="./docs/extensibility_by_design.md">How to extend RoboSat.pink</a>
 
 ### Config file:
 - <a href="./docs/config.md">`config.toml`</a> RoboSat.pink configuration file
@@ -104,12 +102,14 @@ sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 
 
 ### NOTAS: 
-- Requires: Python 3.6 or later, and Nvidia GPU with at least 6Go RAM.
+- Requires: Python 3.6 or later
+- GPU is not strictly mandatory, but `rsp train` would be -that- slower without.
 - To test RoboSat.pink install, launch in a terminal: `rsp -h`
 - Upon your ```pip``` PATH setting, you may have to update it: ```export PATH=$PATH:.local/bin```
 - To install RoboSat.pink dev version: ```pip3 install git+https://github.com/datapink/robosat.pink```
 - PyTorch release published on PyPi is binded with CUDA 9. 
   For CUDA 10, grab a wheel <a href="https://pytorch.org/">from PyTorch web site</a>, e.g ```pip3 install https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl```
+
 
 
 WorkFlows:
@@ -190,7 +190,7 @@ dataset
 ```
 - Tiles images formats could be any able to be read by GDAL.
 - Tiles labels are expected to be PNG with single band.
-- Tools producing XYZ tiles directory as output, also allows to easily generate a web map client, for visual inspection.
+- Tools producing XYZ tiles directory, generate also a web map client, for visual inspection.
 
 
 
@@ -240,7 +240,7 @@ Convolutional Neural Networks</a>
 - <a href="https://arxiv.org/abs/1806.00844">TernausNetV2: Fully Convolutional Network for Instance Segmentation</a>
 - <a href="https://hal.archives-ouvertes.fr/hal-01523573/document">Joint Learning from Earth Observation and
 OpenStreetMap Data to Get Faster Better Semantic Maps</a>
-
+- <a href="https://arxiv.org/abs/1809.06839">Albumentations: fast and flexible image augmentations</a>
 
 
 Contributions and Services:
