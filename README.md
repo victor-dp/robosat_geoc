@@ -206,11 +206,6 @@ Several ways to create your own training dataset, upon input data type:
 NOTA: several inputs connected to a single arrow point means a logical OR (e.g. WMS or XYZ or TMS).
 
 
-### Training ###
-
-<img alt="Training" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/training.png" />
-
-
 
 
 Architecture:
