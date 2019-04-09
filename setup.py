@@ -3,7 +3,7 @@ RoboSat.pink
 ----------
 Semantic Segmentation ecosystem for GeoSpatial Imagery
 
-<http://www.robosat.pink>
+<http://www.RoboSat.pink>
 """
 
 from setuptools import setup, find_packages
@@ -16,7 +16,6 @@ with open(path.join(here, "VERSION")) as f:
 
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
-
 
 with open(path.join(here, "requirements.txt")) as f:
     install_requires = f.read().splitlines()
