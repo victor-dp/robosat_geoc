@@ -90,9 +90,7 @@ def main(args):
     except:
         sys.exit("ERROR: Unable to load {} model".format(config["model"]["nn"]))
 
-    nn = getattr(model_module, config["model"]["nn"])(
-        loader_train.shape_in, loader_train.shape_out, config["model"]["pretrained"]
-    ).to(device)
+    nn = getattr(model_module, config["model"]["nn"])(loader_train.shape_in, loader_train.shape_out, config).to(device)
     nn = torch.nn.DataParallel(nn)
     optimizer = Adam(nn.parameters(), lr=config["model"]["lr"])
 

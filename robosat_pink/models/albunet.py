@@ -26,7 +26,7 @@ class DecoderBlock(nn.Module):
 
 
 class Albunet(nn.Module):
-    def __init__(self, shape_in, shape_out, pretrained=False):
+    def __init__(self, shape_in, shape_out, train_config=None):
         self.doc = """
             U-Net inspired encoder-decoder architecture with a ResNet encoder as proposed by Alexander Buslaev.
 
@@ -41,6 +41,11 @@ class Albunet(nn.Module):
         num_classes = shape_out[0]
 
         super().__init__()
+
+        try:
+            pretrained = train_config["model"]["pretrained"]
+        except:
+            pretrained = False
 
         self.resnet = resnet50(pretrained=pretrained)
 
