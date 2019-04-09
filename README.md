@@ -122,7 +122,7 @@ WorkFlows:
 
  
 
-1) Config file, in `~/.rsp_config`:
+1) Configuration:
 
 
 ```bash
