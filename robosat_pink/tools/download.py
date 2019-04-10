@@ -84,8 +84,8 @@ def main(args):
                 if args.type == "XYZ":
                     url = args.url.format(x=tile.x, y=tile.y, z=tile.z)
                 elif args.type == "TMS":
-                    tile.y = (2 ** tile.z) - tile.y - 1
-                    url = args.url.format(x=tile.x, y=tile.y, z=tile.z)
+                    y = (2 ** tile.z) - tile.y - 1
+                    url = args.url.format(x=tile.x, y=y, z=tile.z)
                 elif args.type == "WMS":
                     xmin, ymin, xmax, ymax = xy_bounds(tile)
                     url = args.url.format(xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
