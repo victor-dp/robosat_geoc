@@ -234,7 +234,7 @@ Web UI:
 usage: rsp train [-h] [--config CONFIG] [--loader LOADER] [--workers WORKERS]
                  [--bs BS] [--lr LR] [--ts TS] [--nn NN] [--loss LOSS]
                  [--da DA] [--dap DAP] [--epochs EPOCHS] [--resume]
-                 [--checkpoint CHECKPOINT]
+                 [--checkpoint CHECKPOINT] [--no_validation]
                  dataset out
 
 optional arguments:
@@ -259,6 +259,7 @@ Model Training:
  --epochs EPOCHS          number of epochs to train [default 10]
  --resume                 resume model training, if set imply to provide a checkpoint
  --checkpoint CHECKPOINT  path to a model checkpoint. To fine tune or resume a training
+ --no_validation          No validation, training only
 
 Output:
  out                      output directory path to save checkpoint .pth files and logs [required]

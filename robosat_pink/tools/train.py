@@ -36,6 +36,7 @@ def add_parser(subparser, formatter_class):
     mt.add_argument("--epochs", type=int, default=10, help="number of epochs to train [default 10]")
     mt.add_argument("--resume", action="store_true", help="resume model training, if set imply to provide a checkpoint")
     mt.add_argument("--checkpoint", type=str, help="path to a model checkpoint. To fine tune or resume a training")
+    mt.add_argument("--no_validation", action="store_true", help="No validation, training only")
 
     out = parser.add_argument_group("Output")
     out.add_argument("out", type=str, help="output directory path to save checkpoint .pth files and logs [required]")
@@ -136,7 +137,8 @@ def main(args):
         log.log("---{}Epoch: {}/{} -- UUID: {}".format(os.linesep, epoch + 1, args.epochs, UUID))
 
         train(train_loader, config, log, device, nn, optimizer, criterion)
-        validate(val_loader, config, log, device, nn, criterion)
+        if not args.no_validation:
+            validate(val_loader, config, log, device, nn, criterion)
 
         try:  # https://github.com/pytorch/pytorch/issues/9176
             nn_doc = nn.module.doc
