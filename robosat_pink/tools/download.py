@@ -98,7 +98,6 @@ def main(args):
 
                 try:
                     tile_image_to_file(args.out, tile, res)
-                    # cv2.imwrite(path, cv2.imdecode(np.fromstring(res.read(), np.uint8), cv2.IMREAD_COLOR))
                 except OSError:
                     return tile, url, False
 
