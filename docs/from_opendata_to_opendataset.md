@@ -4,7 +4,7 @@
 Context:
 -------
 
-In supervised learning, you can't expect to obtain a good trained model from inacurate labels: Garbage In, Garbage Out. Data preparation, however, can be tedious if you don't use efficient enough abstract tools. 
+In supervised learning, you can't expect to obtain a good trained model from inacurate labels: Garbage In, Garbage Out. Data preparation, however, can be tedious if you don't use efficient tools. 
 
 Even though OpenData datasets are widely available, those reliable enough to be used verbatim to train decents models are still scarse. Even with state of art model training algorithms, best results are only achieved by people who can afford to tag manually, with pixel accuracy, their own datasets.
 
@@ -55,13 +55,10 @@ rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVI
 
 NOTA:
 - Retina resolution of 512px is preferred to a regular 256px, because it improves the training accuracy. 
-- Relaunch this command in case of download error, till the whole coverage is downloaded.
-
+- Roofprint choice is important here, as we use aerial imagery to retrieve patterns. If we used the building's footprints instead, the training accuracy would be poorer.
 
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/images/"><img src="img/from_opendata_to_opendataset/images.png" /></a>
-
-
 
 
 Then to download buildings vector roofprints with <a href="https://www.opengeospatial.org/standards/wfs">WFS</a>, 
@@ -69,10 +66,6 @@ Then to download buildings vector roofprints with <a href="https://www.opengeosp
 ```bash
 wget -O ds/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&outputFormat=application/json; subtype=geojson'
 ```
-
-Roofprint choice is important here, as we use aerial imagery to retrieve patterns. If we used the building's footprints instead, the training accuracy would be poorer.
-
-
 
 
 Prepare DataSet
