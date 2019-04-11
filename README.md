@@ -59,9 +59,6 @@ Documentation:
   - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">@PyParis 2018</a>
   - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">@FOSDEM 2019</a>
 
-### Developpers tools:
-- <a href="https://github.com/datapink/robosat.pink/blob/master/docs/makefile.md">```make```</a>
-
 
 Install:
 --------
@@ -221,18 +218,17 @@ Related resources:
 -----------------
 - <a href="https://github.com/mapbox/robosat">Historical MapBox RoboSat github directory (not active anymore)</a>
 - <a href="https://github.com/chrieke/awesome-satellite-imagery-datasets">Christoph Rieke's Awesome Satellite Imagery Datasets</a>
-- <a href="https://github.com/mrgloom/awesome-semantic-segmentation">Mr Gloom's Awesome Semantic Segmentation</a>
 
 
 Bibliography:
 -------------
 
-- <a href="https://arxiv.org/abs/1705.08790">The Lovász-Softmax loss: A tractable surrogate for the optimization of the IoU measure in neural networks</a>
 - <a href="https://arxiv.org/abs/1505.04597">U-Net: Convolutional Networks for Biomedical Image Segmentation</a>
 - <a href="https://arxiv.org/abs/1512.03385">Deep Residual Learning for Image Recognition</a>
 - <a href="https://arxiv.org/pdf/1804.08024.pdf">Angiodysplasia Detection and Localization Using Deep
 Convolutional Neural Networks</a>
 - <a href="https://arxiv.org/abs/1806.00844">TernausNetV2: Fully Convolutional Network for Instance Segmentation</a>
+- <a href="https://arxiv.org/abs/1705.08790">The Lovász-Softmax loss: A tractable surrogate for the optimization of the IoU measure in neural networks</a>
 - <a href="https://hal.archives-ouvertes.fr/hal-01523573/document">Joint Learning from Earth Observation and
 OpenStreetMap Data to Get Faster Better Semantic Maps</a>
 - <a href="https://arxiv.org/abs/1809.06839">Albumentations: fast and flexible image augmentations</a>
@@ -242,7 +238,8 @@ Contributions and Services:
 ---------------------------
 
 - Pull Requests are welcome ! Feel free to send code...
-  Don't hesitate either to initiate a prior discussion throught tickets on any implementation question.
+  Don't hesitate either to initiate a prior discussion via <a href="https://gitter.im/RoboSatPink/community">gitter</a> or ticket on any implementation question.
+  And give also a look at <a href="https://github.com/datapink/robosat.pink/blob/master/docs/makefile.md">Makefile rules</a>.
 
 - If you want to collaborate through code production and maintenance on a long term basis, please get in touch, co-edition with an ad hoc governance can be considered.
 
