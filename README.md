@@ -6,7 +6,7 @@
 <h2 align='center'>Semantic Segmentation ecosystem for GeoSpatial imagery</h2>
 
 <p align=center>
-  <img src="https://pbs.twimg.com/media/DpjonykWwAANpPr.jpg" alt="RoboSat.pink buildings segmentation from Imagery" />
+  <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_side_clean/"><img src="https://pbs.twimg.com/media/DpjonykWwAANpPr.jpg" alt="RoboSat.pink buildings segmentation from Imagery" /></a>
 </p>
 
 
