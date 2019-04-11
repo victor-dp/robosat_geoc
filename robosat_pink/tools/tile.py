@@ -53,14 +53,18 @@ def add_parser(subparser, formatter_class):
     parser.set_defaults(func=main)
 
 
-def is_border(image, no_data=0):
-    """ Return a Boolean upon if at least one pixel border from the image is no_data, on all bands."""
-    return (
+def is_nodata(image, no_data=0, threshold=5):
+
+    if (
         np.all(image[0, :, :] == no_data)
         or np.all(image[-1, :, :] == no_data)
         or np.all(image[:, 0, :] == no_data)
         or np.all(image[:, -1, :] == no_data)
-    )
+    ):
+        return True  # pixel border is no_data, on all bands
+
+    C, W, H = image.shape
+    return np.sum(image[:, :, :] == no_data) > ((threshold * C * 100) / (W * H))
 
 
 def main(args):
@@ -145,7 +149,7 @@ def main(args):
                     sys.exit("Error: Unable to tile {} from raster {}.".format(str(tile), raster))
 
                 tile_key = (str(tile.x), str(tile.y), str(tile.z))
-                if not args.label and len(tiles_map[tile_key]) == 1 and is_border(image):
+                if not args.label and len(tiles_map[tile_key]) == 1 and is_nodata(image):
                     progress.update()
                     continue
 
@@ -198,7 +202,7 @@ def main(args):
                 assert image.shape == split.shape
                 image[:, :, :] += split[:, :, :]
 
-            if not args.label and is_border(image):
+            if not args.label and is_nodata(image):
                 progress.update()
                 return
 
