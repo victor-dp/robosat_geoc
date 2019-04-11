@@ -150,8 +150,7 @@ We also run a csv list diff, in order to pick tiles with a low Quality of Data m
 
 If we zoom back on the map, we can see tiles matching the previous filters:
 
-
-<img src="img/from_opendata_to_opendataset/compare_zoom_out.png" />
+<a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare/"><img src="img/from_opendata_to_opendataset/compare_zoom_out.png" /></a>
 
 
 It is obvious that some areas are not labelled correctly in the original OpenData, so we ought to remove them from the training and validation dataset.
