@@ -107,7 +107,7 @@ Now to launch a first model training:
 rsp train --epochs 10 ds ds/model
 ```
 
-After ten epochs only, the building IoU metric on validation dataset is about **0.82**. 
+After ten epochs only, the building IoU metric on validation dataset is about **0.80**. 
 It's already a fair result with plain Open Data, but we will see below how to improve it again.
 
 
@@ -198,8 +198,8 @@ rsp train --epochs 100 ds ds/model_clean
 ```
 
 Building IoU metrics on validation dataset:
- - After 10  epochs: **0.84** 
- - After 100 epochs: **0.87**
+ - After 10  epochs: **0.82** 
+ - After 100 epochs: **0.86**
  
  
 
