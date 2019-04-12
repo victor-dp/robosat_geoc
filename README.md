@@ -65,7 +65,13 @@ Installs:
 
 ### With PIP:
 ```
-pip3 install RoboSat.pink
+pip3 install RoboSat.pink     # For latest stable version
+```
+
+or
+
+```
+pip3 install git+https://github.com/datapink/robosat.pink     # For current dev version
 ```
 
 ### With Conda, using a virtual env:
