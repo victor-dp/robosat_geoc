@@ -43,17 +43,17 @@ Documentation:
 
 ### Tools:
 
-- <a href="./docs/tools.md#rsp-cover">`rsp cover`</a> Generate a tiles covering, in csv format: X,Y,Z
-- <a href="./docs/tools.md#rsp-download">`rsp download`</a> Downloads tiles from a remote server (XYZ, WMS, or TMS)
-- <a href="./docs/tools.md#rsp-extract">`rsp extract`</a> Extracts GeoJSON features from OpenStreetMap .pbf
-- <a href="./docs/tools.md#rsp-rasterize">`rsp rasterize`</a> Rasterize vector features (GeoJSON or PostGIS), to raster tiles
-- <a href="./docs/tools.md#rsp-subset">`rsp subset`</a> Filter images in a slippy map dir using a csv tiles cover
-- <a href="./docs/tools.md#rsp-tile">`rsp tile`</a> Tile a raster
-- <a href="./docs/tools.md#rsp-train">`rsp train`</a> Trains a model on a dataset
-- <a href="./docs/tools.md#rsp-export">`rsp export`</a> Export a model to ONNX or Torch JIT
-- <a href="./docs/tools.md#rsp-predict">`rsp predict`</a> Predict masks, from given inputs and an already trained model
-- <a href="./docs/tools.md#rsp-compare">`rsp compare`</a> Compute composite images and/or metrics to compare several XYZ dirs
-- <a href="./docs/tools.md#rsp-vectorize">`rsp vectorize`</a> Extract simplified GeoJSON features from segmentation masks
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-cover">`rsp cover`</a> Generate a tiles covering, in csv format: X,Y,Z
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-download">`rsp download`</a> Downloads tiles from a remote server (XYZ, WMS, or TMS)
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-extract">`rsp extract`</a> Extracts GeoJSON features from OpenStreetMap .pbf
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-rasterize">`rsp rasterize`</a> Rasterize vector features (GeoJSON or PostGIS), to raster tiles
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-subset">`rsp subset`</a> Filter images in a slippy map dir using a csv tiles cover
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-tile">`rsp tile`</a> Tile raster coverage
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-train">`rsp train`</a> Trains a model on a dataset
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-export">`rsp export`</a> Export a model to ONNX or Torch JIT
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-predict">`rsp predict`</a> Predict masks, from given inputs and an already trained model
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-compare">`rsp compare`</a> Compute composite images and/or metrics to compare several XYZ dirs
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-vectorize">`rsp vectorize`</a> Extract simplified GeoJSON features from segmentation masks
 
 ### Presentations slides:
   - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">@PyParis 2018</a>
@@ -76,9 +76,8 @@ pip3 install git+https://github.com/datapink/robosat.pink     # For current dev 
 
 ### With Conda, using a virtual env:
 ```
-conda create -n robosat_pink python=3.6
-conda activate robosat_pink
-pip install robosat.pink
+conda create -n robosat_pink python=3.6 && conda activate robosat_pink
+pip install robosat.pink                                      # For latest stable version        
 ```
 
 ### With Ubuntu 18.04, from scratch:
@@ -106,7 +105,7 @@ sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 - GPU is not strictly mandatory, but `rsp train` would be -that- slower without.
 - To test RoboSat.pink install, launch in a terminal: `rsp -h`
 - Upon your ```pip``` PATH setting, you may have to update it: ```export PATH=$PATH:.local/bin```
-- PyTorch release published on PyPi is binded with CUDA 9. 
+- PyTorch release published on PyPI is binded with CUDA 9. 
   For CUDA 10, grab a wheel <a href="https://pytorch.org/">from PyTorch web site</a>, e.g ```pip3 install https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl```
 
 
