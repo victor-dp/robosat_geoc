@@ -9,9 +9,8 @@ import torch.backends.cudnn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
+from robosat_pink.core import load_config, check_model, check_channels, check_classes, Logs
 from robosat_pink.metrics import Metrics
-from robosat_pink.config import load_config, check_model, check_channels, check_classes
-from robosat_pink.logs import Logs
 
 
 def add_parser(subparser, formatter_class):

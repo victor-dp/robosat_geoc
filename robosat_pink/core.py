@@ -1,0 +1,182 @@
+import os
+import sys
+import toml
+
+import re
+import colorsys
+import webcolors
+from pathlib import Path
+
+from robosat_pink.tiles import tile_pixel_to_location, tiles_to_geojson
+
+
+#
+# Config
+#
+
+
+def load_config(path):
+    """Loads a dictionary from configuration file."""
+
+    if not path:
+        path = os.environ["RSP_CONFIG"] if "RSP_CONFIG" in os.environ else None
+    if not path:
+        path = os.path.expanduser("~/.rsp_config") if os.path.isfile(os.path.expanduser("~/.rsp_config")) else None
+    if not path:
+        sys.exit("CONFIG ERROR: Either ~/.rsp_config or RSP_CONFIG env var or --config parameter, is required.")
+
+    try:
+        config = toml.load(os.path.expanduser(path))
+    except:
+        sys.exit("CONFIG ERROR: Unable to load config file from: {}, check both path and syntax.".format(path))
+
+    config["classes"].insert(0, {"title": "Background", "color": "white"})  # Insert white Background
+
+    # Set default values
+    if "model" not in config.keys():
+        config["model"] = {}
+
+    if "ts" not in config["model"].keys():
+        config["model"]["ts"] = (512, 512)
+
+    if "pretrained" not in config["model"].keys():
+        config["model"]["pretrained"] = True
+
+    return config
+
+
+def check_channels(config):
+    if "channels" not in config.keys():
+        sys.exit("CONFIG ERROR: At least one channel is mandatory.")
+
+    # TODO Add name check
+
+    # for channel in config["channels"]:
+    #    if not (len(channel["bands"]) == len(channel["mean"]) == len(channel["std"])):
+    #        sys.exit("CONFIG ERROR: Inconsistent channel bands, mean or std lenght in config file")
+
+
+def check_classes(config):
+    """Check if config file classes subpart is consistent. Exit on error if not."""
+
+    if "classes" not in config.keys():
+        sys.exit("CONFIG ERROR: At least one class is mandatory.")
+
+    if len(config["classes"]) != 2:
+        sys.exit("CONFIG ERROR: For now, only binary classifications are available.")
+
+    for classe in config["classes"]:
+        if "title" not in classe.keys() or not len(classe["title"]):
+            sys.exit("CONFIG ERROR: Missing or empty classes.title value.")
+
+        if "color" not in classe.keys() or not check_color(classe["color"]):
+            sys.exit("CONFIG ERROR: Missing or invalid classes.color value.")
+
+
+def check_model(config):
+
+    hps = {"nn": "str", "pretrained": "bool", "loss": "str", "da": "str"}
+
+    for hp in hps:
+        if hp not in config["model"].keys() or type(config["model"][hp]).__name__ != hps[hp]:
+            sys.exit("CONFIG ERROR: Missing or invalid model.{} value.".format(hp))
+
+
+#
+# Logs
+#
+class Logs:
+    def __init__(self, path, out=sys.stdout):
+        """Create a logs instance on a logs file."""
+
+        self.fp = None
+        self.out = out
+        try:
+            if path:
+                if not os.path.isdir(os.path.dirname(path)):
+                    os.makedirs(os.path.dirname(path), exist_ok=True)
+                self.fp = open(path, mode="a")
+        except:
+            sys.exit("Unable to write in logs directory")
+
+    def log(self, msg):
+        """Log a new message to the opened logs file, and optionnaly on stdout or stderr too."""
+        try:
+            if self.fp:
+                self.fp.write(msg + os.linesep)
+                self.fp.flush()
+
+            if self.out:
+                print(msg, file=self.out)
+        except:
+            sys.exit("Unable to write in logs file")
+
+
+#
+# Colors
+#
+
+
+def make_palette(*colors, complementary=False):
+    """Builds a PIL color palette from CSS3 color names, or hex values patterns as #RRGGBB."""
+
+    assert 0 < len(colors) <= 256
+
+    hex_colors = [webcolors.CSS3_NAMES_TO_HEX[color] if color[0] != "#" else color for color in colors]
+    rgb_colors = [(int(h[1:3], 16), int(h[3:5], 16), int(h[5:7], 16)) for h in hex_colors]
+    palette = list(sum(rgb_colors, ()))
+
+    return palette if not complementary else complementary_palette(palette)
+
+
+def complementary_palette(palette):
+    """Creates a PIL complementary colors palette based on an initial PIL palette."""
+
+    comp_palette = []
+    colors = [palette[i : i + 3] for i in range(0, len(palette), 3)]
+
+    for color in colors:
+        r, g, b = [v for v in color]
+        h, s, v = colorsys.rgb_to_hsv(r, g, b)
+        comp_palette.extend(map(int, colorsys.hsv_to_rgb((h + 0.5) % 1, s, v)))
+
+    return comp_palette
+
+
+def check_color(color):
+    """Check if an input color is or not valid (i.e CSS3 color name or #RRGGBB)."""
+
+    hex_color = webcolors.CSS3_NAMES_TO_HEX[color] if color[0] != "#" else color
+    return bool(re.match(r"^#([0-9a-fA-F]){6}$", hex_color))
+
+
+#
+# Web UI
+#
+def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
+
+    try:
+        if os.path.isfile(os.path.expanduser(template)):
+            web_ui = open(os.path.expanduser(template), "r").read()
+        else:
+            web_ui = open(os.path.join(Path(__file__).parent, "web_ui", template), "r").read()
+    except:
+        sys.exit("Unable to open Web UI template {}".format(template))
+
+    web_ui = re.sub("{{base_url}}", base_url, web_ui)
+    web_ui = re.sub("{{ext}}", ext, web_ui)
+    web_ui = re.sub("{{tiles}}", "tiles.json" if selected_tiles else "''", web_ui)
+
+    if coverage_tiles:
+        # Could surely be improve, but for now, took the first tile to center on
+        tile = list(coverage_tiles)[0]
+        x, y, z = map(int, [tile.x, tile.y, tile.z])
+        web_ui = re.sub("{{zoom}}", str(z), web_ui)
+        web_ui = re.sub("{{center}}", str(list(tile_pixel_to_location(tile, 0.5, 0.5))[::-1]), web_ui)
+
+    with open(os.path.join(out, "index.html"), "w", encoding="utf-8") as fp:
+        fp.write(web_ui)
+
+    if selected_tiles:
+        with open(os.path.join(out, "tiles.json"), "w", encoding="utf-8") as fp:
+            fp.write(tiles_to_geojson(selected_tiles))

@@ -11,10 +11,9 @@ import numpy as np
 
 from mercantile import feature
 
+from robosat_pink.core import web_ui, Logs
 from robosat_pink.tiles import tiles_from_slippy_map, tile_from_slippy_map, tile_image_from_file, tile_image_to_file
 from robosat_pink.metrics import Metrics
-from robosat_pink.web_ui import web_ui
-from robosat_pink.logs import Logs
 
 
 def add_parser(subparser, formatter_class):

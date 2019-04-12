@@ -15,11 +15,8 @@ from rasterio.features import rasterize
 from rasterio.warp import transform
 from supermercado import burntiles
 
-from robosat_pink.config import load_config, check_classes
-from robosat_pink.colors import make_palette
+from robosat_pink.core import load_config, check_classes, make_palette, web_ui, Logs
 from robosat_pink.tiles import tiles_from_csv, tile_label_to_file
-from robosat_pink.web_ui import web_ui
-from robosat_pink.logs import Logs
 
 import psycopg2
 

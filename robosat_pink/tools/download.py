@@ -8,9 +8,8 @@ import requests
 from tqdm import tqdm
 from mercantile import xy_bounds
 
+from robosat_pink.core import web_ui, Logs
 from robosat_pink.tiles import tiles_from_csv, tile_image_from_url, tile_image_to_file
-from robosat_pink.web_ui import web_ui
-from robosat_pink.logs import Logs
 
 
 def add_parser(subparser, formatter_class):

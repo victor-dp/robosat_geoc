@@ -15,7 +15,7 @@ from rasterio.enums import Resampling
 from rasterio.warp import transform_bounds, calculate_default_transform
 from rasterio.transform import from_bounds
 
-from robosat_pink.config import load_config, check_classes
+from robosat_pink.core import load_config, check_classes, make_palette, web_ui
 from robosat_pink.tiles import (
     tile_image_to_file,
     tile_label_to_file,
@@ -23,8 +23,6 @@ from robosat_pink.tiles import (
     tile_image_from_file,
     tile_label_from_file,
 )
-from robosat_pink.colors import make_palette
-from robosat_pink.web_ui import web_ui
 
 
 def add_parser(subparser, formatter_class):

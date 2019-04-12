@@ -6,7 +6,7 @@ from glob import glob
 from tqdm import tqdm
 
 from robosat_pink.tiles import tiles_from_csv
-from robosat_pink.web_ui import web_ui
+from robosat_pink.core import web_ui
 
 
 def add_parser(subparser, formatter_class):

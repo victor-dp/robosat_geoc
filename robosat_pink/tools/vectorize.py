@@ -9,7 +9,7 @@ import mercantile
 import rasterio.features
 import rasterio.transform
 
-from robosat_pink.config import load_config, check_classes
+from robosat_pink.core import load_config, check_classes
 from robosat_pink.tiles import tiles_from_slippy_map
 
 

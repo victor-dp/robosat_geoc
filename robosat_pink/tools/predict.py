@@ -10,11 +10,8 @@ import torch
 import torch.backends.cudnn
 from torch.utils.data import DataLoader
 
+from robosat_pink.core import load_config, check_classes, check_channels, make_palette, web_ui, Logs
 from robosat_pink.tiles import tiles_from_slippy_map, tile_label_to_file
-from robosat_pink.config import load_config, check_classes, check_channels
-from robosat_pink.colors import make_palette
-from robosat_pink.web_ui import web_ui
-from robosat_pink.logs import Logs
 
 
 def add_parser(subparser, formatter_class):
