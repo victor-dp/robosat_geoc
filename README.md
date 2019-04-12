@@ -36,10 +36,10 @@ Documentation:
 --------------
 
 ### Tutorials:
-- <a href="./docs/from_opendata_to_opendataset.md">How to use plain OpenData to create a decent training OpenDataSet</a>
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/from_opendata_to_opendataset.md">How to use plain OpenData to create a decent training OpenDataSet</a>
 
 ### Config file:
-- <a href="./docs/config.md">`config.toml`</a> RoboSat.pink configuration file
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/config.md">RoboSat.pink configuration file</a>
 
 ### Tools:
 
