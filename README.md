@@ -65,7 +65,7 @@ Installs:
 
 ### With PIP:
 ```
-pip3 install RoboSat.pink     # For latest stable version
+pip3 install RoboSat.pink                                     # For latest stable version
 ```
 
 or
