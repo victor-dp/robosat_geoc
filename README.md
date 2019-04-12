@@ -60,39 +60,42 @@ Documentation:
   - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">@FOSDEM 2019</a>
 
 
-Install:
+Installs:
 --------
 
-### Using PIP:
+### With PIP:
 ```
-pip3 install RoboSat.pink
+pip3 install RoboSat.pink                                     # For latest stable version
 ```
 
-### Using Conda, with a virtual env:
+or
+
+```
+pip3 install git+https://github.com/datapink/robosat.pink     # For current dev version
+```
+
+### With Conda, using a virtual env:
 ```
 conda create -n robosat_pink python=3.6
 conda activate robosat_pink
 pip install robosat.pink
 ```
 
-### Install from scratch:
+### With Ubuntu 18.04, from scratch:
 
-Ubuntu 18.04:
 ```
 sudo sh -c "apt update && apt install -y build-essential python3-pip"
 pip3 install RoboSat.pink && export PATH=$PATH:~/.local/bin
 pip3 install https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl
+wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
+sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ```
 
-CentOS 7:
+### With CentOS 7, from scratch:
 ```
 sudo sh -c "yum -y update && yum install -y python36 wget && python3.6 -m ensurepip"
 pip3 install --user RoboSat.pink
 pip3 install --user https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl
-```
-
-Add Nvidia GPU drivers:
-```
 wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
 sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ```
@@ -103,7 +106,6 @@ sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 - GPU is not strictly mandatory, but `rsp train` would be -that- slower without.
 - To test RoboSat.pink install, launch in a terminal: `rsp -h`
 - Upon your ```pip``` PATH setting, you may have to update it: ```export PATH=$PATH:.local/bin```
-- To install RoboSat.pink dev version: ```pip3 install git+https://github.com/datapink/robosat.pink```
 - PyTorch release published on PyPi is binded with CUDA 9. 
   For CUDA 10, grab a wheel <a href="https://pytorch.org/">from PyTorch web site</a>, e.g ```pip3 install https://download.pytorch.org/whl/cu100/torch-1.0.1.post2-cp36-cp36m-linux_x86_64.whl```
 
@@ -218,6 +220,7 @@ Related resources:
 -----------------
 - <a href="https://github.com/mapbox/robosat">Historical MapBox RoboSat github directory (not active anymore)</a>
 - <a href="https://github.com/chrieke/awesome-satellite-imagery-datasets">Christoph Rieke's Awesome Satellite Imagery Datasets</a>
+- <a href="https://landscape.satsummit.io/analysis/spectral-bands.html">Satellites in Global Development</a>
 
 
 Bibliography:
