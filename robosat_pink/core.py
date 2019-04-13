@@ -168,8 +168,7 @@ def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
     web_ui = re.sub("{{tiles}}", "tiles.json" if selected_tiles else "''", web_ui)
 
     if coverage_tiles:
-        # Could surely be improve, but for now, took the first tile to center on
-        tile = list(coverage_tiles)[0]
+        tile = list(coverage_tiles)[0]  # Could surely be improved, but for now, took the first tile to center on
         x, y, z = map(int, [tile.x, tile.y, tile.z])
         web_ui = re.sub("{{zoom}}", str(z), web_ui)
         web_ui = re.sub("{{center}}", str(list(tile_pixel_to_location(tile, 0.5, 0.5))[::-1]), web_ui)
