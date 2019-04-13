@@ -195,7 +195,7 @@ def main(args):
 
     if args.mode == "side" and not args.no_web_ui:
         template = "compare.html" if not args.web_ui_template else args.web_ui_template
-        web_ui(args.out, base_url, None, tiles_compare, args.format, template)
+        web_ui(args.out, base_url, tiles, tiles_compare, args.format, template)
 
     if args.mode == "stack" and not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template

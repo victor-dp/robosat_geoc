@@ -1,5 +1,6 @@
 import os
 import sys
+import glob
 import toml
 
 import re
@@ -13,8 +14,6 @@ from robosat_pink.tiles import tile_pixel_to_location, tiles_to_geojson
 #
 # Config
 #
-
-
 def load_config(path):
     """Loads a dictionary from configuration file."""
 
@@ -115,8 +114,6 @@ class Logs:
 #
 # Colors
 #
-
-
 def make_palette(*colors, complementary=False):
     """Builds a PIL color palette from CSS3 color names, or hex values patterns as #RRGGBB."""
 
@@ -155,26 +152,31 @@ def check_color(color):
 #
 def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
 
-    try:
-        if os.path.isfile(os.path.expanduser(template)):
-            web_ui = open(os.path.expanduser(template), "r").read()
-        else:
-            web_ui = open(os.path.join(Path(__file__).parent, "web_ui", template), "r").read()
-    except:
-        sys.exit("Unable to open Web UI template {}".format(template))
+    out = os.path.expanduser(out)
+    template = os.path.expanduser(template)
 
-    web_ui = re.sub("{{base_url}}", base_url, web_ui)
-    web_ui = re.sub("{{ext}}", ext, web_ui)
-    web_ui = re.sub("{{tiles}}", "tiles.json" if selected_tiles else "''", web_ui)
+    templates = glob.glob(os.path.join(Path(__file__).parent, "web_ui", "*"))
+    if os.path.isfile(template):
+        templates.append(template)
+    os.symlink(os.path.basename(template), os.path.join(out, "index.html"))
 
-    if coverage_tiles:
-        tile = list(coverage_tiles)[0]  # Could surely be improved, but for now, took the first tile to center on
-        x, y, z = map(int, [tile.x, tile.y, tile.z])
-        web_ui = re.sub("{{zoom}}", str(z), web_ui)
-        web_ui = re.sub("{{center}}", str(list(tile_pixel_to_location(tile, 0.5, 0.5))[::-1]), web_ui)
+    def process_template(template):
+        web_ui = open(template, "r").read()
+        web_ui = re.sub("{{base_url}}", base_url, web_ui)
+        web_ui = re.sub("{{ext}}", ext, web_ui)
+        web_ui = re.sub("{{tiles}}", "tiles.json" if selected_tiles else "''", web_ui)
 
-    with open(os.path.join(out, "index.html"), "w", encoding="utf-8") as fp:
-        fp.write(web_ui)
+        if coverage_tiles:
+            tile = list(coverage_tiles)[0]  # Could surely be improved, but for now, took the first tile to center on
+            x, y, z = map(int, [tile.x, tile.y, tile.z])
+            web_ui = re.sub("{{zoom}}", str(z), web_ui)
+            web_ui = re.sub("{{center}}", str(list(tile_pixel_to_location(tile, 0.5, 0.5))[::-1]), web_ui)
+
+        with open(os.path.join(out, os.path.basename(template)), "w", encoding="utf-8") as fp:
+            fp.write(web_ui)
+
+    for template in templates:
+        process_template(template)
 
     if selected_tiles:
         with open(os.path.join(out, "tiles.json"), "w", encoding="utf-8") as fp:
