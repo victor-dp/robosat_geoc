@@ -53,4 +53,7 @@
 
   # Data Augmentation probability
   #dap = 1.0
+  
+  # Metrics
+  metrics = ["iou", "mcc"]
 ```

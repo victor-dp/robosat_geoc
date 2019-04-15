@@ -13,7 +13,7 @@ from mercantile import feature
 
 from robosat_pink.core import web_ui, Logs
 from robosat_pink.tiles import tiles_from_slippy_map, tile_from_slippy_map, tile_image_from_file, tile_image_to_file
-from robosat_pink.metrics import Metrics
+from robosat_pink.metrics.qod import get as compare
 
 
 def add_parser(subparser, formatter_class):
@@ -49,27 +49,6 @@ def add_parser(subparser, formatter_class):
     ui.add_argument("--no_web_ui", action="store_true", help="desactivate Web UI output")
 
     parser.set_defaults(func=main)
-
-
-def compare(masks, labels, tile):
-
-    x, y, z = list(map(str, tile))
-    label = np.array(Image.open(os.path.join(labels, z, x, "{}.png".format(y))))
-    mask = np.array(Image.open(os.path.join(masks, z, x, "{}.png".format(y))))
-
-    assert label.shape == mask.shape
-
-    metrics = Metrics()
-    metrics.add(torch.from_numpy(label), torch.from_numpy(mask), is_prob=False)
-    fg_iou = metrics.get_fg_iou()
-
-    fg_ratio = 100 * max(np.sum(mask != 0), np.sum(label != 0)) / mask.size
-    dist = 0.0 if math.isnan(fg_iou) else 1.0 - fg_iou
-
-    qod = 100 - (dist * (math.log(fg_ratio + 1.0) + np.finfo(float).eps) * (100 / math.log(100)))
-    qod = 0.0 if qod < 0.0 else qod  # Corner case prophilaxy
-
-    return dist, fg_ratio, qod
 
 
 def main(args):
@@ -116,8 +95,13 @@ def main(args):
 
             if args.masks and args.labels:
 
+                label = np.array(Image.open(os.path.join(args.labels, z, x, "{}.png".format(y))))
+                mask = np.array(Image.open(os.path.join(args.masks, z, x, "{}.png".format(y))))
+
+                assert label.shape == mask.shape
+
                 try:
-                    dist, fg_ratio, qod = compare(args.masks, args.labels, tile)
+                    dist, fg_ratio, qod = compare(torch.as_tensor(label, device="cpu"), torch.as_tensor(mask, device="cpu"))
                 except:
                     progress.update()
                     return False, tile

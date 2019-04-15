@@ -2,15 +2,14 @@ import os
 import sys
 import uuid
 from tqdm import tqdm
-from importlib import import_module
 
 import torch
 import torch.backends.cudnn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
-from robosat_pink.core import load_config, check_model, check_channels, check_classes, Logs
-from robosat_pink.metrics import Metrics
+from robosat_pink.core import load_config, load_module, check_model, check_channels, check_classes, Logs
+from robosat_pink.metrics.core import Metrics
 
 
 def add_parser(subparser, formatter_class):
@@ -74,21 +73,15 @@ def main(args):
         log.log("WARNING: Are you really sure sure about not training on GPU ?")
         device = torch.device("cpu")
 
-    try:
-        loader = import_module("robosat_pink.loaders.{}".format(config["model"]["loader"].lower()))
-        loader_train = getattr(loader, config["model"]["loader"])(
-            config, config["model"]["ts"], os.path.join(args.dataset, "training"), "train"
-        )
-        loader_val = getattr(loader, config["model"]["loader"])(
-            config, config["model"]["ts"], os.path.join(args.dataset, "validation"), "train"
-        )
-    except:
-        sys.exit("ERROR: Unable to load data loaders")
+    loader = load_module("robosat_pink.loaders.{}".format(config["model"]["loader"].lower()))
+    loader_train = getattr(loader, config["model"]["loader"])(
+        config, config["model"]["ts"], os.path.join(args.dataset, "training"), "train"
+    )
+    loader_val = getattr(loader, config["model"]["loader"])(
+        config, config["model"]["ts"], os.path.join(args.dataset, "validation"), "train"
+    )
 
-    try:
-        model_module = import_module("robosat_pink.models.{}".format(config["model"]["nn"].lower()))
-    except:
-        sys.exit("ERROR: Unable to load {} model".format(config["model"]["nn"]))
+    model_module = load_module("robosat_pink.models.{}".format(config["model"]["nn"].lower()))
 
     nn = getattr(model_module, config["model"]["nn"])(loader_train.shape_in, loader_train.shape_out, config).to(device)
     nn = torch.nn.DataParallel(nn)
@@ -110,11 +103,8 @@ def main(args):
             if resume >= args.epochs:
                 sys.exit("ERROR: Epoch {} already reached by the given checkpoint".format(config["model"]["epochs"]))
 
-    try:
-        loss_module = import_module("robosat_pink.losses.{}".format(config["model"]["loss"].lower()))
-        criterion = getattr(loss_module, config["model"]["loss"])().to(device)
-    except:
-        sys.exit("ERROR: Unable to load {} loss".format(config["model"]["loss"]))
+    loss_module = load_module("robosat_pink.losses.{}".format(config["model"]["loss"].lower()))
+    criterion = getattr(loss_module, config["model"]["loss"])().to(device)
 
     bs = config["model"]["bs"]
     train_loader = DataLoader(loader_train, batch_size=bs, shuffle=True, drop_last=True, num_workers=args.workers)
@@ -174,7 +164,7 @@ def train(loader, config, log, device, nn, optimizer, criterion):
     num_samples = 0
     running_loss = 0
 
-    metrics = Metrics()
+    metrics = Metrics(config["model"]["metrics"], config=config)
     nn.train()
 
     for images, masks, tiles in tqdm(loader, desc="Train", unit="batch", ascii=True):
@@ -196,14 +186,14 @@ def train(loader, config, log, device, nn, optimizer, criterion):
         running_loss += loss.item()
 
         for mask, output in zip(masks, outputs):
-            prediction = output.detach()
-            metrics.add(mask, prediction)
+            metrics.add(mask, torch.argmax(output.detach(), 0))
 
     assert num_samples > 0, "dataset contains training images and labels"
 
     log.log("{}{:.3f}".format("Loss:".ljust(25, " "), running_loss / num_samples))
     for classe in config["classes"][1:]:
-        log.log("{}{:.3f}".format((classe["title"] + " IoU:").ljust(25, " "), metrics.get_fg_iou()))
+        for metric, value in metrics.get().items():
+            log.log("{}{:.3f}".format((classe["title"] + " " + metric).ljust(25, " "), value))
 
 
 def validate(loader, config, log, device, nn, criterion):
@@ -211,7 +201,7 @@ def validate(loader, config, log, device, nn, criterion):
     num_samples = 0
     running_loss = 0
 
-    metrics = Metrics()
+    metrics = Metrics(config["model"]["metrics"], config=config)
     nn.eval()
 
     with torch.no_grad():
@@ -231,10 +221,11 @@ def validate(loader, config, log, device, nn, criterion):
             running_loss += loss.item()
 
             for mask, output in zip(masks, outputs):
-                metrics.add(mask, output)
+                metrics.add(mask, torch.argmax(output, 0))
 
     assert num_samples > 0, "dataset contains validation images and labels"
 
     log.log("{}{:.3f}".format("Loss:".ljust(25, " "), running_loss / num_samples))
     for classe in config["classes"][1:]:
-        log.log("{}{:.3f}".format((classe["title"] + " IoU:").ljust(25, " "), metrics.get_fg_iou()))
+        for metric, value in metrics.get().items():
+            log.log("{}{:.3f}".format((classe["title"] + " " + metric).ljust(25, " "), value))

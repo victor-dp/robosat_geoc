@@ -2,6 +2,7 @@ import os
 import sys
 import glob
 import toml
+from importlib import import_module
 
 import re
 import colorsys
@@ -9,6 +10,17 @@ import webcolors
 from pathlib import Path
 
 from robosat_pink.tiles import tile_pixel_to_location, tiles_to_geojson
+
+
+#
+# Import module
+#
+def load_module(module):
+    try:
+        module = import_module(module)
+    except:
+        sys.exit("ERROR: Unable to load {} module".format(module))
+    return module
 
 
 #
@@ -158,6 +170,8 @@ def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
     templates = glob.glob(os.path.join(Path(__file__).parent, "web_ui", "*"))
     if os.path.isfile(template):
         templates.append(template)
+    if os.path.isfile(os.path.join(out, "index.html")):
+        os.remove(os.path.join(out, "index.html"))  # if already existing output dir, as symlink can't be overwriten
     os.symlink(os.path.basename(template), os.path.join(out, "index.html"))
 
     def process_template(template):

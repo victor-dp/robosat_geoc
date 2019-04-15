@@ -44,6 +44,7 @@ echo '
   da = "Strong"
   bs = 4
   lr = 0.000025
+  metrics = ["iou"]
 ' > ~/.rsp_config
 ```
 

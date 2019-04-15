@@ -1,7 +1,6 @@
 import os
 import sys
 from tqdm import tqdm
-from importlib import import_module
 
 import numpy as np
 import mercantile
@@ -10,7 +9,7 @@ import torch
 import torch.backends.cudnn
 from torch.utils.data import DataLoader
 
-from robosat_pink.core import load_config, check_classes, check_channels, make_palette, web_ui, Logs
+from robosat_pink.core import load_config, load_module, check_classes, check_channels, make_palette, web_ui, Logs
 from robosat_pink.tiles import tiles_from_slippy_map, tile_label_to_file
 
 
@@ -59,7 +58,7 @@ def main(args):
     try:
         chkpt = torch.load(args.checkpoint, map_location=device)
         assert chkpt["producer_name"] == "RoboSat.pink"
-        model_module = import_module("robosat_pink.models.{}".format(chkpt["nn"].lower()))
+        model_module = load_module("robosat_pink.models.{}".format(chkpt["nn"].lower()))
         nn = getattr(model_module, chkpt["nn"])(chkpt["shape_in"], chkpt["shape_out"]).to(device)
         nn = torch.nn.DataParallel(nn)
         nn.load_state_dict(chkpt["state_dict"])
@@ -69,11 +68,8 @@ def main(args):
 
     log.log("Model {} - UUID: {}".format(chkpt["nn"], chkpt["uuid"]))
 
-    try:
-        loader_module = import_module("robosat_pink.loaders.{}".format(chkpt["loader"].lower()))
-        loader_predict = getattr(loader_module, chkpt["loader"])(config, chkpt["shape_in"][1:3], args.tiles, mode="predict")
-    except:
-        sys.exit("ERROR: Unable to load {} data loader.".format(chkpt["loader"]))
+    loader_module = load_module("robosat_pink.loaders.{}".format(chkpt["loader"].lower()))
+    loader_predict = getattr(loader_module, chkpt["loader"])(config, chkpt["shape_in"][1:3], args.tiles, mode="predict")
 
     loader = DataLoader(loader_predict, batch_size=args.bs, num_workers=args.workers)
     palette = make_palette(config["classes"][0]["color"], config["classes"][1]["color"])

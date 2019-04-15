@@ -1,6 +1,7 @@
 import os
 import sys
-from importlib import import_module
+
+from robosat_pink.core import load_module
 
 
 def add_parser(subparser, formatter_class):
@@ -20,13 +21,10 @@ def main(args):
 
     print("RoboSat.pink - extract {} from {}. Could take some time. Please wait.".format(args.type, args.pbf))
 
-    try:
-        module = import_module("robosat_pink.osm.{}".format(args.type.lower()))
-    except:
-        sys.exit("ERROR: Unknown OSM {} type extactor".format(args.type))
+    module = load_module("robosat_pink.osm.{}".format(args.type.lower()))
+    osmium_handler = getattr(module, "{}Handler".format(args.type))()
 
     try:
-        osmium_handler = getattr(module, "{}Handler".format(args.type))()
         osmium_handler.apply_file(filename=os.path.expanduser(args.pbf), locations=True)
     except:
         sys.exit("ERROR: Unable to extract {} from {}".format(args.type, args.pbf))

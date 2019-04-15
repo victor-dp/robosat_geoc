@@ -1,10 +1,10 @@
 import sys
 
-from importlib import import_module
-
 import torch
 import torch.onnx
 import torch.autograd
+
+from robosat_pink.core import load_module
 
 
 def add_parser(subparser, formatter_class):
@@ -24,10 +24,11 @@ def main(args):
     try:
         chkpt = torch.load(args.checkpoint, map_location=torch.device("cpu"))
         assert chkpt["producer_name"] == "RoboSat.pink"
-        model_module = import_module("robosat_pink.models.{}".format(chkpt["nn"].lower()))
-        nn = getattr(model_module, chkpt["nn"])(chkpt["shape_in"], chkpt["shape_out"]).to("cpu")
     except:
         sys.exit("ERROR: Unable to load checkpoint: {}".format(args.checkpoint))
+
+    model_module = load_module("robosat_pink.models.{}".format(chkpt["nn"].lower()))
+    nn = getattr(model_module, chkpt["nn"])(chkpt["shape_in"], chkpt["shape_out"]).to("cpu")
 
     print("RoboSat.pink - export model to {}".format(args.type))
     print("Model: {} - UUID: {} - Torch {}".format(chkpt["nn"], chkpt["uuid"], torch.__version__))

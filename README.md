@@ -139,6 +139,7 @@ echo '
   da = "Strong"
   loss = "Lovasz"
   loader = "SemSegTiles"
+  metrics = ["iou"]
 
 ' > ~/.rsp_config
 ```
