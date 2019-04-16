@@ -125,9 +125,9 @@ def main(args):
         UUID = uuid.uuid1()
         log.log("---{}Epoch: {}/{} -- UUID: {}".format(os.linesep, epoch + 1, args.epochs, UUID))
 
-        train(train_loader, config, log, device, nn, optimizer, criterion)
+        process(train_loader, config, log, device, nn, criterion, "train", optimizer)
         if not args.no_validation:
-            validate(val_loader, config, log, device, nn, criterion)
+            process(val_loader, config, log, device, nn, criterion, "eval")
 
         try:  # https://github.com/pytorch/pytorch/issues/9176
             nn_doc = nn.module.doc
@@ -159,73 +159,49 @@ def main(args):
             sys.exit("ERROR: Unable to save checkpoint {}".format(checkpoint_path))
 
 
-def train(loader, config, log, device, nn, optimizer, criterion):
+def process(loader, config, log, device, nn, criterion, mode, optimizer=None):
+    def _process():
+        num_samples = 0
+        running_loss = 0
+        metrics = Metrics(config["model"]["metrics"], config=config)
 
-    num_samples = 0
-    running_loss = 0
-
-    metrics = Metrics(config["model"]["metrics"], config=config)
-    nn.train()
-
-    for images, masks, tiles in tqdm(loader, desc="Train", unit="batch", ascii=True):
-        images = images.to(device)
-        masks = masks.to(device)
-
-        assert images.size()[2:] == masks.size()[1:], "resolutions for images and masks are in sync"
-        num_samples += int(images.size(0))
-
-        optimizer.zero_grad()
-        outputs = nn(images)
-
-        assert outputs.size()[2:] == masks.size()[1:], "resolutions for predictions and masks are in sync"
-        assert outputs.size()[1] == len(config["classes"]), "classes for predictions and dataset are in sync"
-
-        loss = criterion(outputs, masks, config)
-        loss.backward()
-        optimizer.step()
-        running_loss += loss.item()
-
-        for mask, output in zip(masks, outputs):
-            metrics.add(mask, torch.argmax(output.detach(), 0))
-
-    assert num_samples > 0, "dataset contains training images and labels"
-
-    log.log("{}{:.3f}".format("Loss:".ljust(25, " "), running_loss / num_samples))
-    for classe in config["classes"][1:]:
-        for metric, value in metrics.get().items():
-            log.log("{}{:.3f}".format((classe["title"] + " " + metric).ljust(25, " "), value))
-
-
-def validate(loader, config, log, device, nn, criterion):
-
-    num_samples = 0
-    running_loss = 0
-
-    metrics = Metrics(config["model"]["metrics"], config=config)
-    nn.eval()
-
-    with torch.no_grad():
-        for images, masks, tiles in tqdm(loader, desc="Validate", unit="batch", ascii=True):
+        for images, masks, tiles in tqdm(loader, desc="Train", unit="batch", ascii=True):
             images = images.to(device)
             masks = masks.to(device)
 
             assert images.size()[2:] == masks.size()[1:], "resolutions for images and masks are in sync"
             num_samples += int(images.size(0))
 
+            if mode == "train":
+                optimizer.zero_grad()
             outputs = nn(images)
 
             assert outputs.size()[2:] == masks.size()[1:], "resolutions for predictions and masks are in sync"
             assert outputs.size()[1] == len(config["classes"]), "classes for predictions and dataset are in sync"
 
             loss = criterion(outputs, masks, config)
+            if mode == "train":
+                loss.backward()
+                optimizer.step()
             running_loss += loss.item()
 
             for mask, output in zip(masks, outputs):
+                if mode == "train":
+                    output.detach()
                 metrics.add(mask, torch.argmax(output, 0))
 
-    assert num_samples > 0, "dataset contains validation images and labels"
+        assert num_samples > 0, "dataset contains training images and labels"
 
-    log.log("{}{:.3f}".format("Loss:".ljust(25, " "), running_loss / num_samples))
-    for classe in config["classes"][1:]:
-        for metric, value in metrics.get().items():
-            log.log("{}{:.3f}".format((classe["title"] + " " + metric).ljust(25, " "), value))
+        log.log("{}{:.3f}".format("Loss:".ljust(25, " "), running_loss / num_samples))
+        for classe in config["classes"][1:]:
+            for metric, value in metrics.get().items():
+                log.log("{}{:.3f}".format((classe["title"] + " " + metric).ljust(25, " "), value))
+
+    if mode == "train":
+        nn.train()
+        _process()
+
+    if mode == "eval":
+        nn.eval()
+        with torch.no_grad():
+            _process()
