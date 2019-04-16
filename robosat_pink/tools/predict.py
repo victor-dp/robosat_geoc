@@ -19,7 +19,7 @@ def add_parser(subparser, formatter_class):
     )
 
     inp = parser.add_argument_group("Inputs")
-    inp.add_argument("predict dataset", type=str, help="predict dataset directory path [required]")
+    inp.add_argument("dataset", type=str, help="predict dataset directory path [required]")
     inp.add_argument("--checkpoint", type=str, required=True, help="path to the trained model to use [required]")
     inp.add_argument("--config", type=str, help="path to config file [required]")
 
@@ -70,7 +70,7 @@ def main(args):
     log.log("Model {} - UUID: {}".format(chkpt["nn"], chkpt["uuid"]))
 
     loader_module = load_module("robosat_pink.loaders.{}".format(chkpt["loader"].lower()))
-    loader_predict = getattr(loader_module, chkpt["loader"])(config, chkpt["shape_in"][1:3], args.tiles, mode="predict")
+    loader_predict = getattr(loader_module, chkpt["loader"])(config, chkpt["shape_in"][1:3], args.dataset, mode="predict")
 
     loader = DataLoader(loader_predict, batch_size=args.bs, num_workers=args.workers)
     if not len(loader):

@@ -123,13 +123,13 @@ usage: rsp predict [-h] --checkpoint CHECKPOINT [--config CONFIG]
                    [--workers WORKERS] [--bs BS]
                    [--web_ui_base_url WEB_UI_BASE_URL]
                    [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
-                   predict dataset out
+                   dataset out
 
 optional arguments:
  -h, --help                         show this help message and exit
 
 Inputs:
- predict dataset                    predict dataset directory path [required]
+ dataset                            predict dataset directory path [required]
  --checkpoint CHECKPOINT            path to the trained model to use [required]
  --config CONFIG                    path to config file [required]
 
