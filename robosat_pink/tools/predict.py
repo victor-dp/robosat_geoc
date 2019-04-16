@@ -19,7 +19,7 @@ def add_parser(subparser, formatter_class):
     )
 
     inp = parser.add_argument_group("Inputs")
-    inp.add_argument("tiles", type=str, help="tiles directory path [required]")
+    inp.add_argument("predict dataset", type=str, help="predict dataset directory path [required]")
     inp.add_argument("--checkpoint", type=str, required=True, help="path to the trained model to use [required]")
     inp.add_argument("--config", type=str, help="path to config file [required]")
 
@@ -42,6 +42,7 @@ def main(args):
     config = load_config(args.config)
     check_channels(config)
     check_classes(config)
+    palette = make_palette(config["classes"][0]["color"], config["classes"][1]["color"])
     args.workers = torch.cuda.device_count() * 2 if torch.device("cuda") and not args.workers else args.workers
 
     log = Logs(os.path.join(args.out, "log"))
@@ -72,7 +73,8 @@ def main(args):
     loader_predict = getattr(loader_module, chkpt["loader"])(config, chkpt["shape_in"][1:3], args.tiles, mode="predict")
 
     loader = DataLoader(loader_predict, batch_size=args.bs, num_workers=args.workers)
-    palette = make_palette(config["classes"][0]["color"], config["classes"][1]["color"])
+    if not len(loader):
+        sys.exit("ERROR: Empty predict dataset directory. Check your path.")
 
     with torch.no_grad():  # don't track tensors with autograd during prediction
 
