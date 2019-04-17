@@ -1,5 +1,3 @@
-import sys
-
 import torch
 import torch.onnx
 import torch.autograd
@@ -21,11 +19,7 @@ def add_parser(subparser, formatter_class):
 
 def main(args):
 
-    try:
-        chkpt = torch.load(args.checkpoint, map_location=torch.device("cpu"))
-        assert chkpt["producer_name"] == "RoboSat.pink"
-    except:
-        sys.exit("ERROR: Unable to load checkpoint: {}".format(args.checkpoint))
+    chkpt = torch.load(args.checkpoint, map_location=torch.device("cpu"))
 
     model_module = load_module("robosat_pink.models.{}".format(chkpt["nn"].lower()))
     nn = getattr(model_module, chkpt["nn"])(chkpt["shape_in"], chkpt["shape_out"]).to("cpu")
@@ -39,12 +33,9 @@ def main(args):
     except AttributeError:
         nn.state_dict(chkpt["state_dict"])
 
-    try:
-        batch = torch.rand(1, *chkpt["shape_in"])
-        if args.type == "onnx":
-            torch.onnx.export(nn, torch.autograd.Variable(batch), args.out)
+    batch = torch.rand(1, *chkpt["shape_in"])
+    if args.type == "onnx":
+        torch.onnx.export(nn, torch.autograd.Variable(batch), args.out)
 
-        if args.type == "jit":
-            torch.jit.trace(nn, batch).save(args.out)
-    except:
-        sys.exit("ERROR: Unable to export model {} in {}.".format(chkpt["uuid"]), args.type)
+    if args.type == "jit":
+        torch.jit.trace(nn, batch).save(args.out)

@@ -89,13 +89,9 @@ def main(args):
 
     resume = 0
     if args.checkpoint:
-        try:
-            chkpt = torch.load(os.path.expanduser(args.checkpoint), map_location=device)
-            nn.load_state_dict(chkpt["state_dict"])
-            log.log("Using checkpoint: {}".format(args.checkpoint))
-
-        except:
-            sys.exit("ERROR: Unable to load {} checkpoint".format(args.checkpoint))
+        chkpt = torch.load(os.path.expanduser(args.checkpoint), map_location=device)
+        nn.load_state_dict(chkpt["state_dict"])
+        log.log("Using checkpoint: {}".format(args.checkpoint))
 
         if args.resume:
             optimizer.load_state_dict(chkpt["optimizer"])
@@ -153,10 +149,7 @@ def main(args):
             "loader": config["model"]["loader"],
         }
         checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}.pth".format(epoch + 1))
-        try:
-            torch.save(states, checkpoint_path)
-        except:
-            sys.exit("ERROR: Unable to save checkpoint {}".format(checkpoint_path))
+        torch.save(states, checkpoint_path)
 
 
 def process(loader, config, log, device, nn, criterion, mode, optimizer=None):

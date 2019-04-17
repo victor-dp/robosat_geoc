@@ -152,7 +152,7 @@ rsp cover --bbox 4.8,45.7,4.83,45.73 --zoom 18 ds/cover
 rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' ds/cover ds/images
 
 wget -nc -O ds/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&BBOX=4.79,45.69,4.84,45.74&outputFormat=application/json; subtype=geojson'
-rsp rasterize --geojson ds/lyon_roofprint.json --cover ds/cover ds/labels
+rsp rasterize --type Building --geojson ds/lyon_roofprint.json --cover ds/cover ds/labels
 
 rsp cover --dir ds/images --splits 70/20/10 ds/training/cover ds/validation/cover ds/prediction/cover
 rsp subset --dir ds/images --cover ds/training/cover ds/training/images

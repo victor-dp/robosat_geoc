@@ -75,7 +75,7 @@ Prepare DataSet
 To transform the vector roofprints to raster labels:
 
 ```bash
-rsp rasterize --geojson ds/lyon_roofprint.json --cover ds/cover ds/labels
+rsp rasterize --type Building --geojson ds/lyon_roofprint.json --cover ds/cover ds/labels
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/labels/"><img src="img/from_opendata_to_opendataset/labels.png" /></a>

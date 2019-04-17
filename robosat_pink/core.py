@@ -16,10 +16,8 @@ from robosat_pink.tiles import tile_pixel_to_location, tiles_to_geojson
 # Import module
 #
 def load_module(module):
-    try:
-        module = import_module(module)
-    except:
-        sys.exit("ERROR: Unable to load {} module".format(module))
+    module = import_module(module)
+    assert module, "Unable to import module {}".format(module)
     return module
 
 
@@ -36,11 +34,8 @@ def load_config(path):
     if not path:
         sys.exit("CONFIG ERROR: Either ~/.rsp_config or RSP_CONFIG env var or --config parameter, is required.")
 
-    try:
-        config = toml.load(os.path.expanduser(path))
-    except:
-        sys.exit("CONFIG ERROR: Unable to load config file from: {}, check both path and syntax.".format(path))
-
+    config = toml.load(os.path.expanduser(path))
+    assert config, "Unable to parse config file"
     config["classes"].insert(0, {"title": "Background", "color": "white"})  # Insert white Background
 
     # Set default values
@@ -57,8 +52,7 @@ def load_config(path):
 
 
 def check_channels(config):
-    if "channels" not in config.keys():
-        sys.exit("CONFIG ERROR: At least one channel is mandatory.")
+    assert "channels" in config.keys(), "At least one Channel is mandatory"
 
     # TODO Add name check
 
@@ -70,27 +64,18 @@ def check_channels(config):
 def check_classes(config):
     """Check if config file classes subpart is consistent. Exit on error if not."""
 
-    if "classes" not in config.keys():
-        sys.exit("CONFIG ERROR: At least one class is mandatory.")
-
-    if len(config["classes"]) != 2:
-        sys.exit("CONFIG ERROR: For now, only binary classifications are available.")
+    assert "classes" in config.keys(), "At least one class is mandatory"
 
     for classe in config["classes"]:
-        if "title" not in classe.keys() or not len(classe["title"]):
-            sys.exit("CONFIG ERROR: Missing or empty classes.title value.")
-
-        if "color" not in classe.keys() or not check_color(classe["color"]):
-            sys.exit("CONFIG ERROR: Missing or invalid classes.color value.")
+        assert "title" in classe.keys() and len(classe["title"]), "Missing or Empty classes.title.value"
+        assert "color" in classe.keys() and check_color(classe["color"]), "Missing or Invalid classes.color value"
 
 
 def check_model(config):
 
     hps = {"nn": "str", "pretrained": "bool", "loss": "str", "da": "str"}
-
     for hp in hps:
-        if hp not in config["model"].keys() or type(config["model"][hp]).__name__ != hps[hp]:
-            sys.exit("CONFIG ERROR: Missing or invalid model.{} value.".format(hp))
+        assert hp in config["model"].keys() and type(config["model"][hp]).__name__ == hps[hp], "Missing or Invalid model"
 
 
 #
@@ -102,25 +87,19 @@ class Logs:
 
         self.fp = None
         self.out = out
-        try:
-            if path:
-                if not os.path.isdir(os.path.dirname(path)):
-                    os.makedirs(os.path.dirname(path), exist_ok=True)
-                self.fp = open(path, mode="a")
-        except:
-            sys.exit("Unable to write in logs directory")
+        if path:
+            if not os.path.isdir(os.path.dirname(path)):
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+            self.fp = open(path, mode="a")
 
     def log(self, msg):
         """Log a new message to the opened logs file, and optionnaly on stdout or stderr too."""
-        try:
-            if self.fp:
-                self.fp.write(msg + os.linesep)
-                self.fp.flush()
+        if self.fp:
+            self.fp.write(msg + os.linesep)
+            self.fp.flush()
 
-            if self.out:
-                print(msg, file=self.out)
-        except:
-            sys.exit("Unable to write in logs file")
+        if self.out:
+            print(msg, file=self.out)
 
 
 #

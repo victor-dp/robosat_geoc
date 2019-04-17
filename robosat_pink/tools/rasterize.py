@@ -29,6 +29,7 @@ def add_parser(subparser, formatter_class):
     inp = parser.add_argument_group("Inputs [either --postgis or --geojson is required]")
     inp.add_argument("--cover", type=str, help="path to csv tiles cover file [required]")
     inp.add_argument("--pg_dsn", type=str, help="PostgreSQL connection dsn using psycopg2 syntax [required with --postgis]")
+    inp.add_argument("--type", type=str, required=True, help="type of feature to rasterize (e.g Building, Road) [required]")
     inp.add_argument("--postgis", type=str, help="SELECT query to retrieve geometry features [e.g SELECT geom FROM table]")
     inp.add_argument("--geojson", type=str, nargs="+", help="path to GeoJSON features files")
     inp.add_argument("--config", type=str, help="path to config file [required]")
@@ -116,7 +117,9 @@ def main(args):
     config = load_config(args.config)
     check_classes(config)
     palette = make_palette(*[classe["color"] for classe in config["classes"]], complementary=True)
-    burn_value = 1
+    burn_value = next(config["classes"].index(classe) for classe in config["classes"] if classe["title"] == args.type)
+    if "burn_value" not in locals():
+        sys.exit("ERROR: asked type to rasterize is not contains in your config file classes.")
 
     args.out = os.path.expanduser(args.out)
     os.makedirs(args.out, exist_ok=True)
@@ -168,10 +171,7 @@ def main(args):
         for geojson_file in args.geojson:
 
             with open(os.path.expanduser(geojson_file)) as geojson:
-                try:
-                    feature_collection = json.load(geojson)
-                except:
-                    sys.exit("ERROR: {} is not a valid JSON file.".format(geojson_file))
+                feature_collection = json.load(geojson)
 
                 try:
                     crs_mapping = {"CRS84": "4326", "900913": "3857"}
@@ -182,16 +182,13 @@ def main(args):
 
                 for i, feature in enumerate(tqdm(feature_collection["features"], ascii=True, unit="feature")):
 
-                    try:
-                        if feature["geometry"]["type"] == "GeometryCollection":
-                            for geometry in feature["geometry"]["geometries"]:
-                                feature_map = geojson_parse_geometry(zoom, srid, feature_map, geometry, i)
-                        else:
-                            feature_map = geojson_parse_geometry(zoom, srid, feature_map, feature["geometry"], i)
-                    except:
-                        sys.exit("ERROR: Unable to parse {} file. Seems not a valid GEOJSON file.".format(geojson_file))
+                    if feature["geometry"]["type"] == "GeometryCollection":
+                        for geometry in feature["geometry"]["geometries"]:
+                            feature_map = geojson_parse_geometry(zoom, srid, feature_map, geometry, i)
+                    else:
+                        feature_map = geojson_parse_geometry(zoom, srid, feature_map, feature["geometry"], i)
 
-        log.log("RoboSat.pink - rasterize - rasterizing tiles from {} on cover {}".format(args.geojson, args.cover))
+        log.log("RoboSat.pink - rasterize - rasterizing {} from {} on cover {}".format(args.type, args.geojson, args.cover))
         with open(os.path.join(os.path.expanduser(args.out), "instances.cover"), mode="w") as cover:
             for tile in tqdm(list(tiles_from_csv(os.path.expanduser(args.cover))), ascii=True, unit="tile"):
 
@@ -209,16 +206,13 @@ def main(args):
 
     if args.postgis:
 
-        try:
-            pg_conn = psycopg2.connect(args.pg_dsn)
-            pg = pg_conn.cursor()
-        except Exception:
-            sys.exit("Unable to connect PostgreSQL: {}".format(args.pg_dsn))
+        pg_conn = psycopg2.connect(args.pg_dsn)
+        pg = pg_conn.cursor()
 
-        log.log("RoboSat.pink - rasterize - rasterizing tiles from PostGIS on cover {}".format(args.cover))
+        log.log("RoboSat.pink - rasterize - rasterizing {} on cover {}".format(args.type, args.cover))
         log.log(" SQL {}".format(args.postgis))
+        pg.execute("SELECT ST_Srid(geom) AS srid FROM ({} LIMIT 1) AS sub".format(args.postgis))
         try:
-            pg.execute("SELECT ST_Srid(geom) AS srid FROM ({} LIMIT 1) AS sub".format(args.postgis))
             srid = pg.fetchone()[0]
         except Exception:
             sys.exit("Unable to retrieve geometry SRID.")

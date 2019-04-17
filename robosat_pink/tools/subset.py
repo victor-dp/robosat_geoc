@@ -1,5 +1,4 @@
 import os
-import sys
 import shutil
 
 from glob import glob
@@ -33,9 +32,7 @@ def add_parser(subparser, formatter_class):
 
 
 def main(args):
-    if not args.out and not args.delete:
-        sys.exit("ERROR: out parameter is required")
-
+    assert args.out or args.delete, "out parameter is required"
     args.out = os.path.expanduser(args.out)
     extension = ""
 
@@ -50,26 +47,22 @@ def main(args):
             continue
         src = paths[0]
 
-        try:
-            if not os.path.isdir(os.path.join(args.out, str(tile.z), str(tile.x))):
-                os.makedirs(os.path.join(args.out, str(tile.z), str(tile.x)), exist_ok=True)
+        if not os.path.isdir(os.path.join(args.out, str(tile.z), str(tile.x))):
+            os.makedirs(os.path.join(args.out, str(tile.z), str(tile.x)), exist_ok=True)
 
-            extension = os.path.splitext(src)[1][1:]
-            dst = os.path.join(args.out, str(tile.z), str(tile.x), "{}.{}".format(tile.y, extension))
+        extension = os.path.splitext(src)[1][1:]
+        dst = os.path.join(args.out, str(tile.z), str(tile.x), "{}.{}".format(tile.y, extension))
 
-            if args.move:
-                assert os.path.isfile(src)
-                shutil.move(src, dst)
+        if args.move:
+            assert os.path.isfile(src)
+            shutil.move(src, dst)
 
-            elif args.delete:
-                assert os.path.isfile(src)
-                os.remove(src)
+        elif args.delete:
+            assert os.path.isfile(src)
+            os.remove(src)
 
-            else:
-                shutil.copyfile(src, dst)
-
-        except:
-            sys.exit("Error: Unable to process tile: {}".format(str(tile)))
+        else:
+            shutil.copyfile(src, dst)
 
     if not args.no_web_ui and not args.delete:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template

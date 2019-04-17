@@ -1,4 +1,3 @@
-import sys
 from tqdm import tqdm
 
 import numpy as np
@@ -31,8 +30,7 @@ def main(args):
     config = load_config(args.config)
     check_classes(config)
     index = [i for i in (list(range(len(config["classes"])))) if config["classes"][i]["title"] == args.type]
-    if not index:
-        sys.exit("ERROR: Requested type {} not found among classes title in the config file.".format(args.type))
+    assert index, "Requested type {} not found among classes title in the config file.".format(args.type)
 
     print("RoboSat.pink - vectorize {} from {}".format(args.type, args.masks))
 
@@ -41,20 +39,17 @@ def main(args):
         out.write('{"type":"FeatureCollection","features":[')
 
         for tile, path in tqdm(list(tiles_from_slippy_map(args.masks)), ascii=True, unit="mask"):
+            features = (np.array(Image.open(path).convert("P"), dtype=np.uint8) == index).astype(np.uint8)
             try:
-                features = (np.array(Image.open(path).convert("P"), dtype=np.uint8) == index).astype(np.uint8)
-                try:
-                    C, W, H = features.shape
-                except:
-                    W, H = features.shape
-                transform = rasterio.transform.from_bounds((*mercantile.bounds(tile.x, tile.y, tile.z)), W, H)
-
-                for shape, value in rasterio.features.shapes(features, transform=transform):
-                    prop = '"properties":{{"x":{},"y":{},"z":{}}}'.format(int(tile.x), int(tile.y), int(tile.z))
-                    geom = '"geometry":{{"type": "Polygon", "coordinates":{}}}'.format(json.dumps(shape["coordinates"]))
-                    out.write('{}{{"type":"Feature",{},{}}}'.format("," if not first else "", geom, prop))
-                    first = False
+                C, W, H = features.shape
             except:
-                sys.exit("ERROR: Unable to vectorize tile {}.".format(str(tile)))
+                W, H = features.shape
+            transform = rasterio.transform.from_bounds((*mercantile.bounds(tile.x, tile.y, tile.z)), W, H)
+
+            for shape, value in rasterio.features.shapes(features, transform=transform):
+                prop = '"properties":{{"x":{},"y":{},"z":{}}}'.format(int(tile.x), int(tile.y), int(tile.z))
+                geom = '"geometry":{{"type": "Polygon", "coordinates":{}}}'.format(json.dumps(shape["coordinates"]))
+                out.write('{}{{"type":"Feature",{},{}}}'.format("," if not first else "", geom, prop))
+                first = False
 
         out.write("]}")

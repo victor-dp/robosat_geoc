@@ -41,18 +41,11 @@ def add_parser(subparser, formatter_class):
 
 def main(args):
 
-    try:
-        tiles = list(tiles_from_csv(args.cover))
-    except:
-        sys.exit("ERROR: unable to read cover file: {}".format(args.cover))
+    tiles = list(tiles_from_csv(args.cover))
+    os.makedirs(os.path.expanduser(args.out), exist_ok=True)
 
     if not args.workers:
         args.workers = max(1, math.floor(os.cpu_count() * 0.5))
-
-    try:
-        os.makedirs(os.path.expanduser(args.out), exist_ok=True)
-    except:
-        sys.exit("ERROR: unable to create output dir: {}".format(args.out))
 
     log = Logs(os.path.join(args.out, "log"), out=sys.stderr)
     log.log("RoboSat.pink - download with {} workers, at max {} req/s, from: {}".format(args.workers, args.rate, args.url))

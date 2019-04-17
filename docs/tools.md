@@ -111,7 +111,7 @@ optional arguments:
  -h, --help   show this help message and exit
 
 Inputs:
- --type TYPE  type of feature to extract (e.g building, road) [required]
+ --type TYPE  type of feature to extract (e.g Building, Road) [required]
  pbf          path to .osm.pbf file [required]
 
 Output:
@@ -147,7 +147,7 @@ Web UI:
 ```
 ## rsp rasterize
 ```
-usage: rsp rasterize [-h] [--cover COVER] [--pg_dsn PG_DSN]
+usage: rsp rasterize [-h] [--cover COVER] [--pg_dsn PG_DSN] --type TYPE
                      [--postgis POSTGIS] [--geojson GEOJSON [GEOJSON ...]]
                      [--config CONFIG] [--ts TS]
                      [--web_ui_base_url WEB_UI_BASE_URL]
@@ -160,6 +160,7 @@ optional arguments:
 Inputs [either --postgis or --geojson is required]:
  --cover COVER                      path to csv tiles cover file [required]
  --pg_dsn PG_DSN                    PostgreSQL connection dsn using psycopg2 syntax [required with --postgis]
+ --type TYPE                        type of feature to rasterize (e.g Building, Road) [required]
  --postgis POSTGIS                  SELECT query to retrieve geometry features [e.g SELECT geom FROM table]
  --geojson GEOJSON [GEOJSON ...]    path to GeoJSON features files
  --config CONFIG                    path to config file [required]

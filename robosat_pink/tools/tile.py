@@ -83,11 +83,8 @@ def main(args):
 
     bands = -1
     for path in args.rasters:
-        try:
-            raster = rasterio_open(path)
-            w, s, e, n = transform_bounds(raster.crs, "EPSG:4326", *raster.bounds)
-        except:
-            sys.exit("Error: Unable to load raster {} or deal with it's projection".format(args.raster))
+        raster = rasterio_open(path)
+        w, s, e, n = transform_bounds(raster.crs, "EPSG:4326", *raster.bounds)
 
         if bands != -1:
             assert bands == len(raster.indexes), "Coverage must be bands consistent"
@@ -126,25 +123,20 @@ def main(args):
 
             for tile in tiles:
 
-                try:
-                    w, s, e, n = mercantile.xy_bounds(tile)
+                w, s, e, n = mercantile.xy_bounds(tile)
 
-                    # inspired by rio-tiler, cf: https://github.com/mapbox/rio-tiler/pull/45
-                    warp_vrt = WarpedVRT(
-                        raster,
-                        crs="epsg:3857",
-                        resampling=Resampling.bilinear,
-                        add_alpha=False,
-                        transform=from_bounds(w, s, e, n, args.ts, args.ts),
-                        width=math.ceil((e - w) / transform.a),
-                        height=math.ceil((s - n) / transform.e),
-                    )
-                    data = warp_vrt.read(
-                        out_shape=(len(raster.indexes), args.ts, args.ts), window=warp_vrt.window(w, s, e, n)
-                    )
-                    image = np.moveaxis(data, 0, 2)  # C,H,W -> H,W,C
-                except:
-                    sys.exit("Error: Unable to tile {} from raster {}.".format(str(tile), raster))
+                # inspired by rio-tiler, cf: https://github.com/mapbox/rio-tiler/pull/45
+                warp_vrt = WarpedVRT(
+                    raster,
+                    crs="epsg:3857",
+                    resampling=Resampling.bilinear,
+                    add_alpha=False,
+                    transform=from_bounds(w, s, e, n, args.ts, args.ts),
+                    width=math.ceil((e - w) / transform.a),
+                    height=math.ceil((s - n) / transform.e),
+                )
+                data = warp_vrt.read(out_shape=(len(raster.indexes), args.ts, args.ts), window=warp_vrt.window(w, s, e, n))
+                image = np.moveaxis(data, 0, 2)  # C,H,W -> H,W,C
 
                 tile_key = (str(tile.x), str(tile.y), str(tile.z))
                 if not args.label and len(tiles_map[tile_key]) == 1 and is_nodata(image):

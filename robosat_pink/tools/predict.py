@@ -1,5 +1,4 @@
 import os
-import sys
 from tqdm import tqdm
 
 import numpy as np
@@ -56,16 +55,12 @@ def main(args):
         log.log("RoboSat.pink - predict on CPU, with {} workers".format(args.workers))
         device = torch.device("cpu")
 
-    try:
-        chkpt = torch.load(args.checkpoint, map_location=device)
-        assert chkpt["producer_name"] == "RoboSat.pink"
-        model_module = load_module("robosat_pink.models.{}".format(chkpt["nn"].lower()))
-        nn = getattr(model_module, chkpt["nn"])(chkpt["shape_in"], chkpt["shape_out"]).to(device)
-        nn = torch.nn.DataParallel(nn)
-        nn.load_state_dict(chkpt["state_dict"])
-        nn.eval()
-    except:
-        sys.exit("ERROR: Unable to load {} checkpoint.".format(args.checkpoint))
+    chkpt = torch.load(args.checkpoint, map_location=device)
+    model_module = load_module("robosat_pink.models.{}".format(chkpt["nn"].lower()))
+    nn = getattr(model_module, chkpt["nn"])(chkpt["shape_in"], chkpt["shape_out"]).to(device)
+    nn = torch.nn.DataParallel(nn)
+    nn.load_state_dict(chkpt["state_dict"])
+    nn.eval()
 
     log.log("Model {} - UUID: {}".format(chkpt["nn"], chkpt["uuid"]))
 
@@ -73,8 +68,7 @@ def main(args):
     loader_predict = getattr(loader_module, chkpt["loader"])(config, chkpt["shape_in"][1:3], args.dataset, mode="predict")
 
     loader = DataLoader(loader_predict, batch_size=args.bs, num_workers=args.workers)
-    if not len(loader):
-        sys.exit("ERROR: Empty predict dataset directory. Check your path.")
+    assert len(loader), "Empty predict dataset directory. Check your path."
 
     with torch.no_grad():  # don't track tensors with autograd during prediction
 
@@ -82,23 +76,13 @@ def main(args):
 
             images = images.to(device)
 
-            try:
-                outputs = nn(images)
-                probs = torch.nn.functional.softmax(outputs, dim=1).data.cpu().numpy()
-            except:
-                log.log("WARNING: Skipping batch:")
-                for tile, prob in zip(tiles, probs):
-                    log.log(" - {}".format(str(tile)))
-                continue
+            outputs = nn(images)
+            probs = torch.nn.functional.softmax(outputs, dim=1).data.cpu().numpy()
 
             for tile, prob in zip(tiles, probs):
-
-                try:
-                    x, y, z = list(map(int, tile))
-                    mask = np.around(prob[1:, :, :]).astype(np.uint8).squeeze()
-                    tile_label_to_file(args.out, mercantile.Tile(x, y, z), palette, mask)
-                except:
-                    log.log("WARNING: Skipping tile {}".format(str(tile)))
+                x, y, z = list(map(int, tile))
+                mask = np.around(prob[1:, :, :]).astype(np.uint8).squeeze()
+                tile_label_to_file(args.out, mercantile.Tile(x, y, z), palette, mask)
 
     if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template

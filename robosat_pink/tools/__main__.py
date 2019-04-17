@@ -34,4 +34,13 @@ def main():
         module.add_parser(subparser, formatter_class=fc)
 
     args = parser.parse_args()
-    args.func(args)
+
+    if "RSP_DEBUG" in os.environ and os.environ["RSP_DEBUG"] == "1":
+        args.func(args)
+
+    else:
+
+        try:
+            args.func(args)
+        except (Exception) as error:
+            sys.exit("{}ERROR: {}".format(os.linesep, error))
