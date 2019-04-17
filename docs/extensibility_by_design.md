@@ -79,7 +79,7 @@ class ParkHandler(osmium.SimpleHandler):
             geojson.dump(geojson.FeatureCollection(self.features), fp)
 ```
 
-Callable with `rsp extract --type park`
+Callable with `rsp extract --type Park`
 
 </details>
 
