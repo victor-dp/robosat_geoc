@@ -1,8 +1,6 @@
-import io
 import os
 import sys
 import json
-import struct
 import collections
 
 import numpy as np
@@ -67,43 +65,6 @@ def geojson_tile_burn(tile, features, srid, ts, burn_value=1):
     transform = from_bounds(*bounds, ts, ts)
 
     return rasterize(shapes, out_shape=(ts, ts), transform=transform)
-
-
-def wkb_to_numpy(wkb):
-    """Convert a PostGIS WKB raster to a NumPy array.
-       Inspired by: https://github.com/nathancahill/wkb-raster
-
-       PostGIS WKB RFC: http://trac.osgeo.org/postgis/browser/trunk/raster/doc/RFC2-WellKnownBinaryFormat
-    """
-
-    out = None
-
-    if not wkb:
-        return None
-
-    endian = ">" if struct.unpack("<b", wkb.read(1)) == 0 else "<"  # raster Endiannes
-    (_, bands, _, _, _, _, _, _, srid, width, height) = struct.unpack(endian + "HHddddddIHH", wkb.read(60))  # MetaData
-
-    for band in range(bands):
-
-        bits = int(struct.unpack(endian + "b", wkb.read(1))[0])  # header band attributes
-        if bool(bits & 128):
-            sys.exit("OffLine PostGIS WKB Data not supported.")
-
-        size = [1, 1, 1, 1, 1, 2, 2, 4, 4, 4, 8][bits & 15]
-        dtype = ["b1", "u1", "u1", "i1", "u1", "i2", "u2", "i4", "u4", "f4", "f8"][bits & 15]
-
-        wkb.read(size)  # Skip raster NoData value
-
-        if band == 0:
-            out = np.zeros((height, width, bands), dtype=np.dtype(dtype))
-            pixtype = bits & 15
-        elif pixtype != bits & 15:
-            sys.exit("Mixed PostGIS WBK Data type not supported.")
-
-        out[:, :, band] = np.ndarray((height, width), buffer=wkb.read(width * height * size), dtype=np.dtype(dtype))
-
-    return out
 
 
 def main(args):
@@ -187,82 +148,62 @@ def main(args):
                             feature_map = geojson_parse_geometry(zoom, srid, feature_map, geometry, i)
                     else:
                         feature_map = geojson_parse_geometry(zoom, srid, feature_map, feature["geometry"], i)
-
-        log.log("RoboSat.pink - rasterize - rasterizing {} from {} on cover {}".format(args.type, args.geojson, args.cover))
-        with open(os.path.join(os.path.expanduser(args.out), "instances.cover"), mode="w") as cover:
-            for tile in tqdm(list(tiles_from_csv(os.path.expanduser(args.cover))), ascii=True, unit="tile"):
-
-                try:
-                    if tile in feature_map:
-                        cover.write("{},{},{}  {}{}".format(tile.x, tile.y, tile.z, len(feature_map[tile]), os.linesep))
-                        out = geojson_tile_burn(tile, feature_map[tile], 4326, args.ts, burn_value)
-                    else:
-                        cover.write("{},{},{}  {}{}".format(tile.x, tile.y, tile.z, 0, os.linesep))
-                        out = np.zeros(shape=(args.ts, args.ts), dtype=np.uint8)
-
-                    tile_label_to_file(args.out, tile, palette, out)
-                except:
-                    log.log("Warning: Unable to rasterize tile. Skipping {}".format(str(tile)))
+        features = args.geojson
 
     if args.postgis:
 
         pg_conn = psycopg2.connect(args.pg_dsn)
         pg = pg_conn.cursor()
 
-        log.log("RoboSat.pink - rasterize - rasterizing {} on cover {}".format(args.type, args.cover))
-        log.log(" SQL {}".format(args.postgis))
         pg.execute("SELECT ST_Srid(geom) AS srid FROM ({} LIMIT 1) AS sub".format(args.postgis))
         try:
             srid = pg.fetchone()[0]
         except Exception:
             sys.exit("Unable to retrieve geometry SRID.")
 
-        for tile in tqdm(list(tiles_from_csv(args.cover)), ascii=True, unit="tile"):
+        features = args.postgis
 
-            s, w, e, n = mercantile.bounds(tile)
-            raster = np.zeros((args.ts, args.ts))
+    log.log("RoboSat.pink - rasterize - rasterizing {} from {} on cover {}".format(args.type, features, args.cover))
+    with open(os.path.join(os.path.expanduser(args.out), "instances.cover"), mode="w") as cover:
 
-            query = """
-WITH
-     bbox      AS (SELECT ST_Transform(ST_MakeEnvelope({},{},{},{}, 4326), {}  ) AS bbox),
-     bbox_merc AS (SELECT ST_Transform(ST_MakeEnvelope({},{},{},{}, 4326), 3857) AS bbox),
+        for tile in tqdm(list(tiles_from_csv(os.path.expanduser(args.cover))), ascii=True, unit="tile"):
 
-     rast_a    AS (SELECT ST_AddBand(
-                           ST_SetSRID(
-                             ST_MakeEmptyRaster({}, {}, ST_Xmin(bbox), ST_Ymax(bbox), (ST_YMax(bbox) - ST_YMin(bbox)) / {}),
-                           3857),
-                          '8BUI'::text, 0) AS rast
-                   FROM bbox_merc),
+            if args.postgis:
 
-     features  AS (SELECT ST_Union(ST_Transform(ST_Force2D(geom), 3857)) AS geom
-                   FROM ({}) AS sub, bbox
-                   WHERE ST_Intersects(geom, bbox)),
+                s, w, e, n = mercantile.bounds(tile)
 
-     rast_b    AS (SELECT ST_AsRaster(geom, rast, '8BUI', {}) AS rast
-                   FROM features, rast_a
-                   WHERE NOT ST_IsEmpty(geom))
+                query = """
+                WITH
+                  a AS ({}),
+                  b AS (SELECT ST_Transform(ST_MakeEnvelope({},{},{},{}, 4326), {}) AS geom)
+                SELECT ST_AsGeoJSON(ST_Transform(ST_Intersection(a.geom, b.geom), 4326), 6)
+                FROM a, b
+                WHERE ST_Intersects(a.geom, b.geom)
+                """.format(
+                    args.postgis, s, w, e, n, srid
+                )
 
-SELECT ST_AsBinary(ST_MapAlgebra(rast_a.rast, rast_b.rast, '{}', NULL, 'FIRST')) AS wkb FROM rast_a, rast_b
+                try:
+                    pg.execute(query)
+                    row = pg.fetchone()
+                    geojson = row[0] if row else None
 
-""".format(
-                s, w, e, n, srid, s, w, e, n, args.ts, args.ts, args.ts, args.postgis, burn_value, burn_value
-            )
+                except Exception:
+                    log.log("Warning: Invalid geometries, skipping {}".format(tile))
+                    pg_conn = psycopg2.connect(args.pg_dsn)
+                    pg = pg_conn.cursor()
 
-            try:
-                pg.execute(query)
-                row = pg.fetchone()
-                if row:
-                    raster = np.squeeze(wkb_to_numpy(io.BytesIO(row[0])), axis=2)
+            if args.geojson:
+                geojson = feature_map[tile] if tile in feature_map else None
 
-            except Exception:
-                log.log("Warning: Invalid geometries, skipping {}".format(tile))
-                pg_conn = psycopg2.connect(args.pg_dsn)
-                pg = pg_conn.cursor()
+            if geojson:
+                out = geojson_tile_burn(tile, geojson, 4326, args.ts, burn_value)
+                cover.write("{},{},{}  {}{}".format(tile.x, tile.y, tile.z, len(geojson), os.linesep))
+            else:
+                out = np.zeros(shape=(args.ts, args.ts), dtype=np.uint8)
+                cover.write("{},{},{}  {}{}".format(tile.x, tile.y, tile.z, 0, os.linesep))
 
-            try:
-                tile_label_to_file(args.out, tile, palette, raster)
-            except:
-                log.log("Warning: Unable to rasterize tile. Skipping {}".format(str(tile)))
+            tile_label_to_file(args.out, tile, palette, out)
 
     if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
