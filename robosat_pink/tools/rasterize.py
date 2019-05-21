@@ -64,7 +64,10 @@ def geojson_tile_burn(tile, features, srid, ts, burn_value=1):
     bounds = mercantile.xy_bounds(tile)
     transform = from_bounds(*bounds, ts, ts)
 
-    return rasterize(shapes, out_shape=(ts, ts), transform=transform)
+    try:
+        return rasterize(shapes, out_shape=(ts, ts), transform=transform)
+    except:
+        return None
 
 
 def main(args):
@@ -176,7 +179,10 @@ def main(args):
                 WITH
                   a AS ({}),
                   b AS (SELECT ST_Transform(ST_MakeEnvelope({},{},{},{}, 4326), {}) AS geom)
-                SELECT ST_AsGeoJSON(ST_Transform(ST_Intersection(a.geom, b.geom), 4326), 6)
+                SELECT '{{
+  "type": "FeatureCollection", "features": [{{"type": "Feature", "geometry": '
+  || ST_AsGeoJSON(ST_Transform(ST_Intersection(a.geom, b.geom), 4326), 6)
+  || '}}]}}'
                 FROM a, b
                 WHERE ST_Intersects(a.geom, b.geom)
                 """.format(
@@ -186,7 +192,7 @@ def main(args):
                 try:
                     pg.execute(query)
                     row = pg.fetchone()
-                    geojson = row[0] if row else None
+                    geojson = json.loads(row[0])["features"] if row else None
 
                 except Exception:
                     log.log("Warning: Invalid geometries, skipping {}".format(tile))
@@ -197,13 +203,15 @@ def main(args):
                 geojson = feature_map[tile] if tile in feature_map else None
 
             if geojson:
+                num = len(geojson)
                 out = geojson_tile_burn(tile, geojson, 4326, args.ts, burn_value)
-                cover.write("{},{},{}  {}{}".format(tile.x, tile.y, tile.z, len(geojson), os.linesep))
-            else:
+
+            if not geojson or out is None:
+                num = 0
                 out = np.zeros(shape=(args.ts, args.ts), dtype=np.uint8)
-                cover.write("{},{},{}  {}{}".format(tile.x, tile.y, tile.z, 0, os.linesep))
 
             tile_label_to_file(args.out, tile, palette, out)
+            cover.write("{},{},{}  {}{}".format(tile.x, tile.y, tile.z, num, os.linesep))
 
     if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
