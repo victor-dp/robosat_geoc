@@ -123,7 +123,7 @@ def tile_label_from_file(path):
     """Return a numpy array, from a label file path, or None."""
 
     try:
-        return np.array(Image.open(os.path.expanduser(path)))
+        return np.array(Image.open(os.path.expanduser(path))).astype(int)
     except:
         return None
 
