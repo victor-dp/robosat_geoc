@@ -86,7 +86,6 @@ pip install robosat.pink                                      # For latest stabl
 sudo sh -c "apt update && apt install -y build-essential python3-pip"
 pip3 install RoboSat.pink
 export PATH=$PATH:~/.local/bin
-pip3 install https://download.pytorch.org/whl/cu100/torch-1.1.0-cp36-cp36m-linux_x86_64.whl
 wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
 sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ```
@@ -95,7 +94,6 @@ sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ```
 sudo sh -c "yum -y update && yum install -y python36 wget && python3.6 -m ensurepip"
 pip3 install --user RoboSat.pink
-pip3 install https://download.pytorch.org/whl/cu100/torch-1.1.0-cp36-cp36m-linux_x86_64.whl
 wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
 sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ```
