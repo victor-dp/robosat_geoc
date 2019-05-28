@@ -84,8 +84,7 @@ pip install robosat.pink                                      # For latest stabl
 
 ```
 sudo sh -c "apt update && apt install -y build-essential python3-pip"
-pip3 install RoboSat.pink
-export PATH=$PATH:~/.local/bin
+pip3 install RoboSat.pink && export PATH=$PATH:~/.local/bin
 wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
 sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ```
@@ -158,7 +157,7 @@ RoboSat.pink use cherry-picked Open Source libs among Deep Learning, Computer Vi
 
 Related resources:
 -----------------
-- <a href="https://github.com/mapbox/robosat">Historical MapBox RoboSat github directory (not active anymore)</a>
+- <a href="https://github.com/mapbox/robosat">Historical MapBox RoboSat github directory</a>
 - <a href="https://github.com/chrieke/awesome-satellite-imagery-datasets">Christoph Rieke's Awesome Satellite Imagery Datasets</a>
 - <a href="https://landscape.satsummit.io/analysis/spectral-bands.html">Satellites in Global Development</a>
 
