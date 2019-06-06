@@ -113,6 +113,10 @@ def main(args):
             log.log("Channel {}:\t\t {}[band: {}]".format(num_channel, channel["name"], band))
             num_channel += 1
 
+    log.log("--- Output Classes ---")
+    for c, classe in enumerate(config["classes"]):
+        log.log("Class {}:\t\t {}".format(c, classe["title"]))
+
     log.log("--- Hyper Parameters ---")
     for hp in config["model"]:
         log.log("{}{}".format(hp.ljust(25, " "), config["model"][hp]))
