@@ -133,7 +133,7 @@ Pixel colors legend:
 
 
 ```bash
-rsp compare --images ds/images ds/labels ds/masks --mode stack --labels ds/labels --masks ds/masks ds/compare
+rsp compare --images ds/images ds/labels ds/masks --mode stack ds/compare
 
 rsp compare --mode list --labels ds/labels --maximum_qod 80 --minimum_fg 5 --masks ds/masks --geojson ds/compare/tiles.json
 ```
@@ -204,7 +204,7 @@ And now to generate masks prediction, and compare composite images, as previousl
 ```bash
 rsp predict --checkpoint ds/model_clean/checkpoint-00100.pth ds ds/masks_clean
 
-rsp compare --images ds/images ds/labels ds/masks_clean --mode stack --labels ds/labels --masks ds/masks_clean ds/compare_clean
+rsp compare --images ds/images ds/labels ds/masks_clean --mode stack ds/compare_clean
 
 rsp compare --mode list --labels ds/labels --maximum_qod 80 --minimum_fg 5 --masks ds/masks_clean --geojson ds/compare_clean/tiles.json
 ```
@@ -221,7 +221,7 @@ rsp subset --dir ds/compare_clean --cover ds/validation/cover.clean ds/validatio
 
 rsp subset --dir ds/masks_clean --cover ds/validation/cover.clean ds/validation/masks_clean
 
-rsp compare --mode side --images ds/validation/images ds/validation/compare_clean --labels ds/validation/labels --masks ds/validation/masks_clean ds/validation/compare_side_clean
+rsp compare --mode side --images ds/validation/images ds/validation/compare_clean ds/validation/compare_side_clean
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_side_clean/"><img src="img/from_opendata_to_opendataset/compare_side_clean.png" /></a>
