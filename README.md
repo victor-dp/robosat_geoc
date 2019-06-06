@@ -85,7 +85,6 @@ pip install robosat.pink                                      # For latest stabl
 ```
 sudo sh -c "apt update && apt install -y build-essential python3-pip"
 pip3 install RoboSat.pink && export PATH=$PATH:~/.local/bin
-pip3 install https://download.pytorch.org/whl/cu100/torch-1.1.0-cp36-cp36m-linux_x86_64.whl
 wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
 sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ```
@@ -94,7 +93,6 @@ sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ```
 sudo sh -c "yum -y update && yum install -y python36 wget && python3.6 -m ensurepip"
 pip3 install --user RoboSat.pink
-pip3 install https://download.pytorch.org/whl/cu100/torch-1.1.0-cp36-cp36m-linux_x86_64.whl
 wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
 sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
 ```
@@ -109,66 +107,7 @@ sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
   For CUDA 10, grab a wheel from <a href="https://pytorch.org/">PyTorch site</a>.
 
 
-WorkFlows:
---------
 
-### A Minimal example ###
- 
- 
- <img alt="Minimal Example" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/minimal.png" />
-
- 
-
-1) Configuration:
-
-
-```bash
-echo '
-
-[[channels]]
-  name   = "images"
-  bands = [1, 2, 3]
-
-[[classes]]
-  title = "Building"
-  color = "deeppink"
-
-[model]
-  nn = "Albunet"
-  da = "Strong"
-  loss = "Lovasz"
-  loader = "SemSegTiles"
-  metrics = ["iou"]
-
-' > ~/.rsp_config
-```
-
-2) Data Preparation:
-
-
-```bash
-rsp cover --bbox 4.8,45.7,4.83,45.73 --zoom 18 ds/cover
-rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' ds/cover ds/images
-
-wget -nc -O ds/lyon_roofprint.json 'https://download.data.grandlyon.com/wfs/grandlyon?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=ms:fpc_fond_plan_communaut.fpctoit&VERSION=1.1.0&srsName=EPSG:4326&BBOX=4.79,45.69,4.84,45.74&outputFormat=application/json; subtype=geojson'
-rsp rasterize --type Building --geojson ds/lyon_roofprint.json --cover ds/cover ds/labels
-
-rsp cover --dir ds/images --splits 70/20/10 ds/training/cover ds/validation/cover ds/prediction/cover
-rsp subset --dir ds/images --cover ds/training/cover ds/training/images
-rsp subset --dir ds/labels --cover ds/training/cover ds/training/labels
-rsp subset --dir ds/images --cover ds/validation/cover ds/validation/images
-rsp subset --dir ds/labels --cover ds/validation/cover ds/validation/labels
-```
-
-3) Model Training and Prediction:
-
-
-```bash
-rsp train  --epochs 5 --lr 0.000025 --bs 4 ds ds/models
-rsp subset --dir ds/images --cover ds/prediction/cover ds/prediction/images
-rsp predict --checkpoint ds/models/checkpoint-00005.pth ds/prediction ds/prediction/masks
-rsp compare --images ds/prediction/images ds/prediction/masks --mode side ds/prediction/compare
-```
 
 
 
@@ -192,7 +131,8 @@ dataset
 
 
 
-### Data Preparation ###
+Data Preparation:
+-----------------
 
 
 Several ways to create your own training dataset, upon input data type:
@@ -217,7 +157,7 @@ RoboSat.pink use cherry-picked Open Source libs among Deep Learning, Computer Vi
 
 Related resources:
 -----------------
-- <a href="https://github.com/mapbox/robosat">Historical MapBox RoboSat github directory (not active anymore)</a>
+- <a href="https://github.com/mapbox/robosat">Historical MapBox RoboSat github directory</a>
 - <a href="https://github.com/chrieke/awesome-satellite-imagery-datasets">Christoph Rieke's Awesome Satellite Imagery Datasets</a>
 - <a href="https://landscape.satsummit.io/analysis/spectral-bands.html">Satellites in Global Development</a>
 
