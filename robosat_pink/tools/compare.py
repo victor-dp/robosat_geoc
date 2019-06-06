@@ -160,6 +160,7 @@ def main(args):
                 out.write('{"type":"FeatureCollection","features":[')
 
             first = True
+            print("Generate cover in {} with {} tiles, from {}", args.out, len(tiles_list), len(tiles))
             for tile_list in tiles_list:
                 tile, fg_ratio, qod = tile_list
                 x, y, z = list(map(str, tile))
