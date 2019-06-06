@@ -160,7 +160,6 @@ def main(args):
                 out.write('{"type":"FeatureCollection","features":[')
 
             first = True
-            print("Generate cover in {} with {} tiles, from {}".format(args.out, len(tiles_list), len(tiles)))
             for tile_list in tiles_list:
                 tile, fg_ratio, qod = tile_list
                 x, y, z = list(map(str, tile))
@@ -175,6 +174,7 @@ def main(args):
             if args.geojson:
                 out.write("]}")
             out.close()
+        print("Cover {} generated, with {} tiles, selected from initials {}".format(args.out, len(tiles_list), len(tiles)))
 
     base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
 
