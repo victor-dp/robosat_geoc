@@ -86,7 +86,7 @@ def main(args):
     tiles_list = []
     tiles_compare = []
     progress = tqdm(total=len(tiles), ascii=True, unit="tile")
-    log = False if args.geojson else Logs(os.path.join(args.out, "log"))
+    log = False if args.mode == "list" else Logs(os.path.join(args.out, "log"))
 
     with futures.ThreadPoolExecutor(args.workers) as executor:
 
