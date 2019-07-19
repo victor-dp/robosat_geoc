@@ -22,10 +22,21 @@ L.tileLayer("https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x
 L.tileLayer("{{base_url}}/{z}/{x}/{y}.{{ext}}", {maxZoom: {{zoom}}+3, maxNativeZoom: {{zoom}}}).addTo(m);
 
 var grid_style = { "color": "deeppink", "opacity": 0.3, "fill": false }
-load_json("{{tiles}}", function(grid){
-    L.vectorGrid.slicer( grid, { maxZoom: {{zoom}}+3,
-                                 rendererFactory: L.canvas.tile,
-                                 vectorTileLayerStyles: { sliced: grid_style } } ).addTo(m) })
+load_json("{{tiles}}",
+    function(grid){
+      L.vectorGrid.slicer(grid, { maxZoom: {{zoom}}+3,
+                                   rendererFactory: L.canvas.tile,
+                                   vectorTileLayerStyles: { sliced: grid_style },
+	                           interactive: true,
+				   getFeatureId: function(f) {
+                                        return [f.properties.x, f.properties.y, f.properties.z];
+                                   }
+              	                }).on('click',
+    function(e) {
+      var properties = e.layer.properties;
+      L.popup().setContent(properties.x + ',' + properties.y + ',' + properties.z).setLatLng(e.latlng).openOn(m);
+    }).addTo(m);
+})
   </script>
 </body>
 </html>
