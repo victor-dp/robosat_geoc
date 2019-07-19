@@ -178,22 +178,22 @@ def main(args):
                 query = """
                 WITH
                   a AS ({}),
-                  b AS (SELECT ST_Transform(ST_MakeEnvelope({},{},{},{}, 4326), {}) AS geom)
-                SELECT '{{
-  "type": "FeatureCollection", "features": [{{"type": "Feature", "geometry": '
-  || ST_AsGeoJSON(ST_Transform(ST_Intersection(a.geom, b.geom), 4326), 6)
-  || '}}]}}'
-                FROM a, b
-                WHERE ST_Intersects(a.geom, b.geom)
+                  b AS (SELECT ST_Transform(ST_MakeEnvelope({},{},{},{}, 4326), {}) AS geom),
+                  c AS (SELECT '{{"type": "Feature", "geometry": '
+                        || ST_AsGeoJSON(ST_Transform(ST_Intersection(a.geom, b.geom), 4326), 6) 
+                        || '}}' AS features
+                        FROM a, b
+                        WHERE ST_Intersects(a.geom, b.geom))
+                  SELECT '{{"type": "FeatureCollection", "features": [' || Array_To_String(array_agg(features), ',') || ']}}'
+                  FROM c
                 """.format(
                     args.postgis, s, w, e, n, srid
                 )
 
+                pg.execute(query)
                 try:
-                    pg.execute(query)
                     row = pg.fetchone()
-                    geojson = json.loads(row[0])["features"] if row else None
-
+                    geojson = json.loads(row[0])["features"] if row and row[0] else None
                 except Exception:
                     log.log("Warning: Invalid geometries, skipping {}".format(tile))
                     pg_conn = psycopg2.connect(args.pg_dsn)
