@@ -180,7 +180,7 @@ def main(args):
                   a AS ({}),
                   b AS (SELECT ST_Transform(ST_MakeEnvelope({},{},{},{}, 4326), {}) AS geom),
                   c AS (SELECT '{{"type": "Feature", "geometry": '
-                        || ST_AsGeoJSON(ST_Transform(ST_Intersection(a.geom, b.geom), 4326), 6) 
+                        || ST_AsGeoJSON(ST_Transform(ST_Intersection(a.geom, b.geom), 4326), 6)
                         || '}}' AS features
                         FROM a, b
                         WHERE ST_Intersects(a.geom, b.geom))
