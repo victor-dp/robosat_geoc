@@ -29,7 +29,7 @@ def add_parser(subparser, formatter_class):
     inp.add_argument("--labels", type=str, help="path to tiles labels directory [required for QoD filtering]")
     inp.add_argument("--masks", type=str, help="path to tiles masks directory [required for QoD filtering)")
     inp.add_argument("--images", type=str, nargs="+", help="path to images directories [required for stack or side modes]")
-    inp.add_argument("--workers", type=int, help="number of workers [default: CPU / 2]")
+    inp.add_argument("--workers", type=int, help="number of workers [default: CPU]")
 
     qod = parser.add_argument_group("QoD Filtering")
     qod.add_argument("--minimum_fg", type=float, default=0.0, help="skip tile if label foreground below. [default: 0]")
@@ -56,7 +56,7 @@ def main(args):
     args.out = os.path.expanduser(args.out)
 
     if not args.workers:
-        args.workers = max(1, math.floor(os.cpu_count() * 0.5))
+        args.workers = os.cpu_count()
 
     print("RoboSat.pink - compare {} on CPU, with {} workers".format(args.mode, args.workers))
 
@@ -174,6 +174,7 @@ def main(args):
             if args.geojson:
                 out.write("]}")
             out.close()
+        progress.update()
         print("Cover {} generated, with {} tiles, selected from initials {}".format(args.out, len(tiles_list), len(tiles)))
 
     base_url = args.web_ui_base_url if args.web_ui_base_url else "./"

@@ -41,7 +41,7 @@ def add_parser(subparser, formatter_class):
     lab.add_argument("--config", type=str, help="path to config file [required in label mode]")
 
     perf = parser.add_argument_group("Performances")
-    perf.add_argument("--workers", type=int, help="number of workers [default: CPU / 2]")
+    perf.add_argument("--workers", type=int, help="number of workers [default: CPU]")
 
     ui = parser.add_argument_group("Web UI")
     ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
@@ -68,7 +68,7 @@ def is_nodata(image, no_data=0, threshold=5):
 def main(args):
 
     if not args.workers:
-        args.workers = max(1, math.floor(os.cpu_count() * 0.5))
+        args.workers = os.cpu_count()
 
     if args.label:
         config = load_config(args.config)
