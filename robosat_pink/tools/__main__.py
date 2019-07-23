@@ -26,8 +26,9 @@ def main():
 
     os.environ["COLUMNS"] = str(shutil.get_terminal_size().columns)  # cf https://bugs.python.org/issue13041
     fc = lambda prog: argparse.RawTextHelpFormatter(prog, max_help_position=40, indent_increment=1)  # noqa: E731
-    for i, arg in enumerate(sys.argv): # handle negative values cf #64
-        if (arg[0] == '-') and arg[1].isdigit(): sys.argv[i] = ' ' + arg
+    for i, arg in enumerate(sys.argv):  # handle negative values cf #64
+        if (arg[0] == "-") and arg[1].isdigit():
+            sys.argv[i] = " " + arg
     parser = argparse.ArgumentParser(prog="rsp", formatter_class=fc)
     subparser = parser.add_subparsers(title="RoboSat.pink tools", metavar="")
 
