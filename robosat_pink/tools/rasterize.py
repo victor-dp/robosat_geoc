@@ -226,7 +226,6 @@ def main(args):
                 row = db.fetchone()
                 try:
                     geojson = json.loads(row[0])["features"] if row and row[0] else None
-                    print(query, geojson)
                 except Exception:
                     log.log("Warning: Invalid geometries, skipping {}".format(tile))
                     conn = psycopg2.connect(args.pg)
@@ -253,16 +252,17 @@ def main(args):
                 db.execute(query)
                 row = db.fetchone()
                 try:
-                    geojson = json.loads(row[0])["features"] if row else None
+                    geojson = json.loads(row[0])["features"] if row and row[0] else None
+                except Exception:
+                    log.log("Warning: Invalid geometries, skipping {}".format(tile))
 
+                if geojson:
                     for i, geometry in enumerate(geojson):  # SpatiaLite ST_Dump lack...
                         if geometry["geometry"]["type"] == "MultiPolygon":
                             for polygon in geometry["geometry"]["coordinates"]:
                                 geojson.append({"type": "Feature", "geometry":{"type": "Polygon", "coordinates": polygon}})
                             geojson.pop(i)
 
-                except Exception:
-                    log.log("Warning: Invalid geometries, skipping {}".format(tile))
 
             if args.geojson:
                 geojson = feature_map[tile] if tile in feature_map else None
