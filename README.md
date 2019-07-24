@@ -80,7 +80,7 @@ conda create -n robosat_pink python=3.6 && conda activate robosat_pink
 pip install robosat.pink                                      # For latest stable version        
 ```
 
-### With Ubuntu 18.04, from scratch:
+### With Ubuntu 18.04, 18.10 or 19.04, from scratch:
 
 ```
 sudo sh -c "apt -y update && apt install -y build-essential python3-pip"
