@@ -263,10 +263,11 @@ def main(args):
                             geojson_simple.append(geometry)
                         if geometry["geometry"]["type"] == "MultiPolygon":
                             for polygon in geometry["geometry"]["coordinates"]:
-                                geojson_simple.append({"type": "Feature", "geometry":{"type": "Polygon", "coordinates": polygon}})
+                                geojson_simple.append(
+                                    {"type": "Feature", "geometry": {"type": "Polygon", "coordinates": polygon}}
+                                )
 
                     geojson = geojson_simple
-
 
             if args.geojson:
                 geojson = feature_map[tile] if tile in feature_map else None
