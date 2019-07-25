@@ -256,12 +256,16 @@ def main(args):
                 except Exception:
                     log.log("Warning: Invalid geometries, skipping {}".format(tile))
 
+                geojson_simple = []
                 if geojson:
                     for i, geometry in enumerate(geojson):  # SpatiaLite ST_Dump lack...
+                        if geometry["geometry"]["type"] == "Polygon":
+                            geojson_simple.append(geometry)
                         if geometry["geometry"]["type"] == "MultiPolygon":
                             for polygon in geometry["geometry"]["coordinates"]:
-                                geojson.append({"type": "Feature", "geometry":{"type": "Polygon", "coordinates": polygon}})
-                            geojson.pop(i)
+                                geojson_simple.append({"type": "Feature", "geometry":{"type": "Polygon", "coordinates": polygon}})
+
+                    geojson = geojson_simple
 
 
             if args.geojson:
