@@ -80,10 +80,10 @@ conda create -n robosat_pink python=3.6 && conda activate robosat_pink
 pip install robosat.pink                                      # For latest stable version        
 ```
 
-### With Ubuntu 18.04, from scratch:
+### With Ubuntu 18.04, 18.10 or 19.04, from scratch:
 
 ```
-sudo sh -c "apt -y update && apt install -y build-essential python3-pip"
+sudo sh -c "apt update && apt install -y build-essential python3-pip"
 pip3 install RoboSat.pink && export PATH=$PATH:~/.local/bin
 wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
 sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
