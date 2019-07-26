@@ -178,14 +178,14 @@ def main(args):
         conn = sqlite3.connect(args.sqlite)
         conn.enable_load_extension(True)
         try:
-            conn.execute('SELECT load_extension("mod_spatialite")')
+            conn.execute("SELECT load_extension('mod_spatialite')")
         except:
-            conn.execute('SELECT load_extension("mod_spatialite.so")')  # Ubuntu 18.04
+            conn.execute("SELECT load_extension('mod_spatialite.so')")  # Ubuntu 18.04
 
         try:
             conn.cursor().execute("SELECT count(*) FROM spatial_ref_sys").fetchone()[0]
         except:
-            conn.execute("SELECT InitSpatialMetaData()")
+            conn.execute("SELECT InitSpatialMetaData(1)")
 
         db = conn.cursor()
         db.execute("SELECT Srid(geom) FROM ({} LIMIT 1) AS sub".format(args.sql))
