@@ -14,9 +14,9 @@ class Metrics:
         assert self.metrics
         self.n += 1
         for metric, module in self.modules.items():
-            dist = module.get(mask, output, self.config)
-            dist = dist if dist == dist else 0.0
-            self.metrics[metric] += dist
+            m = module.get(mask, output, self.config)
+            m = m if m == m else 1.0
+            self.metrics[metric] += m
 
     def get(self):
         assert self.metrics
