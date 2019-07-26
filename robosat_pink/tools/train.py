@@ -162,7 +162,7 @@ def process(loader, config, log, device, nn, criterion, mode, optimizer=None):
         running_loss = 0
         metrics = Metrics(config["model"]["metrics"], config=config)
 
-        for images, masks, tiles in tqdm(loader, desc="Train", unit="batch", ascii=True):
+        for images, masks, tiles in tqdm(loader, desc=mode.title(), unit="batch", ascii=True):
             images = images.to(device)
             masks = masks.to(device)
 
