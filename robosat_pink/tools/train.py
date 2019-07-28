@@ -19,7 +19,7 @@ def add_parser(subparser, formatter_class):
     data = parser.add_argument_group("Dataset")
     data.add_argument("dataset", type=str, help="training dataset path")
     data.add_argument("--loader", type=str, help="dataset loader name [if set override config file value]")
-    data.add_argument("--workers", type=int, help="number of pre-processing images workers [default: GPUs x 2]")
+    data.add_argument("--workers", type=int, help="number of pre-processing images workers [default: batch size]")
 
     hp = parser.add_argument_group("Hyper Parameters [if set override config file value]")
     hp.add_argument("--bs", type=int, help="batch size")
@@ -45,7 +45,6 @@ def add_parser(subparser, formatter_class):
 def main(args):
     config = load_config(args.config)
     args.out = os.path.expanduser(args.out)
-    args.workers = torch.cuda.device_count() * 2 if torch.device("cuda") and not args.workers else args.workers
     config["model"]["loader"] = args.loader if args.loader else config["model"]["loader"]
     config["model"]["bs"] = args.bs if args.bs else config["model"]["bs"]
     config["model"]["lr"] = args.lr if args.lr else config["model"]["lr"]
@@ -54,6 +53,7 @@ def main(args):
     config["model"]["loss"] = args.loss if args.loss else config["model"]["loss"]
     config["model"]["da"] = args.da if args.da else config["model"]["da"]
     config["model"]["dap"] = args.dap if args.dap else config["model"]["dap"]
+    args.workers = config["model"]["bs"] if not args.workers else args.workers
     check_classes(config)
     check_channels(config)
     check_model(config)
