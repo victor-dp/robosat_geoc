@@ -18,7 +18,7 @@ Inputs:
  --labels LABELS                    path to tiles labels directory [required for QoD filtering]
  --masks MASKS                      path to tiles masks directory [required for QoD filtering)
  --images IMAGES [IMAGES ...]       path to images directories [required for stack or side modes]
- --workers WORKERS                  number of workers [default: CPU / 2]
+ --workers WORKERS                  number of workers [default: CPU]
 
 QoD Filtering:
  --minimum_fg MINIMUM_FG            skip tile if label foreground below. [default: 0]
@@ -147,9 +147,9 @@ Web UI:
 ```
 ## rsp rasterize
 ```
-usage: rsp rasterize [-h] [--cover COVER] [--pg_dsn PG_DSN] --type TYPE
-                     [--postgis POSTGIS] [--geojson GEOJSON [GEOJSON ...]]
-                     [--config CONFIG] [--ts TS]
+usage: rsp rasterize [-h] [--cover COVER] [--config CONFIG] --type TYPE
+                     [--pg PG] [--sqlite SQLITE] [--sql SQL]
+                     [--geojson GEOJSON [GEOJSON ...]] [--ts TS]
                      [--web_ui_base_url WEB_UI_BASE_URL]
                      [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                      out
@@ -159,11 +159,12 @@ optional arguments:
 
 Inputs [either --postgis or --geojson is required]:
  --cover COVER                      path to csv tiles cover file [required]
- --pg_dsn PG_DSN                    PostgreSQL connection dsn using psycopg2 syntax [required with --postgis]
- --type TYPE                        type of feature to rasterize (e.g Building, Road) [required]
- --postgis POSTGIS                  SELECT query to retrieve geometry features [e.g SELECT geom FROM table]
- --geojson GEOJSON [GEOJSON ...]    path to GeoJSON features files
  --config CONFIG                    path to config file [required]
+ --type TYPE                        type of feature to rasterize (e.g Building, Road) [required]
+ --pg PG                            PostgreSQL dsn using psycopg2 syntax (e.g 'dbname=db user=postgres')
+ --sqlite SQLITE                    path to spatialite or GeoPackage file
+ --sql SQL                          SELECT query to retrieve geometry features [e.g SELECT geom FROM table]
+ --geojson GEOJSON [GEOJSON ...]    path to GeoJSON features files
 
 Outputs:
  out                                output directory path [required]
@@ -223,7 +224,7 @@ Labels:
  --config CONFIG                    path to config file [required in label mode]
 
 Performances:
- --workers WORKERS                  number of workers [default: CPU / 2]
+ --workers WORKERS                  number of workers [default: CPU]
 
 Web UI:
  --web_ui_base_url WEB_UI_BASE_URL  alternate Web UI base URL
@@ -245,7 +246,7 @@ optional arguments:
 Dataset:
  dataset                  training dataset path
  --loader LOADER          dataset loader name [if set override config file value]
- --workers WORKERS        number of pre-processing images workers [default: GPUs x 2]
+ --workers WORKERS        number of pre-processing images workers [default: batch size]
 
 Hyper Parameters [if set override config file value]:
  --bs BS                  batch size
