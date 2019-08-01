@@ -80,30 +80,35 @@ conda create -n robosat_pink python=3.6 && conda activate robosat_pink
 pip install robosat.pink                                      # For latest stable version        
 ```
 
-### With Ubuntu 18.04, 18.10 or 19.04, from scratch:
+### With Ubuntu 19.04, from scratch:
 
 ```
 sudo sh -c "apt update && apt install -y build-essential python3-pip"
+pip3 install https://download.pytorch.org/whl/cu100/torch-1.1.0-cp37-cp37m-linux_x86_64.whl
+pip3 install https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp37-cp37m-linux_x86_64.whl
 pip3 install RoboSat.pink && export PATH=$PATH:~/.local/bin
-wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
-sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
+wget http://us.download.nvidia.com/XFree86/Linux-x86_64/430.40/NVIDIA-Linux-x86_64-430.40.run
+sudo sh NVIDIA-Linux-x86_64-430.40.run -a -q --ui=none
 ```
 
 ### With CentOS 7, from scratch:
 ```
 sudo sh -c "yum -y update && yum install -y python36 wget && python3.6 -m ensurepip"
+pip3 install --user https://download.pytorch.org/whl/cu100/torch-1.1.0-cp36-cp36m-linux_x86_64.whl
+pip3 install --user https://download.pytorch.org/whl/cu100/torchvision-0.3.0-cp36-cp36m-linux_x86_64.whl
 pip3 install --user RoboSat.pink
-wget http://us.download.nvidia.com/XFree86/Linux-x86_64/418.43/NVIDIA-Linux-x86_64-418.43.run 
-sudo sh NVIDIA-Linux-x86_64-418.43.run -a -q --ui=none
+sudo sh -c "yum groupinstall -y 'Development Tools' && yum install -y kernel-devel epel-release"
+wget http://us.download.nvidia.com/XFree86/Linux-x86_64/430.40/NVIDIA-Linux-x86_64-430.40.run
+sudo sh NVIDIA-Linux-x86_64-430.40.run -a -q --ui=none
 ```
 
 
 ### NOTAS: 
-- Requires: Python 3.6 or later
-- GPU is not strictly mandatory, but `rsp train` would be -that- slower without.
+- Requires: Python 3.6 or 3.7
+- GPU is not strictly mandatory, but `rsp train` and `rsp predict` would be -that- slower without.
 - To test RoboSat.pink install, launch in a terminal: `rsp -h`
 - Upon your ```pip``` PATH setting, you may have to update it: ```export PATH=$PATH:.local/bin```
-- PyTorch release published on PyPI is binded with CUDA 9. 
+- PyTorch release published on PyPI is binded with CUDA 9.
   For CUDA 10, grab a wheel from <a href="https://pytorch.org/">PyTorch site</a>.
 
 
