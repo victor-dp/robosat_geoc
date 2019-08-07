@@ -6,7 +6,7 @@ import math
 
 from tqdm import tqdm
 from random import shuffle
-from mercantile import tiles
+from mercantile import tiles, xy_bounds
 from supermercado import burntiles
 from rasterio import open as rasterio_open
 from rasterio.warp import transform_bounds
@@ -114,6 +114,21 @@ def main(args):
     if args.cover:
         print("RoboSat.pink - cover from {}".format(args.cover))
         cover = [tile for tile in tiles_from_csv(args.cover)]
+
+    _cover = []
+    for tile in tqdm(cover, ascii=True, unit="tile"):
+        if args.zoom and tile.z != args.zoom:
+            w, s, n, e = transform_bounds("EPSG:900913", "EPSG:4326", *xy_bounds(tile))
+            for t in tiles(w, s, n, e, args.zoom):
+                unique = True
+                for _t in _cover:
+                    if _t == t:
+                        unique = False
+                if unique:
+                    _cover.append(t)
+        else:
+            _cover.append(tile)
+    cover = _cover
 
     if args.splits:
         shuffle(cover)  # in-place
