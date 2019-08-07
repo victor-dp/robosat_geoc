@@ -118,7 +118,7 @@ def main(args):
     _cover = []
     for tile in tqdm(cover, ascii=True, unit="tile"):
         if args.zoom and tile.z != args.zoom:
-            w, s, n, e = transform_bounds("EPSG:900913", "EPSG:4326", *xy_bounds(tile))
+            w, s, n, e = transform_bounds("EPSG:3857", "EPSG:4326", *xy_bounds(tile))
             for t in tiles(w, s, n, e, args.zoom):
                 unique = True
                 for _t in _cover:
