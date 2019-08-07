@@ -9,6 +9,6 @@ def get(label, predicted, config=None):
     try:
         mcc = (tp * tn - fp * fn) / math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
     except ZeroDivisionError:
-        mcc = float("NaN")
+        mcc = 0.0
 
     return mcc

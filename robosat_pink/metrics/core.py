@@ -15,7 +15,6 @@ class Metrics:
         self.n += 1
         for metric, module in self.modules.items():
             m = module.get(mask, output, self.config)
-            m = m if m == m else 1.0
             self.metrics[metric] += m
 
     def get(self):

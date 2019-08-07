@@ -8,6 +8,6 @@ def get(label, predicted, config=None):
     try:
         iou = tp / (tp + fn + fp)
     except ZeroDivisionError:
-        iou = float("NaN")
+        iou = 1.0
 
     return iou
