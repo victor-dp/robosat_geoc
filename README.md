@@ -104,8 +104,6 @@ sudo sh NVIDIA-Linux-x86_64-430.40.run -a -q --ui=none
 - GPU is not strictly mandatory, but `rsp train` and `rsp predict` would be -that- slower without.
 - To test RoboSat.pink install, launch in a terminal: `rsp -h`
 - Upon your ```pip``` PATH setting, you may have to update it: ```export PATH=$PATH:.local/bin```
-- PyTorch release published on PyPI is binded with CUDA 9.
-  For CUDA 10, grab a wheel from <a href="https://pytorch.org/">PyTorch site</a>.
 
 
 
