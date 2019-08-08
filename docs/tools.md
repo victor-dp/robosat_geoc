@@ -177,8 +177,8 @@ Web UI:
 ```
 ## rsp subset
 ```
-usage: rsp subset [-h] --dir DIR --cover COVER [--move] [--delete]
-                  [--web_ui_base_url WEB_UI_BASE_URL]
+usage: rsp subset [-h] --dir DIR --cover COVER [--workers WORKERS] [--move]
+                  [--delete] [--web_ui_base_url WEB_UI_BASE_URL]
                   [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                   [out]
 
@@ -188,6 +188,7 @@ optional arguments:
 Inputs:
  --dir DIR                          to XYZ tiles input dir path [required]
  --cover COVER                      path to csv cover file to filter dir by [required]
+ --workers WORKERS                  number of workers [default: 4]
 
 Alternate modes, as default is to copy.:
  --move                             move tiles from input to output
