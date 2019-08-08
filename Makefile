@@ -85,7 +85,7 @@ it_train:
 it_post:
 	@echo "==================================================================================="
 	@rsp export --checkpoint it/pth/checkpoint-00003.pth --type jit it/pth/export.jit
-	#@rsp export --checkpoint it/pth/checkpoint-00003.pth --type onnx it/pth/export.onnx
+	@rsp export --checkpoint it/pth/checkpoint-00003.pth --type onnx it/pth/export.onnx
 	@rsp predict --config config.toml --bs 4 --checkpoint it/pth/checkpoint-00003.pth it/prediction it/prediction/masks
 	@rsp compare --images it/prediction/images it/prediction/labels it/prediction/masks --mode stack --labels it/prediction/labels --masks it/prediction/masks it/prediction/compare
 	@rsp compare --images it/prediction/images it/prediction/compare --mode side it/prediction/compare_side
