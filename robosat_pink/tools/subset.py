@@ -1,5 +1,6 @@
 import os
 import shutil
+import concurrent.futures as futures
 
 from glob import glob
 from tqdm import tqdm
@@ -15,6 +16,7 @@ def add_parser(subparser, formatter_class):
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("--dir", type=str, required=True, help="to XYZ tiles input dir path [required]")
     inp.add_argument("--cover", type=str, required=True, help="path to csv cover file to filter dir by [required]")
+    inp.add_argument("--workers", type=int, help="number of workers [default: 4]")
 
     mode = parser.add_argument_group("Alternate modes, as default is to copy.")
     mode.add_argument("--move", action="store_true", help="move tiles from input to output")
@@ -35,34 +37,42 @@ def main(args):
     assert args.out or args.delete, "out parameter is required"
     args.out = os.path.expanduser(args.out)
     extension = ""
+    if not args.workers:
+        args.workers = 4 if os.cpu_count() >= 4 else os.cpu_count()
 
-    print("RoboSat.pink - subset {} with cover {}".format(args.dir, args.cover))
+    print("RoboSat.pink - subset {} with cover {}, on CPU, with {} workers".format(args.dir, args.cover, args.workers))
 
     tiles = set(tiles_from_csv(os.path.expanduser(args.cover)))
-    for tile in tqdm(tiles, desc="Subset", unit="tiles", ascii=True):
+    progress = tqdm(total=len(tiles), ascii=True, unit="tiles")
+    with futures.ThreadPoolExecutor(args.workers) as executor:
 
-        paths = glob(os.path.join(os.path.expanduser(args.dir), str(tile.z), str(tile.x), "{}.*".format(tile.y)))
-        if len(paths) != 1:
-            print("Warning: {} skipped.".format(tile))
-            continue
-        src = paths[0]
+        def worker(tile):
 
-        if not os.path.isdir(os.path.join(args.out, str(tile.z), str(tile.x))):
-            os.makedirs(os.path.join(args.out, str(tile.z), str(tile.x)), exist_ok=True)
+            paths = glob(os.path.join(os.path.expanduser(args.dir), str(tile.z), str(tile.x), "{}.*".format(tile.y)))
+            if len(paths) != 1:
+                print("Warning: {} skipped.".format(tile))
+                return
+            src = paths[0]
 
-        extension = os.path.splitext(src)[1][1:]
-        dst = os.path.join(args.out, str(tile.z), str(tile.x), "{}.{}".format(tile.y, extension))
+            if not os.path.isdir(os.path.join(args.out, str(tile.z), str(tile.x))):
+                os.makedirs(os.path.join(args.out, str(tile.z), str(tile.x)), exist_ok=True)
 
-        if args.move:
-            assert os.path.isfile(src)
-            shutil.move(src, dst)
+            extension = os.path.splitext(src)[1][1:]
+            dst = os.path.join(args.out, str(tile.z), str(tile.x), "{}.{}".format(tile.y, extension))
 
-        elif args.delete:
-            assert os.path.isfile(src)
-            os.remove(src)
+            if args.move:
+                assert os.path.isfile(src)
+                shutil.move(src, dst)
 
-        else:
-            shutil.copyfile(src, dst)
+            elif args.delete:
+                assert os.path.isfile(src)
+                os.remove(src)
+
+            else:
+                shutil.copyfile(src, dst)
+
+        for tile in executor.map(worker, tiles):
+            progress.update()
 
     if not args.no_web_ui and not args.delete:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
