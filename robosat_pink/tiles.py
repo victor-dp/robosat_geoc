@@ -16,6 +16,7 @@ import cv2
 import csv
 import json
 import mercantile
+import supermercado
 
 warnings.simplefilter("ignore", UserWarning)  # To prevent rasterio NotGeoreferencedWarning
 
@@ -73,15 +74,13 @@ def tiles_from_csv(path):
 def tiles_to_geojson(tiles):
     """Convert tiles to their footprint GeoJSON."""
 
-    geojson = '{"type":"FeatureCollection","features":['
     first = True
-    for tile in tiles:
-        prop = '"properties":{{"x":{},"y":{},"z":{}}}'.format(tile.x, tile.y, tile.z)
-        geom = '"geometry":{}'.format(json.dumps(mercantile.feature(tile, precision=6)["geometry"]))
-        geojson += '{}{{"type":"Feature",{},{}}}'.format("," if not first else "", geom, prop)
+    geojson = '{"type":"FeatureCollection","features":['
+    tiles = [str(tile.z) + "-" + str(tile.x) + "-" + str(tile.y) + "\n" for tile in tiles]
+    for feature in supermercado.uniontiles.union(tiles, True):
+        geojson += json.dumps(feature) if first else "," + json.dumps(feature)
         first = False
     geojson += "]}"
-
     return geojson
 
 
