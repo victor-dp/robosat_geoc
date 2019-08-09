@@ -141,7 +141,7 @@ def tile_label_to_file(root, tile, palette, label):
     out.putpalette(palette)
 
     try:
-        out.save(os.path.join(out_path, "{}.png".format(str(tile.y))), optimize=True)
+        out.save(os.path.join(out_path, "{}.png".format(str(tile.y))), optimize=True, transparency=0)
         return True
     except:
         return False
