@@ -72,7 +72,6 @@ def main(args):
 
             return ext
 
-
         for extension in executor.map(worker, tiles):
             progress.update()
 
