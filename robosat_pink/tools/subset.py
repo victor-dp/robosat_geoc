@@ -36,7 +36,6 @@ def add_parser(subparser, formatter_class):
 def main(args):
     assert args.out or args.delete, "out parameter is required"
     args.out = os.path.expanduser(args.out)
-    extension = ""
     if not args.workers:
         args.workers = 4 if os.cpu_count() >= 4 else os.cpu_count()
 
@@ -51,14 +50,14 @@ def main(args):
             paths = glob(os.path.join(os.path.expanduser(args.dir), str(tile.z), str(tile.x), "{}.*".format(tile.y)))
             if len(paths) != 1:
                 print("Warning: {} skipped.".format(tile))
-                return
+                return None
             src = paths[0]
 
             if not os.path.isdir(os.path.join(args.out, str(tile.z), str(tile.x))):
                 os.makedirs(os.path.join(args.out, str(tile.z), str(tile.x)), exist_ok=True)
 
-            extension = os.path.splitext(src)[1][1:]
-            dst = os.path.join(args.out, str(tile.z), str(tile.x), "{}.{}".format(tile.y, extension))
+            ext = os.path.splitext(src)[1][1:]
+            dst = os.path.join(args.out, str(tile.z), str(tile.x), "{}.{}".format(tile.y, ext))
 
             if args.move:
                 assert os.path.isfile(src)
@@ -71,10 +70,15 @@ def main(args):
             else:
                 shutil.copyfile(src, dst)
 
-        for tile in executor.map(worker, tiles):
+            return ext
+
+
+        for extension in executor.map(worker, tiles):
             progress.update()
 
     if not args.no_web_ui and not args.delete:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
         web_ui(args.out, base_url, tiles, tiles, extension, template)
+
+    # Issue: on delete or move modes, original tiles not updated
