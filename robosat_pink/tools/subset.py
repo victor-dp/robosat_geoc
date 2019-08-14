@@ -2,10 +2,10 @@ import os
 import shutil
 import concurrent.futures as futures
 
-from glob import glob
+import mercantile
 from tqdm import tqdm
 
-from robosat_pink.tiles import tiles_from_csv
+from robosat_pink.tiles import tiles_from_csv, tile_from_xyz
 from robosat_pink.core import web_ui
 
 
@@ -47,30 +47,29 @@ def main(args):
 
         def worker(tile):
 
-            paths = glob(os.path.join(os.path.expanduser(args.dir), str(tile.z), str(tile.x), "{}.*".format(tile.y)))
-            if len(paths) != 1:
-                print("Warning: {} skipped.".format(tile))
-                return None
-            src = paths[0]
+            if isinstance(tile, mercantile.Tile):
+                _, src = tile_from_xyz(args.dir, tile.x, tile.y, tile.z)
+                dst_dir = os.path.join(args.out, str(tile.z), str(tile.x))
+            else:
+                src = tile
+                dst_dir = os.path.join(args.out, os.path.dirname(tile))
 
-            if not os.path.isdir(os.path.join(args.out, str(tile.z), str(tile.x))):
-                os.makedirs(os.path.join(args.out, str(tile.z), str(tile.x)), exist_ok=True)
+            assert os.path.isfile(src)
+            dst = os.path.join(dst_dir, os.path.basename(src))
 
-            ext = os.path.splitext(src)[1][1:]
-            dst = os.path.join(args.out, str(tile.z), str(tile.x), "{}.{}".format(tile.y, ext))
+            if not os.path.isdir(dst_dir):
+                os.makedirs(dst_dir, exist_ok=True)
 
             if args.move:
-                assert os.path.isfile(src)
                 shutil.move(src, dst)
 
             elif args.delete:
-                assert os.path.isfile(src)
                 os.remove(src)
 
             else:
                 shutil.copyfile(src, dst)
 
-            return ext
+            return os.path.splitext(src)[1][1:]  # ext
 
         for extension in executor.map(worker, tiles):
             progress.update()
@@ -79,5 +78,3 @@ def main(args):
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
         web_ui(args.out, base_url, tiles, tiles, extension, template)
-
-    # Issue: on delete or move modes, original tiles not updated

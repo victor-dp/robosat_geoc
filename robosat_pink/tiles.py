@@ -34,30 +34,6 @@ def tile_pixel_to_location(tile, dx, dy):
     return lerp(w, e, dx), lerp(s, n, dy)  # lon, lat
 
 
-def tiles_from_slippy_map(root):
-    """Loads files from an on-disk slippy map dir."""
-
-    root = os.path.expanduser(root)
-    paths = glob.glob(os.path.join(root, "[0-9]*/[0-9]*/[0-9]*.*"))
-
-    for path in paths:
-        tile = re.match(os.path.join(root, "(?P<z>[0-9]+)/(?P<x>[0-9]+)/(?P<y>[0-9]+).+"), path)
-        if not tile:
-            continue
-
-        yield mercantile.Tile(int(tile["x"]), int(tile["y"]), int(tile["z"])), path
-
-
-def tile_from_slippy_map(root, x, y, z):
-    """Retrieve a single tile from a slippy map dir."""
-
-    path = glob.glob(os.path.join(os.path.expanduser(root), str(z), str(x), str(y) + ".*"))
-    if not path:
-        return None
-
-    return mercantile.Tile(x, y, z), path[0]
-
-
 def tiles_from_csv(path):
     """Retrieve tiles from a line-delimited csv file."""
 
@@ -68,7 +44,69 @@ def tiles_from_csv(path):
             if not row:
                 continue
 
-            yield mercantile.Tile(*map(int, row))
+            try:
+                assert len(row) == 3
+                yield mercantile.Tile(*map(int, row))
+            except:
+                yield row
+
+
+def tiles_from_dir(root, xyz=True, xyz_path=False):
+    """Loads files from an on-disk dir."""
+    root = os.path.expanduser(root)
+
+    if xyz is True:
+        paths = glob.glob(os.path.join(root, "[0-9]*/[0-9]*/[0-9]*.*"))
+
+        for path in paths:
+            tile = re.match(os.path.join(root, "(?P<z>[0-9]+)/(?P<x>[0-9]+)/(?P<y>[0-9]+).+"), path)
+            if not tile:
+                continue
+
+            if xyz_path is True:
+                yield mercantile.Tile(int(tile["x"]), int(tile["y"]), int(tile["z"])), path
+            else:
+                yield mercantile.Tile(int(tile["x"]), int(tile["y"]), int(tile["z"]))
+
+    else:
+        paths = glob.glob(root, "**/*.*", recursive=True)
+
+        for path in paths:
+            return path
+
+
+def tile_from_xyz(root, x, y, z):
+    """Retrieve a single tile from a slippy map dir."""
+
+    path = glob.glob(os.path.join(os.path.expanduser(root), str(z), str(x), str(y) + ".*"))
+    if not path:
+        return None
+
+    assert len(path) == 1, "ambiguous tile path"
+
+    return mercantile.Tile(x, y, z), path[0]
+
+
+def tile_bbox(tile, mercator=False):
+
+    if isinstance(tile, mercantile.Tile):
+        if mercator:
+            return mercantile.xy_bounds(tile)  # EPSG:3857
+        else:
+            return mercantile.bounds(tile)  # EPSG:4326
+
+    else:
+        with open(rasterio_open(tile)) as r:
+
+            if mercator:
+                w, s, e, n = r.bounds
+                w, s = mercantile.xy(w, s)
+                e, n = mercantile.xy(e, n)
+                return w, s, e, n  # EPSG:3857
+            else:
+                return r.bounds  # EPSG:4326
+
+        assert False, "Unable to open tile"
 
 
 def tiles_to_geojson(tiles):
@@ -107,7 +145,8 @@ def tile_image_from_file(path, bands=None):
 def tile_image_to_file(root, tile, image):
     """ Write an image tile on disk. """
 
-    out_path = os.path.join(os.path.expanduser(root), str(tile.z), str(tile.x))
+    root = os.path.expanduser(root)
+    out_path = os.path.join(root, str(tile.z), str(tile.x)) if isinstance(tile, mercantile.Tile) else root
     os.makedirs(out_path, exist_ok=True)
 
     if image.shape[2] > 3:
@@ -115,7 +154,8 @@ def tile_image_to_file(root, tile, image):
     else:
         ext = "webp"
 
-    return cv2.imwrite(os.path.join(out_path, "{}.{}").format(str(tile.y), ext), cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+    filename = "{}.{}".format(str(tile.y), ext) if isinstance(tile, mercantile.Tile) else "{}.{}".format(tile, ext)
+    return cv2.imwrite(os.path.join(out_path, filename), cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
 
 
 def tile_label_from_file(path):
@@ -130,7 +170,8 @@ def tile_label_from_file(path):
 def tile_label_to_file(root, tile, palette, label):
     """ Write a label tile on disk. """
 
-    out_path = os.path.join(os.path.expanduser(root), str(tile.z), str(tile.x))
+    root = os.path.expanduser(root)
+    out_path = os.path.join(root, str(tile.z), str(tile.x)) if isinstance(tile, mercantile.Tile) else root
     os.makedirs(out_path, exist_ok=True)
 
     if len(label.shape) == 3:  # H,W,C -> H,W

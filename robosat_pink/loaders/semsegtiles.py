@@ -4,7 +4,7 @@ import os
 import numpy as np
 import torch.utils.data
 
-from robosat_pink.tiles import tiles_from_slippy_map, tile_image_from_file, tile_label_from_file
+from robosat_pink.tiles import tiles_from_dir, tile_image_from_file, tile_label_from_file
 from robosat_pink.da.core import to_normalized_tensor
 
 
@@ -22,7 +22,7 @@ class SemSegTiles(torch.utils.data.Dataset):
         self.tiles = {}
         for channel in config["channels"]:
             path = os.path.join(self.root, channel["name"])
-            self.tiles[channel["name"]] = [(tile, path) for tile, path in tiles_from_slippy_map(path)]
+            self.tiles[channel["name"]] = [(tile, path) for tile, path in tiles_from_dir(path, xyz_path=True)]
             self.tiles[channel["name"]].sort(key=lambda tile: tile[0])
             num_channels += len(channel["bands"])
 
@@ -31,7 +31,7 @@ class SemSegTiles(torch.utils.data.Dataset):
 
         if self.mode == "train":
             path = os.path.join(self.root, "labels")
-            self.tiles["labels"] = [(tile, path) for tile, path in tiles_from_slippy_map(path)]
+            self.tiles["labels"] = [(tile, path) for tile, path in tiles_from_dir(path, xyz_path=True)]
             self.tiles["labels"].sort(key=lambda tile: tile[0])
 
     def __len__(self):

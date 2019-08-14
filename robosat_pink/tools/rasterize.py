@@ -14,10 +14,9 @@ from rasterio.warp import transform
 from supermercado import burntiles
 
 import psycopg2
-import sqlite3
 
 from robosat_pink.core import load_config, check_classes, make_palette, web_ui, Logs
-from robosat_pink.tiles import tiles_from_csv, tile_label_to_file
+from robosat_pink.tiles import tiles_from_csv, tile_label_to_file, tile_bbox
 
 
 def add_parser(subparser, formatter_class):
@@ -30,8 +29,7 @@ def add_parser(subparser, formatter_class):
     inp.add_argument("--config", type=str, help="path to config file [required]")
     inp.add_argument("--type", type=str, required=True, help="type of feature to rasterize (e.g Building, Road) [required]")
     inp.add_argument("--pg", type=str, help="PostgreSQL dsn using psycopg2 syntax (e.g 'dbname=db user=postgres')")
-    inp.add_argument("--sqlite", type=str, help="path to spatialite or GeoPackage file")
-    inp.add_argument("--sql", type=str, help="SELECT query to retrieve geometry features [e.g SELECT geom FROM table]")
+    inp.add_argument("--sql", type=str, help="SQL to retrieve geometry features [e.g SELECT geom FROM your_table]")
     inp.add_argument("--geojson", type=str, nargs="+", help="path to GeoJSON features files")
 
     out = parser.add_argument_group("Outputs")
@@ -63,7 +61,7 @@ def geojson_tile_burn(tile, features, srid, ts, burn_value=1):
 
     shapes = ((geometry, burn_value) for feature in features for geometry in geojson_reproject(feature, srid, 3857))
 
-    bounds = mercantile.xy_bounds(tile)
+    bounds = tile_bbox(tile, mercator=True)
     transform = from_bounds(*bounds, ts, ts)
 
     try:
@@ -78,12 +76,8 @@ def main(args):
         if not args.sql:
             sys.exit("ERROR: With PostgreSQL db, --sql must be provided")
 
-    if args.sqlite:
-        if not args.sql:
-            sys.exit("ERROR: With SQLite db, --sql must be provided")
-
-    if (args.sql and args.geojson) or (args.pg and args.sqlite) or (args.sql and not args.pg and not args.sqlite):
-        sys.exit("ERROR: You can use either --pg or --sqlite or --geojson inputs, but only one kind at once.")
+    if (args.sql and args.geojson) or (args.sql and not args.pg):
+        sys.exit("ERROR: You can use either --pg or --geojson inputs, but only one at once.")
 
     config = load_config(args.config)
     check_classes(config)
@@ -129,12 +123,11 @@ def main(args):
 
     if args.geojson:
 
-        try:
-            tiles = [tile for tile in tiles_from_csv(os.path.expanduser(args.cover))]
-            zoom = tiles[0].z
-            assert not [tile for tile in tiles if tile.z != zoom]
-        except:
-            sys.exit("ERROR: Inconsistent cover {}".format(args.cover))
+        tiles = [tile for tile in tiles_from_csv(os.path.expanduser(args.cover))]
+        assert tiles, "Empty cover"
+
+        zoom = tiles[0].z
+        assert not [tile for tile in tiles if tile.z != zoom], "Unsupported zoom mixed cover. Use PostGIS instead"
 
         feature_map = collections.defaultdict(list)
 
@@ -165,36 +158,15 @@ def main(args):
         conn = psycopg2.connect(args.pg)
         db = conn.cursor()
 
+        assert "limit" not in args.sql.lower(), "LIMIT is not supported"
         db.execute("SELECT ST_Srid(geom) AS srid FROM ({} LIMIT 1) AS sub".format(args.sql))
-        try:
-            srid = db.fetchone()[0]
-        except Exception:
-            sys.exit("Unable to retrieve geometry SRID.")
+        srid = db.fetchone()[0]
+        assert srid, "Unable to retrieve geometry SRID."
 
-        features = args.sql
-
-    if args.sqlite:
-
-        conn = sqlite3.connect(args.sqlite)
-        conn.enable_load_extension(True)
-        try:
-            conn.execute("SELECT load_extension('mod_spatialite')")
-        except:
-            conn.execute("SELECT load_extension('mod_spatialite.so')")  # Ubuntu 18.04
-
-        try:
-            conn.cursor().execute("SELECT count(*) FROM spatial_ref_sys").fetchone()[0]
-        except:
-            conn.execute("SELECT InitSpatialMetaData(1)")
-
-        db = conn.cursor()
-        db.execute("SELECT Srid(geom) FROM ({} LIMIT 1) AS sub".format(args.sql))
-
-        try:
-            srid = db.fetchone()[0]
-        except Exception:
-            sys.exit("Unable to retrieve geometry SRID.")
-
+        if "where" not in args.sql.lower():  # TODO: Find a more reliable way to handle feature filtering
+            args.sql += " WHERE ST_Intersects(tile.geom, geom)"
+        else:
+            args.sql += " AND ST_Intersects(tile.geom, geom)"
         features = args.sql
 
     log.log("RoboSat.pink - rasterize - rasterizing {} from {} on cover {}".format(args.type, features, args.cover))
@@ -206,20 +178,20 @@ def main(args):
 
             if args.pg:
 
-                w, s, e, n = mercantile.bounds(tile)
+                w, s, e, n = tile_bbox(tile)
 
                 query = """
                 WITH
-                  a AS ({}),
-                  b AS (SELECT ST_Transform(ST_MakeEnvelope({},{},{},{}, 4326), {}) AS geom),
-                  c AS (SELECT '{{"type": "Feature", "geometry": '
-                         || ST_AsGeoJSON((ST_Dump(ST_Transform(ST_Force2D(ST_Intersection(a.geom, b.geom)), 4326))).geom, 6)
+                  tile AS (SELECT ST_Transform(ST_MakeEnvelope({},{},{},{}, 4326), {}) AS geom),
+                  geom AS (SELECT ST_Intersection(tile.geom, sql.geom) AS geom FROM tile CROSS JOIN LATERAL ({}) sql),
+                  json AS (SELECT '{{"type": "Feature", "geometry": '
+                         || ST_AsGeoJSON((ST_Dump(ST_Transform(ST_Force2D(geom.geom), 4326))).geom, 6)
                          || '}}' AS features
-                        FROM a, b WHERE ST_Intersects(a.geom, b.geom))
+                        FROM geom)
                 SELECT '{{"type": "FeatureCollection", "features": [' || Array_To_String(array_agg(features), ',') || ']}}'
-                FROM c
+                FROM json
                 """.format(
-                    args.sql, w, s, e, n, srid
+                    w, s, e, n, srid, args.sql
                 )
 
                 db.execute(query)
@@ -230,44 +202,6 @@ def main(args):
                     log.log("Warning: Invalid geometries, skipping {}".format(tile))
                     conn = psycopg2.connect(args.pg)
                     db = conn.cursor()
-
-            if args.sqlite:
-
-                w, s, e, n = mercantile.bounds(tile)
-
-                query = """
-                WITH
-                  a AS ({}),
-                  b AS (SELECT ST_Transform(GeomFromText('POLYGON(({} {},{} {},{} {},{} {},{} {}))', 4326), {}) AS geom),
-                  c AS (SELECT a.geom AS geom FROM a, b WHERE ST_Intersects(a.geom, b.geom)),
-                  d AS (SELECT '{{"type": "Feature", "geometry": '
-                         || AsGeoJSON(ST_Transform(CastTOXY(ST_Intersection(c.geom, b.geom)), 4326), 6)
-                         || '}}' AS features
-                        FROM b, c)
-                SELECT '{{"type": "FeatureCollection", "features": [' || group_concat(features, ',') || ']}}' FROM d
-                """.format(
-                    args.sql, w, s, w, n, e, n, e, s, w, s, srid
-                )
-
-                db.execute(query)
-                row = db.fetchone()
-                try:
-                    geojson = json.loads(row[0])["features"] if row and row[0] else None
-                except Exception:
-                    log.log("Warning: Invalid geometries, skipping {}".format(tile))
-
-                geojson_simple = []
-                if geojson:
-                    for i, geometry in enumerate(geojson):  # SpatiaLite ST_Dump lack...
-                        if geometry["geometry"]["type"] == "Polygon":
-                            geojson_simple.append(geometry)
-                        if geometry["geometry"]["type"] == "MultiPolygon":
-                            for polygon in geometry["geometry"]["coordinates"]:
-                                geojson_simple.append(
-                                    {"type": "Feature", "geometry": {"type": "Polygon", "coordinates": polygon}}
-                                )
-
-                    geojson = geojson_simple
 
             if args.geojson:
                 geojson = feature_map[tile] if tile in feature_map else None

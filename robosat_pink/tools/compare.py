@@ -11,7 +11,7 @@ import numpy as np
 from mercantile import feature
 
 from robosat_pink.core import web_ui, Logs
-from robosat_pink.tiles import tiles_from_slippy_map, tile_from_slippy_map, tile_image_from_file, tile_image_to_file
+from robosat_pink.tiles import tiles_from_dir, tile_from_xyz, tile_image_from_file, tile_image_to_file
 from robosat_pink.metrics.qod import get as compare
 
 
@@ -65,20 +65,21 @@ def main(args):
         if args.minimum_fg > 0 or args.maximum_fg < 100 or args.minimum_qod > 0 or args.maximum_qod < 100:
             sys.exit("ERROR: Parameters masks and labels are mandatories in QoD filtering.")
 
-    try:
-        if args.images:
-            tiles = [tile for tile, _ in tiles_from_slippy_map(args.images[0])]
-            for image in args.images[1:]:
-                assert sorted(tiles) == sorted([tile for tile, _ in tiles_from_slippy_map(image)])
+    if args.images:
+        tiles = [tile for tile in tiles_from_dir(args.images[0])]
+        for image in args.images[1:]:
+            assert sorted(tiles) == sorted([tile for tile in tiles_from_dir(image)])
 
-        if args.labels and args.masks:
-            tiles_masks = [tile for tile, _ in tiles_from_slippy_map(args.masks)]
-            tiles_labels = [tile for tile, _ in tiles_from_slippy_map(args.labels)]
-            if args.images:
-                assert sorted(tiles) == sorted(tiles_masks) == sorted(tiles_labels)
-            else:
-                assert sorted(tiles_masks) == sorted(tiles_labels)
-                tiles = tiles_masks
+    if args.labels and args.masks:
+        tiles_masks = [tile for tile in tiles_from_dir(args.masks)]
+        tiles_labels = [tile for tile in tiles_from_dir(args.labels)]
+        if args.images:
+            assert sorted(tiles) == sorted(tiles_masks) == sorted(tiles_labels)
+        else:
+            assert sorted(tiles_masks) == sorted(tiles_labels)
+            tiles = tiles_masks
+    try:
+        pass
     except:
         sys.exit("ERROR: inconsistent input coverage")
 
@@ -113,7 +114,7 @@ def main(args):
 
             if args.mode == "side":
                 for i, root in enumerate(args.images):
-                    img = tile_image_from_file(tile_from_slippy_map(root, x, y, z)[1])
+                    img = tile_image_from_file(tile_from_xyz(root, x, y, z)[1])
 
                     if i == 0:
                         side = np.zeros((img.shape[0], img.shape[1] * len(args.images), 3))
@@ -131,7 +132,7 @@ def main(args):
 
             elif args.mode == "stack":
                 for i, root in enumerate(args.images):
-                    tile_image = tile_image_from_file(tile_from_slippy_map(root, x, y, z)[1])
+                    tile_image = tile_image_from_file(tile_from_xyz(root, x, y, z)[1])
 
                     if i == 0:
                         image_shape = tile_image.shape[0:2]
@@ -173,8 +174,6 @@ def main(args):
             if args.geojson:
                 out.write("]}")
             out.close()
-        progress.update()
-        print("Cover {} generated, with {} tiles, selected from initials {}".format(args.out, len(tiles_list), len(tiles)))
 
     base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
 
@@ -184,5 +183,5 @@ def main(args):
 
     if args.mode == "stack" and not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
-        tiles = [tile for tile, _ in tiles_from_slippy_map(args.images[0])]
+        tiles = [tile for tile in tiles_from_dir(args.images[0])]
         web_ui(args.out, base_url, tiles, tiles_compare, args.format, template)

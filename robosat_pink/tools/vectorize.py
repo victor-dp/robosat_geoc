@@ -9,7 +9,7 @@ import rasterio.features
 import rasterio.transform
 
 from robosat_pink.core import load_config, check_classes
-from robosat_pink.tiles import tiles_from_slippy_map
+from robosat_pink.tiles import tiles_from_dir
 
 
 def add_parser(subparser, formatter_class):
@@ -21,7 +21,7 @@ def add_parser(subparser, formatter_class):
     inp.add_argument("--config", type=str, help="path to config file [required]")
 
     out = parser.add_argument_group("Outputs")
-    out.add_argument("out", type=str, help="path to GeoJSON file to store features in [required]")
+    out.add_argument("out", type=str, help="path to output file to store features in [required]")
 
     parser.set_defaults(func=main)
 
@@ -31,25 +31,25 @@ def main(args):
     check_classes(config)
     index = [i for i in (list(range(len(config["classes"])))) if config["classes"][i]["title"] == args.type]
     assert index, "Requested type {} not found among classes title in the config file.".format(args.type)
-
     print("RoboSat.pink - vectorize {} from {}".format(args.type, args.masks))
 
-    with open(args.out, "w", encoding="utf-8") as out:
-        first = True
-        out.write('{"type":"FeatureCollection","features":[')
+    out = open(args.out, "w", encoding="utf-8")
+    assert out, "Unable to write in output file"
 
-        for tile, path in tqdm(list(tiles_from_slippy_map(args.masks)), ascii=True, unit="mask"):
-            features = (np.array(Image.open(path).convert("P"), dtype=np.uint8) == index).astype(np.uint8)
-            try:
-                C, W, H = features.shape
-            except:
-                W, H = features.shape
-            transform = rasterio.transform.from_bounds((*mercantile.bounds(tile.x, tile.y, tile.z)), W, H)
+    out.write('{"type":"FeatureCollection","features":[')
 
-            for shape, value in rasterio.features.shapes(features, transform=transform):
-                prop = '"properties":{{"x":{},"y":{},"z":{}}}'.format(int(tile.x), int(tile.y), int(tile.z))
-                geom = '"geometry":{{"type": "Polygon", "coordinates":{}}}'.format(json.dumps(shape["coordinates"]))
-                out.write('{}{{"type":"Feature",{},{}}}'.format("," if not first else "", geom, prop))
-                first = False
+    first = True
+    for tile, path in tqdm(list(tiles_from_dir(args.masks, xyz_path=True)), ascii=True, unit="mask"):
+        mask = (np.array(Image.open(path).convert("P"), dtype=np.uint8) == index).astype(np.uint8)
+        try:
+            C, W, H = mask.shape
+        except:
+            W, H = mask.shape
+        transform = rasterio.transform.from_bounds((*mercantile.bounds(tile.x, tile.y, tile.z)), W, H)
 
-        out.write("]}")
+        for shape, value in rasterio.features.shapes(mask, transform=transform, mask=mask):
+            geom = '"geometry":{{"type": "Polygon", "coordinates":{}}}'.format(json.dumps(shape["coordinates"]))
+            out.write('{}{{"type":"Feature",{}}}'.format("" if first else ",", geom))
+            first = False
+
+    out.write("]}")

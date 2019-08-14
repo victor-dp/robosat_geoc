@@ -9,7 +9,7 @@ import torch.backends.cudnn
 from torch.utils.data import DataLoader
 
 from robosat_pink.core import load_config, load_module, check_classes, check_channels, make_palette, web_ui, Logs
-from robosat_pink.tiles import tiles_from_slippy_map, tile_label_to_file
+from robosat_pink.tiles import tiles_from_dir, tile_label_to_file
 
 
 def add_parser(subparser, formatter_class):
@@ -87,5 +87,5 @@ def main(args):
     if not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
-        tiles = [tile for tile, _ in tiles_from_slippy_map(args.out)]
+        tiles = [tile for tile in tiles_from_dir(args.out)]
         web_ui(args.out, base_url, tiles, tiles, "png", template)

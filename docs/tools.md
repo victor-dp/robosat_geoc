@@ -39,16 +39,17 @@ Web UI:
 ```
 ## rsp cover
 ```
-usage: rsp cover [-h] [--dir DIR] [--bbox BBOX] [--geojson GEOJSON]
-                 [--cover COVER] [--raster RASTER] [--zoom ZOOM]
-                 [--splits SPLITS]
+usage: rsp cover [-h] [--xyz XYZ] [--dir DIR] [--bbox BBOX]
+                 [--geojson GEOJSON] [--cover COVER] [--raster RASTER]
+                 [--zoom ZOOM] [--splits SPLITS]
                  out [out ...]
 
 optional arguments:
  -h, --help         show this help message and exit
 
 Input [one among the following is required]:
- --dir DIR          XYZ tiles dir path
+ --xyz XYZ          xyz tiles dir path
+ --dir DIR          plain tiles dir path
  --bbox BBOX        a lat/lon bbox: xmin,ymin,xmax,ymax or a bbox: xmin,xmin,xmax,xmax,EPSG:xxxx
  --geojson GEOJSON  a geojson file path
  --cover COVER      a cover file path
@@ -148,9 +149,8 @@ Web UI:
 ## rsp rasterize
 ```
 usage: rsp rasterize [-h] [--cover COVER] [--config CONFIG] --type TYPE
-                     [--pg PG] [--sqlite SQLITE] [--sql SQL]
-                     [--geojson GEOJSON [GEOJSON ...]] [--ts TS]
-                     [--web_ui_base_url WEB_UI_BASE_URL]
+                     [--pg PG] [--sql SQL] [--geojson GEOJSON [GEOJSON ...]]
+                     [--ts TS] [--web_ui_base_url WEB_UI_BASE_URL]
                      [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                      out
 
@@ -162,8 +162,7 @@ Inputs [either --postgis or --geojson is required]:
  --config CONFIG                    path to config file [required]
  --type TYPE                        type of feature to rasterize (e.g Building, Road) [required]
  --pg PG                            PostgreSQL dsn using psycopg2 syntax (e.g 'dbname=db user=postgres')
- --sqlite SQLITE                    path to spatialite or GeoPackage file
- --sql SQL                          SELECT query to retrieve geometry features [e.g SELECT geom FROM table]
+ --sql SQL                          SQL to retrieve geometry features [e.g SELECT geom FROM your_table]
  --geojson GEOJSON [GEOJSON ...]    path to GeoJSON features files
 
 Outputs:
@@ -287,5 +286,5 @@ Inputs:
  --config CONFIG  path to config file [required]
 
 Outputs:
- out              path to GeoJSON file to store features in [required]
+ out              path to output file to store features in [required]
 ```

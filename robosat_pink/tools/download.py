@@ -62,9 +62,8 @@ def main(args):
                 tick = time.monotonic()
                 progress.update()
 
-                x, y, z = map(str, [tile.x, tile.y, tile.z])
-
                 try:
+                    x, y, z = map(str, [tile.x, tile.y, tile.z])
                     os.makedirs(os.path.join(args.out, z, x), exist_ok=True)
                 except:
                     return tile, None, False

@@ -2,13 +2,13 @@ import unittest
 
 import mercantile
 
-from robosat_pink.tiles import tiles_from_slippy_map, tiles_from_csv
+from robosat_pink.tiles import tiles_from_dir, tiles_from_csv
 
 
 class TestSlippyMapTiles(unittest.TestCase):
     def test_slippy_map_directory(self):
         root = "tests/fixtures/images"
-        tiles = [tile for tile in tiles_from_slippy_map(root)]
+        tiles = [(tile, path) for tile, path in tiles_from_dir(root, xyz_path=True)]
         tiles.sort()
 
         self.assertEqual(len(tiles), 3)

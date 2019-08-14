@@ -11,17 +11,17 @@ from supermercado import burntiles
 from rasterio import open as rasterio_open
 from rasterio.warp import transform_bounds
 
-from robosat_pink.tiles import tiles_from_slippy_map, tiles_from_csv
+from robosat_pink.tiles import tiles_from_dir, tiles_from_csv
 
 
 def add_parser(subparser, formatter_class):
 
-    parser = subparser.add_parser(
-        "cover", help="Generate a tiles covering, in csv format: X,Y,Z", formatter_class=formatter_class
-    )
+    help = "Generate a tiles covering list (i.e either X,Y,Z or relative path excluding filename extension)"
+    parser = subparser.add_parser("cover", help=help, formatter_class=formatter_class)
 
     inp = parser.add_argument_group("Input [one among the following is required]")
-    inp.add_argument("--dir", type=str, help="XYZ tiles dir path")
+    inp.add_argument("--xyz", type=str, help="xyz tiles dir path")
+    inp.add_argument("--dir", type=str, help="plain tiles dir path")
     inp.add_argument("--bbox", type=str, help="a lat/lon bbox: xmin,ymin,xmax,ymax or a bbox: xmin,xmin,xmax,xmax,EPSG:xxxx")
     inp.add_argument("--geojson", type=str, help="a geojson file path")
     inp.add_argument("--cover", type=str, help="a cover file path")
@@ -41,6 +41,7 @@ def main(args):
         int(args.bbox is not None)
         + int(args.geojson is not None)
         + int(args.dir is not None)
+        + int(args.xyz is not None)
         + int(args.raster is not None)
         + int(args.cover is not None)
         != 1
@@ -82,7 +83,7 @@ def main(args):
             except:
                 sys.exit("ERROR: unable to deal with raster projection")
 
-            cover = tiles(w, s, e, n, args.zoom)
+            cover = [tile for tile in tiles(w, s, e, n, args.zoom)]
 
     if args.geojson:
         print("RoboSat.pink - cover from {} at zoom {}".format(args.geojson, args.zoom))
@@ -105,15 +106,19 @@ def main(args):
             except:
                 sys.exit("ERROR: unable to deal with raster projection")
 
-        cover = tiles(w, s, e, n, args.zoom)
-
-    if args.dir:
-        print("RoboSat.pink - cover from {}".format(args.dir))
-        cover = [tile for tile, _ in tiles_from_slippy_map(args.dir)]
+        cover = [tile for tile in tiles(w, s, e, n, args.zoom)]
 
     if args.cover:
         print("RoboSat.pink - cover from {}".format(args.cover))
         cover = [tile for tile in tiles_from_csv(args.cover)]
+
+    if args.dir:
+        print("RoboSat.pink - cover from {}".format(args.dir))
+        cover = [tile for tile in tiles_from_dir(args.dir, xyz=False)]
+
+    if args.xyz:
+        print("RoboSat.pink - cover from {}".format(args.xyz))
+        cover = [tile for tile in tiles_from_dir(args.xyz, xyz=True)]
 
     _cover = []
     for tile in tqdm(cover, ascii=True, unit="tile"):

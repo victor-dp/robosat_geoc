@@ -19,7 +19,7 @@ from robosat_pink.core import load_config, check_classes, make_palette, web_ui
 from robosat_pink.tiles import (
     tile_image_to_file,
     tile_label_to_file,
-    tile_from_slippy_map,
+    tile_from_xyz,
     tile_image_from_file,
     tile_label_from_file,
 )
@@ -193,7 +193,7 @@ def main(args):
             x, y, z = map(int, tile_key)
             for i in range(len(tiles_map[tile_key])):
                 root = os.path.join(splits_path, str(i))
-                _, path = tile_from_slippy_map(root, x, y, z)
+                _, path = tile_from_xyz(root, x, y, z)
 
                 if not args.label:
                     split = tile_image_from_file(path)
