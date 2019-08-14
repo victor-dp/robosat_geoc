@@ -149,7 +149,7 @@ def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
     templates = glob.glob(os.path.join(Path(__file__).parent, "web_ui", "*"))
     if os.path.isfile(template):
         templates.append(template)
-    if os.path.isfile(os.path.join(out, "index.html")):
+    if os.path.lexists(os.path.join(out, "index.html")):
         os.remove(os.path.join(out, "index.html"))  # if already existing output dir, as symlink can't be overwriten
     os.symlink(os.path.basename(template), os.path.join(out, "index.html"))
 
