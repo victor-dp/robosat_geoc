@@ -54,6 +54,7 @@ Documentation:
 - <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-predict">`rsp predict`</a> Predict masks, from given inputs and an already trained model
 - <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-compare">`rsp compare`</a> Compute composite images and/or metrics to compare several XYZ dirs
 - <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-vectorize">`rsp vectorize`</a> Extract simplified GeoJSON features from segmentation masks
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-info">`rsp info`</a> Print RoboSat.pink version informations
 
 ### Presentations slides:
   - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">@PyParis 2018</a>

@@ -99,7 +99,7 @@ optional arguments:
 
 Inputs:
  --checkpoint CHECKPOINT  model checkpoint to load [required]
- --type {onnx,jit}        output type [default: jit]
+ --type {onnx,jit}        output type [default: onnx]
 
 Output:
  out                      path to save export model to [required]
@@ -117,6 +117,13 @@ Inputs:
 
 Output:
  out          GeoJSON output file path [required]
+```
+## rsp info
+```
+usage: rsp info [-h]
+
+optional arguments:
+ -h, --help  show this help message and exit
 ```
 ## rsp predict
 ```
