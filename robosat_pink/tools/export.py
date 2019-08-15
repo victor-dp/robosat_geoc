@@ -10,7 +10,7 @@ def add_parser(subparser, formatter_class):
 
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("--checkpoint", type=str, required=True, help="model checkpoint to load [required]")
-    inp.add_argument("--type", type=str, choices=["onnx", "jit"], default="jit", help="output type [default: jit]")
+    inp.add_argument("--type", type=str, choices=["onnx", "jit"], default="onnx", help="output type [default: onnx]")
     out = parser.add_argument_group("Output")
     out.add_argument("out", type=str, help="path to save export model to [required]")
 
@@ -33,9 +33,18 @@ def main(args):
     except AttributeError:
         nn.state_dict(chkpt["state_dict"])
 
+    nn.eval()
+
     batch = torch.rand(1, *chkpt["shape_in"])
     if args.type == "onnx":
-        torch.onnx.export(nn, torch.autograd.Variable(batch), args.out)
+        torch.onnx.export(
+            nn,
+            torch.autograd.Variable(batch),
+            args.out,
+            input_names=["input", "shape_in", "shape_out"],
+            output_names=["output"],
+            dynamic_axes={"input": {0: "num_batch"}, "output": {0: "num_batch"}},
+        )
 
     if args.type == "jit":
         torch.jit.trace(nn, batch).save(args.out)
