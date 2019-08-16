@@ -1,6 +1,8 @@
 import os
 import sys
+import cv2
 import torch
+import rasterio
 from os import path
 
 
@@ -15,6 +17,8 @@ def main(args):
     print("RoboSat.pink " + open(path.join(path.dirname(__file__), "../../VERSION")).read())
     print("Python:  " + sys.version[:5])
     print("Torch:   " + torch.__version__)
+    print("OpenCV   " + cv2.__version__)
+    print("GDAL     " + rasterio._base.gdal_version())
     print("CPUs:    " + str(os.cpu_count()))
     print("GPUs:    " + str(torch.cuda.device_count()))
     print("Cuda:    " + torch.version.cuda)
