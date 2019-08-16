@@ -31,16 +31,11 @@ def add_parser(subparser, formatter_class):
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("rasters", type=str, nargs="+", help="path to raster files to tile [required]")
 
-    nd = parser.add_argument_group("No Data")
-    help = "Skip tile if nodata pixel ratio > threshold. [default: 100]"
-    nd.add_argument("--nodata_threshold", type=int, default=100, choices=range(0, 101), metavar="[0-100]", help=help)
-    nd.add_argument("--nodata_border", action="store_true", help="if set, keep no data border tiles")
-    help = "No data pixel value [default: 0]"
-    nd.add_argument("--nodata_value", type=int, default=0, choices=range(0, 256), metavar="[0-255]", help=help)
-
     out = parser.add_argument_group("Output")
     out.add_argument("--zoom", type=int, required=True, help="zoom level of tiles [required]")
     out.add_argument("--ts", type=int, default=512, help="tile size in pixels [default: 512]")
+    help = "Skip tile if nodata pixel ratio > threshold. [default: 100]"
+    out.add_argument("--nodata_threshold", type=int, default=100, choices=range(0, 101), metavar="[0-100]", help=help)
     out.add_argument("out", type=str, help="output directory path [required]")
 
     lab = parser.add_argument_group("Labels")
@@ -58,18 +53,15 @@ def add_parser(subparser, formatter_class):
     parser.set_defaults(func=main)
 
 
-def skip_nodata(image, keep_border, no_data, threshold):
+def is_nodata(image, no_data=0, threshold=5):
 
-    if not keep_border and (
+    if (
         np.all(image[0, :, :] == no_data)
         or np.all(image[-1, :, :] == no_data)
         or np.all(image[:, 0, :] == no_data)
         or np.all(image[:, -1, :] == no_data)
     ):
         return True  # pixel border is no_data, on all bands
-
-    if threshold == 100:
-        return False
 
     C, W, H = image.shape
     return np.sum(image[:, :, :] == no_data) > ((threshold * C * 100) / (W * H))
@@ -149,11 +141,9 @@ def main(args):
                 image = np.moveaxis(data, 0, 2)  # C,H,W -> H,W,C
 
                 tile_key = (str(tile.x), str(tile.y), str(tile.z))
-
-                if not args.label and len(tiles_map[tile_key]) == 1:
-                    if skip_nodata(image, args.nodata_border, args.nodata_value, args.nodata_threshold):
-                        progress.update()
-                        continue
+                if not args.label and len(tiles_map[tile_key]) == 1 and is_nodata(image, threshold=args.nodata_threshold):
+                    progress.update()
+                    continue
 
                 if len(tiles_map[tile_key]) > 1:
                     out = os.path.join(splits_path, str(tiles_map[tile_key].index(path)))
@@ -183,7 +173,7 @@ def main(args):
     # Aggregate remaining tiles splits
     with futures.ThreadPoolExecutor(args.workers) as executor:
 
-        def worker(tile_key, nodata):
+        def worker(tile_key):
 
             if len(tiles_map[tile_key]) == 1:
                 return
@@ -204,7 +194,7 @@ def main(args):
                 assert image.shape == split.shape
                 image[:, :, :] += split[:, :, :]
 
-            if not args.label and skip_nodata(image, nodata["border"], nodata["value"], nodata["threshold"]):
+            if not args.label and is_nodata(image, threshold=args.nodata_threshold):
                 progress.update()
                 return
 
@@ -222,8 +212,7 @@ def main(args):
             progress.update()
             return tile
 
-        nodata = {"border": args.nodata_border, "value": args.nodata_value, "threshold": args.nodata_threshold}
-        for tiled in executor.map(worker, tiles_map.keys(), nodata):
+        for tiled in executor.map(worker, tiles_map.keys()):
             if tiled is not None:
                 tiles.append(tiled)
 

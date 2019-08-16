@@ -210,9 +210,8 @@ Web UI:
 ```
 ## rsp tile
 ```
-usage: rsp tile [-h] [--nodata_threshold [0-100]] [--nodata_border]
-                [--nodata_value [0-255]] --zoom ZOOM [--ts TS] [--label]
-                [--config CONFIG] [--workers WORKERS]
+usage: rsp tile [-h] --zoom ZOOM [--ts TS] [--nodata_threshold [0-100]]
+                [--label] [--config CONFIG] [--workers WORKERS]
                 [--web_ui_base_url WEB_UI_BASE_URL]
                 [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                 rasters [rasters ...] out
@@ -223,14 +222,10 @@ optional arguments:
 Inputs:
  rasters                            path to raster files to tile [required]
 
-No Data:
- --nodata_threshold [0-100]         Skip tile if nodata pixel ratio > threshold. [default: 100]
- --nodata_border                    if set, keep no data border tiles
- --nodata_value [0-255]             No data pixel value [default: 0]
-
 Output:
  --zoom ZOOM                        zoom level of tiles [required]
  --ts TS                            tile size in pixels [default: 512]
+ --nodata_threshold [0-100]         Skip tile if nodata pixel ratio > threshold. [default: 100]
  out                                output directory path [required]
 
 Labels:
