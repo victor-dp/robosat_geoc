@@ -169,7 +169,7 @@ Inputs [either --postgis or --geojson is required]:
  --config CONFIG                    path to config file [required]
  --type TYPE                        type of feature to rasterize (e.g Building, Road) [required]
  --pg PG                            PostgreSQL dsn using psycopg2 syntax (e.g 'dbname=db user=postgres')
- --sql SQL                          SQL to retrieve geometry features [e.g SELECT geom FROM your_table]
+ --sql SQL                          SQL to retrieve geometry features [e.g SELECT geom FROM a_table WHERE ST_Intersects(TILE_GEOM, geom)]
  --geojson GEOJSON [GEOJSON ...]    path to GeoJSON features files
 
 Outputs:

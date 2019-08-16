@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import json
 import collections
@@ -29,7 +30,8 @@ def add_parser(subparser, formatter_class):
     inp.add_argument("--config", type=str, help="path to config file [required]")
     inp.add_argument("--type", type=str, required=True, help="type of feature to rasterize (e.g Building, Road) [required]")
     inp.add_argument("--pg", type=str, help="PostgreSQL dsn using psycopg2 syntax (e.g 'dbname=db user=postgres')")
-    inp.add_argument("--sql", type=str, help="SQL to retrieve geometry features [e.g SELECT geom FROM your_table]")
+    help = "SQL to retrieve geometry features [e.g SELECT geom FROM a_table WHERE ST_Intersects(TILE_GEOM, geom)]"
+    inp.add_argument("--sql", type=str, help=help)
     inp.add_argument("--geojson", type=str, nargs="+", help="path to GeoJSON features files")
 
     out = parser.add_argument_group("Outputs")
@@ -159,14 +161,14 @@ def main(args):
         db = conn.cursor()
 
         assert "limit" not in args.sql.lower(), "LIMIT is not supported"
-        db.execute("SELECT ST_Srid(geom) AS srid FROM ({} LIMIT 1) AS sub".format(args.sql))
-        srid = db.fetchone()[0]
-        assert srid, "Unable to retrieve geometry SRID."
+        assert "TILE_GEOM" in args.sql, "TILE_GEOM filter not found in your SQL"
+        sql = re.sub("ST_Intersects( )*\((.*)?TILE_GEOM(.*)?\)", "1=1", args.sql, re.I)
+        assert sql and sql != args.sql
 
-        if "where" not in args.sql.lower():  # TODO: Find a more reliable way to handle feature filtering
-            args.sql += " WHERE ST_Intersects(tile.geom, geom)"
-        else:
-            args.sql += " AND ST_Intersects(tile.geom, geom)"
+        db.execute("""SELECT ST_Srid("1") AS srid FROM ({} LIMIT 1) AS t("1")""".format(sql))
+        srid = db.fetchone()[0]
+        assert srid and int(srid) > 0, "Unable to retrieve geometry SRID."
+
         features = args.sql
 
     log.log("RoboSat.pink - rasterize - rasterizing {} from {} on cover {}".format(args.type, features, args.cover))
@@ -179,11 +181,12 @@ def main(args):
             if args.pg:
 
                 w, s, e, n = tile_bbox(tile)
+                tile_geom = "ST_Transform(ST_MakeEnvelope({},{},{},{}, 4326), {})".format(w, s, e, n, srid)
 
                 query = """
                 WITH
-                  tile AS (SELECT ST_Transform(ST_MakeEnvelope({},{},{},{}, 4326), {}) AS geom),
-                  geom AS (SELECT ST_Intersection(tile.geom, sql.geom) AS geom FROM tile CROSS JOIN LATERAL ({}) sql),
+                  sql  AS ({}),
+                  geom AS (SELECT "1" AS geom FROM sql AS t("1")),
                   json AS (SELECT '{{"type": "Feature", "geometry": '
                          || ST_AsGeoJSON((ST_Dump(ST_Transform(ST_Force2D(geom.geom), 4326))).geom, 6)
                          || '}}' AS features
@@ -191,7 +194,7 @@ def main(args):
                 SELECT '{{"type": "FeatureCollection", "features": [' || Array_To_String(array_agg(features), ',') || ']}}'
                 FROM json
                 """.format(
-                    w, s, e, n, srid, args.sql
+                    args.sql.replace("TILE_GEOM", tile_geom)
                 )
 
                 db.execute(query)
