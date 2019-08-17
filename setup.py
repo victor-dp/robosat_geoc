@@ -8,11 +8,12 @@ Semantic Segmentation ecosystem for GeoSpatial Imagery
 
 from setuptools import setup, find_packages
 from os import path
+import re
 
 here = path.dirname(__file__)
 
-with open(path.join(here, "VERSION")) as f:
-    version = f.read()
+with open(path.join(here, "robosat_pink", "__init__.py"), encoding="utf-8") as f:
+    version = re.sub('( )*__version__( )*=( )*', "", f.read()).replace('"', "")
 
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
