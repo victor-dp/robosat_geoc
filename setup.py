@@ -13,7 +13,7 @@ import re
 here = path.dirname(__file__)
 
 with open(path.join(here, "robosat_pink", "__init__.py"), encoding="utf-8") as f:
-    version = re.sub('( )*__version__( )*=( )*', "", f.read()).replace('"', "")
+    version = re.sub("( )*__version__( )*=( )*", "", f.read()).replace('"', "")
 
 with open(path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
