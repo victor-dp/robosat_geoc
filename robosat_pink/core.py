@@ -5,6 +5,7 @@ import toml
 from importlib import import_module
 
 import re
+import math
 import colorsys
 import webcolors
 from pathlib import Path
@@ -106,13 +107,23 @@ class Logs:
 # Colors
 #
 def make_palette(colors, complementary=False):
-    """Builds a PIL color palette from CSS3 color names, or hex values patterns as #RRGGBB."""
+    """Builds a One Hot PIL color palette from Classes CSS3 color names, or hex values patterns as #RRGGBB."""
 
-    assert 0 < len(colors) <= 256
+    assert 0 < len(colors) < 8  # 8bits One Hot encoding
 
-    hex_colors = [webcolors.CSS3_NAMES_TO_HEX[color] if color[0] != "#" else color for color in colors]
+    hex_colors = [webcolors.CSS3_NAMES_TO_HEX[color.lower()] if color[0] != "#" else color for color in colors]
     rgb_colors = [(int(h[1:3], 16), int(h[3:5], 16), int(h[5:7], 16)) for h in hex_colors]
-    palette = list(sum(rgb_colors, ()))
+
+    one_hot_colors = [(0, 0, 0) for i in range(256)]
+    one_hot_colors[0] = rgb_colors[0]
+    for c, color in enumerate(rgb_colors[1:]):
+        one_hot_colors[int(math.pow(2, c))] = color
+
+    for i in range(3, int(math.pow(2, len(colors) - 1))):
+        if i not in (4, 8, 16, 32, 64, 128):
+            one_hot_colors[i] = (0, 0, 0)  # TODO compute colors for overlapping classes
+
+    palette = list(sum(one_hot_colors, ()))  # flatten
 
     return palette if not complementary else complementary_palette(palette)
 
@@ -134,7 +145,7 @@ def complementary_palette(palette):
 def check_color(color):
     """Check if an input color is or not valid (i.e CSS3 color name or #RRGGBB)."""
 
-    hex_color = webcolors.CSS3_NAMES_TO_HEX[color] if color[0] != "#" else color
+    hex_color = webcolors.CSS3_NAMES_TO_HEX[color.lower()] if color[0] != "#" else color
     return bool(re.match(r"^#([0-9a-fA-F]){6}$", hex_color))
 
 
