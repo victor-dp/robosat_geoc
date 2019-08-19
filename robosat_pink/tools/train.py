@@ -8,6 +8,7 @@ import torch.backends.cudnn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
+import robosat_pink as rsp
 from robosat_pink.core import load_config, load_module, check_model, check_channels, check_classes, Logs
 from robosat_pink.metrics.core import Metrics
 
@@ -140,7 +141,7 @@ def main(args):
             "uuid": UUID,
             "model_version": nn_version,
             "producer_name": "RoboSat.pink",
-            "producer_version": "0.4.0",
+            "producer_version": rsp.__version__,
             "model_licence": "MIT",
             "domain": "pink.RoboSat",  # reverse-DNS
             "doc_string": nn_doc,
