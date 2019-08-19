@@ -105,7 +105,7 @@ class Logs:
 #
 # Colors
 #
-def make_palette(*colors, complementary=False):
+def make_palette(colors, complementary=False):
     """Builds a PIL color palette from CSS3 color names, or hex values patterns as #RRGGBB."""
 
     assert 0 < len(colors) <= 256

@@ -157,7 +157,7 @@ Web UI:
 ```
 usage: rsp rasterize [-h] [--cover COVER] [--config CONFIG] --type TYPE
                      [--pg PG] [--sql SQL] [--geojson GEOJSON [GEOJSON ...]]
-                     [--ts TS] [--web_ui_base_url WEB_UI_BASE_URL]
+                     [--append] [--ts TS] [--web_ui_base_url WEB_UI_BASE_URL]
                      [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                      out
 
@@ -174,6 +174,7 @@ Inputs [either --postgis or --geojson is required]:
 
 Outputs:
  out                                output directory path [required]
+ --append                           Append to existing tile if any, useful to multiclass labels
  --ts TS                            output tile size [default: 512]
 
 Web UI:
@@ -183,8 +184,8 @@ Web UI:
 ```
 ## rsp subset
 ```
-usage: rsp subset [-h] --dir DIR --cover COVER [--workers WORKERS] [--move]
-                  [--delete] [--web_ui_base_url WEB_UI_BASE_URL]
+usage: rsp subset [-h] --dir DIR --cover COVER [--copy] [--delete]
+                  [--web_ui_base_url WEB_UI_BASE_URL]
                   [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                   [out]
 
@@ -194,10 +195,9 @@ optional arguments:
 Inputs:
  --dir DIR                          to XYZ tiles input dir path [required]
  --cover COVER                      path to csv cover file to filter dir by [required]
- --workers WORKERS                  number of workers [default: 4]
 
-Alternate modes, as default is to copy.:
- --move                             move tiles from input to output
+Alternate modes, as default is to create relative symlinks.:
+ --copy                             copy tiles from input to output
  --delete                           delete tiles listed in cover
 
 Output:

@@ -41,7 +41,7 @@ def main(args):
     config = load_config(args.config)
     check_channels(config)
     check_classes(config)
-    palette = make_palette(config["classes"][0]["color"], config["classes"][1]["color"])
+    palette = make_palette([classe["color"] for classe in config["classes"]])
     args.workers = torch.cuda.device_count() * 2 if torch.device("cuda") and not args.workers else args.workers
 
     log = Logs(os.path.join(args.out, "log"))

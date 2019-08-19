@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import math
 import json
 import collections
 
@@ -36,6 +37,7 @@ def add_parser(subparser, formatter_class):
 
     out = parser.add_argument_group("Outputs")
     out.add_argument("out", type=str, help="output directory path [required]")
+    out.add_argument("--append", action="store_true", help="Append to existing tile if any, useful to multiclass labels")
     out.add_argument("--ts", type=int, default=512, help="output tile size [default: 512]")
 
     ui = parser.add_argument_group("Web UI")
@@ -83,10 +85,12 @@ def main(args):
 
     config = load_config(args.config)
     check_classes(config)
-    palette = make_palette(*[classe["color"] for classe in config["classes"]], complementary=True)
-    burn_value = next(config["classes"].index(classe) for classe in config["classes"] if classe["title"] == args.type)
-    if "burn_value" not in locals():
-        sys.exit("ERROR: asked type to rasterize is not contains in your config file classes.")
+
+    palette = make_palette([classe["color"] for classe in config["classes"]], complementary=True)
+    index = [config["classes"].index(classe) for classe in config["classes"] if classe["title"] == args.type]
+    assert index, "ERROR: requested type is not contains in your config file classes."
+    burn_value = int(math.pow(2, index[0] - 1))  # 8bits One Hot Encoding
+    assert 0 <= burn_value <= 128
 
     args.out = os.path.expanduser(args.out)
     os.makedirs(args.out, exist_ok=True)
@@ -162,7 +166,7 @@ def main(args):
 
         assert "limit" not in args.sql.lower(), "LIMIT is not supported"
         assert "TILE_GEOM" in args.sql, "TILE_GEOM filter not found in your SQL"
-        sql = re.sub("ST_Intersects( )*\((.*)?TILE_GEOM(.*)?\)", "1=1", args.sql, re.I)
+        sql = re.sub(r"ST_Intersects( )*\((.*)?TILE_GEOM(.*)?\)", "1=1", args.sql, re.I)
         assert sql and sql != args.sql
 
         db.execute("""SELECT ST_Srid("1") AS srid FROM ({} LIMIT 1) AS t("1")""".format(sql))
@@ -172,7 +176,7 @@ def main(args):
         features = args.sql
 
     log.log("RoboSat.pink - rasterize - rasterizing {} from {} on cover {}".format(args.type, features, args.cover))
-    with open(os.path.join(os.path.expanduser(args.out), "instances.cover"), mode="w") as cover:
+    with open(os.path.join(os.path.expanduser(args.out), "instances_" + args.type.lower() + ".cover"), mode="w") as cover:
 
         for tile in tqdm(list(tiles_from_csv(os.path.expanduser(args.cover))), ascii=True, unit="tile"):
 
@@ -217,7 +221,7 @@ def main(args):
                 num = 0
                 out = np.zeros(shape=(args.ts, args.ts), dtype=np.uint8)
 
-            tile_label_to_file(args.out, tile, palette, out)
+            tile_label_to_file(args.out, tile, palette, out, append=args.append)
             cover.write("{},{},{}  {}{}".format(tile.x, tile.y, tile.z, num, os.linesep))
 
     if not args.no_web_ui:

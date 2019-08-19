@@ -167,22 +167,28 @@ def tile_label_from_file(path):
         return None
 
 
-def tile_label_to_file(root, tile, palette, label):
+def tile_label_to_file(root, tile, palette, label, append=False):
     """ Write a label tile on disk. """
 
     root = os.path.expanduser(root)
-    out_path = os.path.join(root, str(tile.z), str(tile.x)) if isinstance(tile, mercantile.Tile) else root
-    os.makedirs(out_path, exist_ok=True)
+    dir_path = os.path.join(root, str(tile.z), str(tile.x)) if isinstance(tile, mercantile.Tile) else root
+    path = os.path.join(dir_path, "{}.png".format(str(tile.y)))
 
     if len(label.shape) == 3:  # H,W,C -> H,W
         assert label.shape[2] == 1
         label = label.reshape((label.shape[0], label.shape[1]))
 
-    out = Image.fromarray(label, mode="P")
-    out.putpalette(palette)
+    if append and os.path.isfile(path):
+        previous = tile_label_from_file(path)
+        assert previous is not None, "Unable to open existing label: {}".format(path)
+        label = np.uint8(previous + label)
+    else:
+        os.makedirs(dir_path, exist_ok=True)
 
     try:
-        out.save(os.path.join(out_path, "{}.png".format(str(tile.y))), optimize=True, transparency=0)
+        out = Image.fromarray(label, mode="P")
+        out.putpalette(palette)
+        out.save(path, optimize=True, transparency=0)
         return True
     except:
         return False
