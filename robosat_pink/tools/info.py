@@ -4,7 +4,6 @@ import cv2
 import torch
 import rasterio
 import robosat_pink as rsp
-from os import path
 
 
 def add_parser(subparser, formatter_class):
