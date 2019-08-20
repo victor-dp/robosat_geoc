@@ -210,9 +210,9 @@ Web UI:
 ```
 ## rsp tile
 ```
-usage: rsp tile [-h] --zoom ZOOM [--ts TS] [--nodata_threshold [0-100]]
-                [--label] [--config CONFIG] [--workers WORKERS]
-                [--web_ui_base_url WEB_UI_BASE_URL]
+usage: rsp tile [-h] [--cover COVER] --zoom ZOOM [--ts TS]
+                [--nodata_threshold [0-100]] [--label] [--config CONFIG]
+                [--workers WORKERS] [--web_ui_base_url WEB_UI_BASE_URL]
                 [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                 rasters [rasters ...] out
 
@@ -221,6 +221,7 @@ optional arguments:
 
 Inputs:
  rasters                            path to raster files to tile [required]
+ --cover COVER                      path to csv tiles cover file, to filter tiles to tile [optional]
 
 Output:
  --zoom ZOOM                        zoom level of tiles [required]
