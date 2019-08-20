@@ -62,8 +62,8 @@ Outputs:
 ```
 ## rsp download
 ```
-usage: rsp download [-h] [--type {XYZ,WMS,TMS}] [--rate RATE]
-                    [--timeout TIMEOUT] [--workers WORKERS] [--format FORMAT]
+usage: rsp download [-h] [--type {XYZ,WMS}] [--rate RATE] [--timeout TIMEOUT]
+                    [--workers WORKERS] [--format FORMAT]
                     [--web_ui_base_url WEB_UI_BASE_URL]
                     [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
                     url cover out
@@ -73,7 +73,7 @@ optional arguments:
 
 Web Server:
  url                                URL server endpoint, with: {z}/{x}/{y} or {xmin},{ymin},{xmax},{ymax} [required]
- --type {XYZ,WMS,TMS}               service type [default: XYZ]
+ --type {XYZ,WMS}                   service type [default: XYZ]
  --rate RATE                        download rate limit in max requests/seconds [default: 10]
  --timeout TIMEOUT                  download request timeout (in seconds) [default: 10]
  --workers WORKERS                  number of workers [default: CPU / 2]

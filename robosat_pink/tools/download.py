@@ -14,12 +14,12 @@ from robosat_pink.tiles import tiles_from_csv, tile_image_from_url, tile_image_t
 
 def add_parser(subparser, formatter_class):
     parser = subparser.add_parser(
-        "download", help="Downloads tiles from a remote server (XYZ, WMS, or TMS)", formatter_class=formatter_class
+        "download", help="Downloads tiles from a remote server (XYZ or WMS)", formatter_class=formatter_class
     )
 
     ws = parser.add_argument_group("Web Server")
     ws.add_argument("url", type=str, help="URL server endpoint, with: {z}/{x}/{y} or {xmin},{ymin},{xmax},{ymax} [required]")
-    ws.add_argument("--type", type=str, default="XYZ", choices=["XYZ", "WMS", "TMS"], help="service type [default: XYZ]")
+    ws.add_argument("--type", type=str, default="XYZ", choices=["XYZ", "WMS"], help="service type [default: XYZ]")
     ws.add_argument("--rate", type=int, default=10, help="download rate limit in max requests/seconds [default: 10]")
     ws.add_argument("--timeout", type=int, default=10, help="download request timeout (in seconds) [default: 10]")
     ws.add_argument("--workers", type=int, help="number of workers [default: CPU / 2]")
@@ -74,9 +74,6 @@ def main(args):
 
                 if args.type == "XYZ":
                     url = args.url.format(x=tile.x, y=tile.y, z=tile.z)
-                elif args.type == "TMS":
-                    y = (2 ** tile.z) - tile.y - 1
-                    url = args.url.format(x=tile.x, y=y, z=tile.z)
                 elif args.type == "WMS":
                     xmin, ymin, xmax, ymax = xy_bounds(tile)
                     url = args.url.format(xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
