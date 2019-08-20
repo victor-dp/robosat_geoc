@@ -22,6 +22,7 @@ def main(args):
     print("GDAL    " + rasterio._base.gdal_version())
     print("Cuda    " + torch.version.cuda)
     print("Cudnn   " + str(torch.backends.cudnn.version()))
+    print("========================================")
     print("CPUs    " + str(os.cpu_count()))
     print("GPUs    " + str(torch.cuda.device_count()))
     for i in range(torch.cuda.device_count()):
