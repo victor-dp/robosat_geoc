@@ -17,6 +17,7 @@ from rasterio.transform import from_bounds
 
 from robosat_pink.core import load_config, check_classes, make_palette, web_ui
 from robosat_pink.tiles import (
+    tiles_from_csv,
     tile_image_to_file,
     tile_label_to_file,
     tile_from_xyz,
@@ -30,6 +31,7 @@ def add_parser(subparser, formatter_class):
 
     inp = parser.add_argument_group("Inputs")
     inp.add_argument("rasters", type=str, nargs="+", help="path to raster files to tile [required]")
+    inp.add_argument("--cover", type=str, help="path to csv tiles cover file, to filter tiles to tile [optional]")
 
     out = parser.add_argument_group("Output")
     out.add_argument("--zoom", type=int, required=True, help="zoom level of tiles [required]")
@@ -78,6 +80,8 @@ def main(args):
         colors = [classe["color"] for classe in config["classes"]]
         palette = make_palette(*colors)
 
+    cover = [tile for tile in tiles_from_csv(os.path.expanduser(args.cover))] if args.cover else None
+
     splits_path = os.path.join(os.path.expanduser(args.out), ".splits")
     tiles_map = {}
 
@@ -93,6 +97,8 @@ def main(args):
         bands = len(raster.indexes)
 
         tiles = [mercantile.Tile(x=x, y=y, z=z) for x, y, z in mercantile.tiles(w, s, e, n, args.zoom)]
+        tiles = list(set(tiles) & set(cover)) if cover else tiles
+
         for tile in tiles:
             tile_key = (str(tile.x), str(tile.y), str(tile.z))
             if tile_key not in tiles_map.keys():
@@ -124,6 +130,9 @@ def main(args):
             tiled = []
 
             for tile in tiles:
+
+                if cover and tile not in cover:
+                    continue
 
                 w, s, e, n = mercantile.xy_bounds(tile)
 
@@ -219,7 +228,7 @@ def main(args):
         if splits_path and os.path.isdir(splits_path):
             shutil.rmtree(splits_path)  # Delete suffixes dir if any
 
-    if not args.no_web_ui:
+    if tiles and not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
         base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
         web_ui(args.out, base_url, tiles, tiles, ext, template)
