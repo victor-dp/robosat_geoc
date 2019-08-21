@@ -140,3 +140,11 @@ pypi: check
 	rm -rf dist RoboSat.pink.egg-info
 	python3 setup.py sdist
 	twine upload dist/* -r pypi
+
+# Kill NVIDIA processes
+kill:
+	@rm -f .PID
+	@for i in `echo $$CUDA_VISIBLE_DEVICES | tr ',' " "`; do \
+	lsof /dev/nvidia$$i | awk '{print $$2}' | tail -n +2 | uniq >> .PID ; \
+	done
+	@sort .PID | uniq | tr '\n' ' ' | xargs --no-run-if-empty echo "sudo kill -9"
