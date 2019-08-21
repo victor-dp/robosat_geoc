@@ -142,10 +142,10 @@ pypi: check
 	twine upload dist/* -r pypi
 
 
-# List NVIDIA processes running, to kill them all
+# Kill all NVIDIA processes running
 kill:
 	@rm -f .PID
 	@for i in `echo $$CUDA_VISIBLE_DEVICES | tr ',' " "`; do \
 	lsof /dev/nvidia$$i | awk '{print $$2}' | tail -n +2 | uniq >> .PID ; \
 	done
-	@sort .PID | uniq | tr '\n' ' ' | xargs --no-run-if-empty echo "sudo kill -9"
+	@sort .PID | uniq | tr '\n' ' ' | xargs --no-run-if-empty sudo kill -9
