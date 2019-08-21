@@ -141,7 +141,8 @@ pypi: check
 	python3 setup.py sdist
 	twine upload dist/* -r pypi
 
-# Kill NVIDIA processes
+
+# List NVIDIA processes running, to kill them all
 kill:
 	@rm -f .PID
 	@for i in `echo $$CUDA_VISIBLE_DEVICES | tr ',' " "`; do \

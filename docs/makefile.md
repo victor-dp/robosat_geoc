@@ -15,6 +15,9 @@ For plain user installation follow README.md instructions, instead.
                   Do it, at least, on each CLI modifications, and before a release.
                   NOTA: It takes a while.
 
+ make kill	  List all GPU processes running, in order to kill them all.
+                  Useful, to eradicate NVIDIA zombies processes...
+
  make pink        Python code beautifier,
                   as Pink is the new Black ^^
 ```
