@@ -15,7 +15,7 @@ For plain user installation follow README.md instructions, instead.
                   Do it, at least, on each CLI modifications, and before a release.
                   NOTA: It takes a while.
 
- make kill	  Kill all GPU processes running, from CUDA_VISIBLE_DEVICES GPUs.
+ make kill        Kill all GPU processes running, from CUDA_VISIBLE_DEVICES GPUs.
                   Useful, to eradicate NVIDIA zombies processes...
 
  make pink        Python code beautifier,

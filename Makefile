@@ -14,6 +14,9 @@ help:
 	@echo "                  Do it, at least, on each CLI modifications, and before a release."
 	@echo "                  NOTA: It takes a while."
 	@echo ""
+	@echo " make kill        Kill all GPU processes running, from CUDA_VISIBLE_DEVICES GPUs."
+	@echo "                  Useful, to eradicate NVIDIA zombies processes..."
+	@echo ""
 	@echo " make pink        Python code beautifier,"
 	@echo "                  as Pink is the new Black ^^"
 
