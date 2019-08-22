@@ -147,11 +147,14 @@ pypi: check
 
 # Kill all NVIDIA processes running
 kill:
+	@[ "$$CUDA_VISIBLE_DEVICES" ] || echo "CUDA_VISIBLE_DEVICES is not set"
 	@echo "Looking to processes related to GPUs: "$$CUDA_VISIBLE_DEVICES
-	@echo "" > .PID && echo "" > .PID_KILL
+	@rm -f .PID
 	@for i in `echo $$CUDA_VISIBLE_DEVICES | tr ',' " "`; do \
 	lsof /dev/nvidia$$i | awk '{print $$2}' | tail -n +2 | uniq >> .PID ; \
 	done
+	@test -s .PID || echo "No GPU process running." & touch .PID
 	@cat .PID | sort | uniq | tr '\n' ' ' | xargs --no-run-if-empty echo > .PID_KILL
 	@cat .PID_KILL | xargs --no-run-if-empty echo "Processes to kill:"
 	@cat .PID_KILL | xargs --no-run-if-empty sudo kill -9
+	@rm -f .PID .PID_KILL
