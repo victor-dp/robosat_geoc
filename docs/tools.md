@@ -39,21 +39,23 @@ Web UI:
 ```
 ## rsp cover
 ```
-usage: rsp cover [-h] [--xyz XYZ] [--dir DIR] [--bbox BBOX]
-                 [--geojson GEOJSON] [--cover COVER] [--raster RASTER]
-                 [--zoom ZOOM] [--splits SPLITS]
+usage: rsp cover [-h] [--dir DIR] [--bbox BBOX] [--geojson GEOJSON]
+                 [--cover COVER] [--raster RASTER] [--no_xyz] [--zoom ZOOM]
+                 [--splits SPLITS]
                  out [out ...]
 
 optional arguments:
  -h, --help         show this help message and exit
 
 Input [one among the following is required]:
- --xyz XYZ          xyz tiles dir path
  --dir DIR          plain tiles dir path
  --bbox BBOX        a lat/lon bbox: xmin,ymin,xmax,ymax or a bbox: xmin,xmin,xmax,xmax,EPSG:xxxx
  --geojson GEOJSON  a geojson file path
  --cover COVER      a cover file path
  --raster RASTER    a raster file path
+
+Tiles:
+ --no_xyz           if set, tiles are not expected to be XYZ based.
 
 Outputs:
  --zoom ZOOM        zoom level of tiles [required with --geojson or --bbox]

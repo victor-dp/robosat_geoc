@@ -64,14 +64,14 @@ it_pre:
 	echo "Download PBF" && wget --show-progress -q -O it/lyon.pbf http://datapink.tools/rsp/it/lyon.pbf
 	rsp extract --type Building it/lyon.pbf it/osm_lyon_footprint.json
 	rsp rasterize --type Building --geojson it/lyon_roofprint.json --config config.toml --cover it/cover it/labels_osm
-	rsp cover --xyz it/images --splits 80/20 it/training/cover it/validation/cover
+	rsp cover --dir it/images --splits 80/20 it/training/cover it/validation/cover
 	rsp subset --dir it/images --cover it/training/cover it/training/images
 	rsp subset --dir it/labels --cover it/training/cover it/training/labels
 	rsp subset --dir it/images --cover it/validation/cover it/validation/images
 	rsp subset --dir it/labels --cover it/validation/cover it/validation/labels
 	wget -nc -O it/tanzania.tif http://datapink.tools/rsp/it/tanzania.tif
 	rsp tile --zoom 19 it/tanzania.tif it/prediction/images
-	rsp cover --zoom 19 --xyz it/prediction/images it/prediction/cover
+	rsp cover --zoom 19 --dir it/prediction/images it/prediction/cover
 	wget -nc -O it/tanzania.geojson http://datapink.tools/rsp/it/tanzania.geojson
 	rsp rasterize --type Building --geojson it/tanzania.geojson --config config.toml --cover it/prediction/cover it/prediction/labels
 

@@ -20,12 +20,14 @@ def add_parser(subparser, formatter_class):
     parser = subparser.add_parser("cover", help=help, formatter_class=formatter_class)
 
     inp = parser.add_argument_group("Input [one among the following is required]")
-    inp.add_argument("--xyz", type=str, help="xyz tiles dir path")
     inp.add_argument("--dir", type=str, help="plain tiles dir path")
     inp.add_argument("--bbox", type=str, help="a lat/lon bbox: xmin,ymin,xmax,ymax or a bbox: xmin,xmin,xmax,xmax,EPSG:xxxx")
     inp.add_argument("--geojson", type=str, help="a geojson file path")
     inp.add_argument("--cover", type=str, help="a cover file path")
     inp.add_argument("--raster", type=str, help="a raster file path")
+
+    tile = parser.add_argument_group("Tiles")
+    tile.add_argument("--no_xyz", action="store_true", help="if set, tiles are not expected to be XYZ based.")
 
     out = parser.add_argument_group("Outputs")
     out.add_argument("--zoom", type=int, help="zoom level of tiles [required with --geojson or --bbox]")
@@ -41,7 +43,6 @@ def main(args):
         int(args.bbox is not None)
         + int(args.geojson is not None)
         + int(args.dir is not None)
-        + int(args.xyz is not None)
         + int(args.raster is not None)
         + int(args.cover is not None)
         != 1
@@ -114,11 +115,7 @@ def main(args):
 
     if args.dir:
         print("RoboSat.pink - cover from {}".format(args.dir))
-        cover = [tile for tile in tiles_from_dir(args.dir, xyz=False)]
-
-    if args.xyz:
-        print("RoboSat.pink - cover from {}".format(args.xyz))
-        cover = [tile for tile in tiles_from_dir(args.xyz, xyz=True)]
+        cover = [tile for tile in tiles_from_dir(args.dir, xyz=not (args.no_xyz))]
 
     _cover = []
     for tile in tqdm(cover, ascii=True, unit="tile"):
