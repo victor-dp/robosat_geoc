@@ -175,7 +175,7 @@ def main(args):
                 out.write("]}")
             out.close()
 
-    base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
+    base_url = args.web_ui_base_url if args.web_ui_base_url else "."
 
     if args.mode == "side" and not args.no_web_ui:
         template = "compare.html" if not args.web_ui_template else args.web_ui_template

@@ -230,5 +230,5 @@ def main(args):
 
     if tiles and not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template
-        base_url = args.web_ui_base_url if args.web_ui_base_url else "./"
+        base_url = args.web_ui_base_url if args.web_ui_base_url else "."
         web_ui(args.out, base_url, tiles, tiles, ext, template)
