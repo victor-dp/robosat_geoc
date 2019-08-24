@@ -36,6 +36,7 @@ def add_parser(subparser, formatter_class):
     mt.add_argument("--resume", action="store_true", help="resume model training, if set imply to provide a checkpoint")
     mt.add_argument("--checkpoint", type=str, help="path to a model checkpoint. To fine tune or resume a training")
     mt.add_argument("--no_validation", action="store_true", help="No validation, training only")
+    mt.add_argument("--no_training", action="store_true", help="No training, validation only")
 
     out = parser.add_argument_group("Output")
     out.add_argument("out", type=str, help="output directory path to save checkpoint .pth files and logs [required]")
@@ -62,6 +63,9 @@ def main(args):
     if not os.path.isdir(os.path.expanduser(args.dataset)):
         sys.exit("ERROR: dataset {} is not a directory".format(args.dataset))
 
+    if args.no_training and args.no_validation:
+        sys.exit()
+
     log = Logs(os.path.join(args.out, "log"))
 
     if torch.cuda.is_available():
@@ -71,8 +75,27 @@ def main(args):
         torch.backends.cudnn.benchmark = True
     else:
         log.log("RoboSat.pink - training on CPU, with {} workers - (Torch:{})".format(args.workers, torch.__version__))
-        log.log("WARNING: Are you really sure sure about not training on GPU ?")
+        log.log("")
+        log.log("==========================================================")
+        log.log("WARNING: Are you -really- sure about not training on GPU ?")
+        log.log("==========================================================")
+        log.log("")
         device = torch.device("cpu")
+
+    log.log("--- Input tensor from Dataset: {} ---".format(args.dataset))
+    num_channel = 1  # 1-based numerotation
+    for channel in config["channels"]:
+        for band in channel["bands"]:
+            log.log("Channel {}:\t\t {}[band: {}]".format(num_channel, channel["name"], band))
+            num_channel += 1
+
+    log.log("--- Output Classes ---")
+    for c, classe in enumerate(config["classes"]):
+        log.log("Class {}:\t\t {}".format(c, classe["title"]))
+
+    log.log("--- Hyper Parameters ---")
+    for hp in config["model"]:
+        log.log("{}{}".format(hp.ljust(25, " "), config["model"][hp]))
 
     loader = load_module("robosat_pink.loaders.{}".format(config["model"]["loader"].lower()))
     loader_train = getattr(loader, config["model"]["loader"])(
@@ -92,7 +115,9 @@ def main(args):
     if args.checkpoint:
         chkpt = torch.load(os.path.expanduser(args.checkpoint), map_location=device)
         nn.load_state_dict(chkpt["state_dict"])
-        log.log("Using checkpoint: {}".format(args.checkpoint))
+        log.log("--- Using Checkpoint ---")
+        log.log("Path:\t\t {}".format(args.checkpoint))
+        log.log("UUID:\t\t {}".format(chkpt["uuid"]))
 
         if args.resume:
             optimizer.load_state_dict(chkpt["optimizer"])
@@ -107,28 +132,15 @@ def main(args):
     train_loader = DataLoader(loader_train, batch_size=bs, shuffle=True, drop_last=True, num_workers=args.workers)
     val_loader = DataLoader(loader_val, batch_size=bs, shuffle=False, drop_last=True, num_workers=args.workers)
 
-    log.log("--- Input tensor from Dataset: {} ---".format(args.dataset))
-    num_channel = 1  # 1-based numerotation
-    for channel in config["channels"]:
-        for band in channel["bands"]:
-            log.log("Channel {}:\t\t {}[band: {}]".format(num_channel, channel["name"], band))
-            num_channel += 1
-
-    log.log("--- Output Classes ---")
-    for c, classe in enumerate(config["classes"]):
-        log.log("Class {}:\t\t {}".format(c, classe["title"]))
-
-    log.log("--- Hyper Parameters ---")
-    for hp in config["model"]:
-        log.log("{}{}".format(hp.ljust(25, " "), config["model"][hp]))
+    if args.no_training:
+        process(val_loader, config, log, device, nn, criterion, "eval")
+        sys.exit()
 
     for epoch in range(resume, args.epochs):
         UUID = uuid.uuid1()
         log.log("---{}Epoch: {}/{} -- UUID: {}".format(os.linesep, epoch + 1, args.epochs, UUID))
 
         process(train_loader, config, log, device, nn, criterion, "train", optimizer)
-        if not args.no_validation:
-            process(val_loader, config, log, device, nn, criterion, "eval")
 
         try:  # https://github.com/pytorch/pytorch/issues/9176
             nn_doc = nn.module.doc
@@ -155,6 +167,9 @@ def main(args):
         }
         checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}.pth".format(epoch + 1))
         torch.save(states, checkpoint_path)
+
+        if not args.no_validation:
+            process(val_loader, config, log, device, nn, criterion, "eval")
 
 
 def process(loader, config, log, device, nn, criterion, mode, optimizer=None):

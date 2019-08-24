@@ -248,7 +248,7 @@ Web UI:
 usage: rsp train [-h] [--config CONFIG] [--loader LOADER] [--workers WORKERS]
                  [--bs BS] [--lr LR] [--ts TS] [--nn NN] [--loss LOSS]
                  [--da DA] [--dap DAP] [--epochs EPOCHS] [--resume]
-                 [--checkpoint CHECKPOINT] [--no_validation]
+                 [--checkpoint CHECKPOINT] [--no_validation] [--no_training]
                  dataset out
 
 optional arguments:
@@ -274,6 +274,7 @@ Model Training:
  --resume                 resume model training, if set imply to provide a checkpoint
  --checkpoint CHECKPOINT  path to a model checkpoint. To fine tune or resume a training
  --no_validation          No validation, training only
+ --no_training            No training, validation only
 
 Output:
  out                      output directory path to save checkpoint .pth files and logs [required]
