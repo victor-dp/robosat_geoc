@@ -1,5 +1,4 @@
 import os
-import sys
 import csv
 import json
 import math
@@ -39,38 +38,29 @@ def add_parser(subparser, formatter_class):
 
 def main(args):
 
-    if (
+    assert (
         int(args.bbox is not None)
         + int(args.geojson is not None)
         + int(args.dir is not None)
         + int(args.raster is not None)
         + int(args.cover is not None)
-        != 1
-    ):
-        sys.exit("ERROR: One, and only one, input type must be provided, among: --dir, --bbox, --cover or --geojson.")
+        == 1
+    ), "One, and only one, input type must be provided, among: --dir, --bbox, --cover or --geojson."
 
     if args.bbox:
         try:
             w, s, e, n, crs = args.bbox.split(",")
             w, s, e, n = map(float, (w, s, e, n))
         except:
-            try:
-                crs = None
-                w, s, e, n = map(float, args.bbox.split(","))
-            except:
-                sys.exit("ERROR: invalid bbox parameter.")
+            crs = None
+            w, s, e, n = map(float, args.bbox.split(","))
+        assert isinstance(w, float) and isinstance(s, float), "Invalid bbox parameter."
 
     if args.splits:
+        splits = [int(split) for split in args.splits.split("/")]
+        assert len(splits) == len(args.out) and sum(splits) == 100, "Invalid split value or incoherent with out paths."
 
-        try:
-            splits = [int(split) for split in args.splits.split("/")]
-            assert len(splits) == len(args.out)
-            assert sum(splits) == 100
-        except:
-            sys.exit("ERROR: Invalid split value or incoherent with provided out paths.")
-
-    if not args.zoom and (args.geojson or args.bbox or args.raster):
-        sys.exit("ERROR: Zoom parameter is required.")
+    assert not (not args.zoom and (args.geojson or args.bbox or args.raster)), "Zoom parameter is required."
 
     args.out = [os.path.expanduser(out) for out in args.out]
 
@@ -79,10 +69,8 @@ def main(args):
     if args.raster:
         print("RoboSat.pink - cover from {} at zoom {}".format(args.raster, args.zoom))
         with rasterio_open(os.path.expanduser(args.raster)) as r:
-            try:
-                w, s, e, n = transform_bounds(r.crs, "EPSG:4326", *r.bounds)
-            except:
-                sys.exit("ERROR: unable to deal with raster projection")
+            w, s, e, n = transform_bounds(r.crs, "EPSG:4326", *r.bounds)
+            assert isinstance(w, float) and isinstance(s, float), "Unable to deal with raster projection"
 
             cover = [tile for tile in tiles(w, s, e, n, args.zoom)]
 
@@ -91,21 +79,16 @@ def main(args):
         with open(os.path.expanduser(args.geojson)) as f:
             features = json.load(f)
 
-        try:
-            for feature in tqdm(features["features"], ascii=True, unit="feature"):
-                cover.extend(map(tuple, burntiles.burn([feature], args.zoom).tolist()))
-        except:
-            sys.exit("ERROR: invalid or unsupported GeoJSON.")
+        for feature in tqdm(features["features"], ascii=True, unit="feature"):
+            cover.extend(map(tuple, burntiles.burn([feature], args.zoom).tolist()))
 
         cover = list(set(cover))  # tiles can overlap for multiple features; unique tile ids
 
     if args.bbox:
         print("RoboSat.pink - cover from {} at zoom {}".format(args.bbox, args.zoom))
         if crs:
-            try:
-                w, s, e, n = transform_bounds(crs, "EPSG:4326", w, s, e, n)
-            except:
-                sys.exit("ERROR: unable to deal with raster projection")
+            w, s, e, n = transform_bounds(crs, "EPSG:4326", w, s, e, n)
+            assert isinstance(w, float) and isinstance(s, float), "Unable to deal with raster projection"
 
         cover = [tile for tile in tiles(w, s, e, n, args.zoom)]
 

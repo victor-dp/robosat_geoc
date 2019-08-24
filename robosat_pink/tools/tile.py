@@ -1,5 +1,4 @@
 import os
-import sys
 import math
 from tqdm import tqdm
 import concurrent.futures as futures
@@ -166,8 +165,7 @@ def main(args):
                 if args.label:
                     ret = tile_label_to_file(out, mercantile.Tile(x=x, y=y, z=z), palette, image)
 
-                if not ret:
-                    sys.exit("Error: Unable to write tile {} from raster {}.".format(str(tile), raster))
+                assert ret, "Unable to write tile {} from raster {}.".format(str(tile), raster)
 
                 if len(tiles_map[tile_key]) == 1:
                     progress.update()
@@ -215,8 +213,7 @@ def main(args):
             if args.label:
                 ret = tile_label_to_file(args.out, tile, palette, image)
 
-            if not ret:
-                sys.exit("Error: Unable to write tile {}.".format(str(tile_key)))
+            assert ret, "Unable to write tile {} from raster {}.".format(str(tile_key))
 
             progress.update()
             return tile

@@ -76,19 +76,15 @@ def geojson_tile_burn(tile, features, srid, ts, burn_value=1):
 
 def main(args):
 
-    if args.pg:
-        if not args.sql:
-            sys.exit("ERROR: With PostgreSQL db, --sql must be provided")
-
-    if (args.sql and args.geojson) or (args.sql and not args.pg):
-        sys.exit("ERROR: You can use either --pg or --geojson inputs, but only one at once.")
+    assert not (args.sql and args.geojson), "You can only use at once --pg OR --geojson."
+    assert not (args.pg and not args.sql), "With PostgreSQL --pg, --sql must also be provided"
 
     config = load_config(args.config)
     check_classes(config)
 
     palette = make_palette([classe["color"] for classe in config["classes"]], complementary=True)
     index = [config["classes"].index(classe) for classe in config["classes"] if classe["title"] == args.type]
-    assert index, "ERROR: requested type is not contains in your config file classes."
+    assert index, "Requested type is not contains in your config file classes."
     burn_value = int(math.pow(2, index[0] - 1))  # 8bits One Hot Encoding
     assert 0 <= burn_value <= 128
 
