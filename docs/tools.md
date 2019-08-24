@@ -249,6 +249,7 @@ usage: rsp train [-h] [--config CONFIG] [--loader LOADER] [--workers WORKERS]
                  [--bs BS] [--lr LR] [--ts TS] [--nn NN] [--loss LOSS]
                  [--da DA] [--dap DAP] [--epochs EPOCHS] [--resume]
                  [--checkpoint CHECKPOINT] [--no_validation] [--no_training]
+                 [--saving SAVING]
                  dataset out
 
 optional arguments:
@@ -270,13 +271,14 @@ Hyper Parameters [if set override config file value]:
  --dap DAP                data augmentation probability [default: 1.0]
 
 Model Training:
- --epochs EPOCHS          number of epochs to train [default 10]
+ --epochs EPOCHS          number of epochs to train [default: 10]
  --resume                 resume model training, if set imply to provide a checkpoint
  --checkpoint CHECKPOINT  path to a model checkpoint. To fine tune or resume a training
  --no_validation          No validation, training only
  --no_training            No training, validation only
 
 Output:
+ --saving SAVING          number of epochs beetwen checkpoint .pth saving [default: 1]
  out                      output directory path to save checkpoint .pth files and logs [required]
 ```
 ## rsp vectorize

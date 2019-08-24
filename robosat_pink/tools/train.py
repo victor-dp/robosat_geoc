@@ -32,13 +32,14 @@ def add_parser(subparser, formatter_class):
     hp.add_argument("--dap", type=float, default=1.0, help="data augmentation probability [default: 1.0]")
 
     mt = parser.add_argument_group("Model Training")
-    mt.add_argument("--epochs", type=int, default=10, help="number of epochs to train [default 10]")
+    mt.add_argument("--epochs", type=int, default=10, help="number of epochs to train [default: 10]")
     mt.add_argument("--resume", action="store_true", help="resume model training, if set imply to provide a checkpoint")
     mt.add_argument("--checkpoint", type=str, help="path to a model checkpoint. To fine tune or resume a training")
     mt.add_argument("--no_validation", action="store_true", help="No validation, training only")
     mt.add_argument("--no_training", action="store_true", help="No training, validation only")
 
     out = parser.add_argument_group("Output")
+    out.add_argument("--saving", type=int, default=1, help="number of epochs beetwen checkpoint .pth saving [default: 1]")
     out.add_argument("out", type=str, help="output directory path to save checkpoint .pth files and logs [required]")
 
     parser.set_defaults(func=main)
@@ -166,7 +167,9 @@ def main(args):
             "loader": config["model"]["loader"],
         }
         checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}.pth".format(epoch + 1))
-        torch.save(states, checkpoint_path)
+        if (epoch + 1) == args.epochs or not (epoch % args.saving):
+            log.log("[Saving checkpoint]")
+            torch.save(states, checkpoint_path)
 
         if not args.no_validation:
             process(val_loader, config, log, device, nn, criterion, "eval")
