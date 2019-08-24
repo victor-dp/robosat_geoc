@@ -45,7 +45,7 @@ echo '
   bs = 4
   lr = 0.000025
   metrics = ["iou"]
-' > ~/.rsp_config
+' > ds/config.toml
 ```
 
 Download imagery using <a href="https://www.opengeospatial.org/standards/wms">WMS</a>:
@@ -75,7 +75,7 @@ Prepare DataSet
 To transform the vector roofprints to raster labels:
 
 ```bash
-rsp rasterize --type Building --geojson ds/lyon_roofprint.json --cover ds/cover ds/labels
+rsp rasterize --config ds/config.toml --type Building --geojson ds/lyon_roofprint.json --cover ds/cover ds/labels
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/labels/"><img src="img/from_opendata_to_opendataset/labels.png" /></a>
@@ -98,7 +98,7 @@ Train
 Now to launch a first model training:
 
 ```bash
-rsp train --epochs 10 ds ds/model
+rsp train --config ds/config.toml --epochs 10 ds ds/model
 ```
 
 After ten epochs only, the building IoU metric on validation dataset is about **0.80**. 
@@ -113,7 +113,7 @@ Predictive masks
 To create predictive masks from our first model, on the entire coverage:
 
 ```bash
-rsp predict --checkpoint ds/model/checkpoint-00010.pth ds ds/masks
+rsp predict --config ds/config.toml --checkpoint ds/model/checkpoint-00010.pth ds ds/masks
 ```
 
 <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/masks/"><img src="img/from_opendata_to_opendataset/masks.png" /></a>
@@ -187,7 +187,7 @@ Train
 Having a cleaner training and validation dataset, we can launch a second and longer training:
 
 ```bash
-rsp train --epochs 100 ds ds/model_clean
+rsp train --config ds/config.toml --epochs 100 ds ds/model_clean
 ```
 
 Building IoU metrics on validation dataset:
