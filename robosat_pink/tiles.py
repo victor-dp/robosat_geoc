@@ -109,15 +109,24 @@ def tile_bbox(tile, mercator=False):
         assert False, "Unable to open tile"
 
 
-def tiles_to_geojson(tiles):
+def tiles_to_geojson(tiles, union=True):
     """Convert tiles to their footprint GeoJSON."""
 
     first = True
     geojson = '{"type":"FeatureCollection","features":['
-    tiles = [str(tile.z) + "-" + str(tile.x) + "-" + str(tile.y) + "\n" for tile in tiles]
-    for feature in supermercado.uniontiles.union(tiles, True):
-        geojson += json.dumps(feature) if first else "," + json.dumps(feature)
-        first = False
+
+    if union:  # smaller tiles union geometries (but losing properties)
+        tiles = [str(tile.z) + "-" + str(tile.x) + "-" + str(tile.y) + "\n" for tile in tiles]
+        for feature in supermercado.uniontiles.union(tiles, True):
+            geojson += json.dumps(feature) if first else "," + json.dumps(feature)
+            first = False
+    else:  # keep each tile geometry and properties (but fat)
+        for tile in tiles:
+            prop = '"properties":{{"x":{},"y":{},"z":{}}}'.format(tile.x, tile.y, tile.z)
+            geom = '"geometry":{}'.format(json.dumps(mercantile.feature(tile, precision=6)["geometry"]))
+            geojson += '{}{{"type":"Feature",{},{}}}'.format("," if not first else "", geom, prop)
+            first = False
+
     geojson += "]}"
     return geojson
 
