@@ -43,7 +43,11 @@ def main(args):
     for tile in tqdm(tiles, ascii=True, unit="tiles"):
 
         if isinstance(tile, mercantile.Tile):
-            _, src = tile_from_xyz(args.dir, tile.x, tile.y, tile.z)
+            src_tile = tile_from_xyz(args.dir, tile.x, tile.y, tile.z)
+            if not src_tile:
+                print("WARNING: skipping tile {}".format(tile))
+                continue
+            _, src = src_tile
             dst_dir = os.path.join(args.out, str(tile.z), str(tile.x))
         else:
             src = tile
