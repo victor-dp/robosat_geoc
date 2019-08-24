@@ -61,9 +61,7 @@ def main(args):
     check_channels(config)
     check_model(config)
 
-    if not os.path.isdir(os.path.expanduser(args.dataset)):
-        sys.exit("ERROR: dataset {} is not a directory".format(args.dataset))
-
+    assert os.path.isdir(os.path.expanduser(args.dataset)), "Dataset is not a directory"
     if args.no_training and args.no_validation:
         sys.exit()
 
@@ -123,8 +121,7 @@ def main(args):
         if args.resume:
             optimizer.load_state_dict(chkpt["optimizer"])
             resume = chkpt["epoch"]
-            if resume >= args.epochs:
-                sys.exit("ERROR: Epoch {} already reached by the given checkpoint".format(config["model"]["epochs"]))
+            assert resume < args.epochs, "Epoch asked, already reached by the given checkpoint"
 
     loss_module = load_module("robosat_pink.losses.{}".format(config["model"]["loss"].lower()))
     criterion = getattr(loss_module, config["model"]["loss"])().to(device)
@@ -137,9 +134,9 @@ def main(args):
         process(val_loader, config, log, device, nn, criterion, "eval")
         sys.exit()
 
-    for epoch in range(resume, args.epochs):
+    for epoch in range(resume + 1, args.epochs + 1):  # 1-N based
         UUID = uuid.uuid1()
-        log.log("---{}Epoch: {}/{} -- UUID: {}".format(os.linesep, epoch + 1, args.epochs, UUID))
+        log.log("---{}Epoch: {}/{} -- UUID: {}".format(os.linesep, epoch, args.epochs, UUID))
 
         process(train_loader, config, log, device, nn, criterion, "train", optimizer)
 
@@ -161,13 +158,13 @@ def main(args):
             "shape_in": loader_train.shape_in,
             "shape_out": loader_train.shape_out,
             "state_dict": nn.state_dict(),
-            "epoch": epoch + 1,
+            "epoch": epoch,
             "nn": config["model"]["nn"],
             "optimizer": optimizer.state_dict(),
             "loader": config["model"]["loader"],
         }
-        checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}.pth".format(epoch + 1))
-        if (epoch + 1) == args.epochs or not (epoch % args.saving):
+        checkpoint_path = os.path.join(args.out, "checkpoint-{:05d}.pth".format(epoch))
+        if epoch == args.epochs or not (epoch % args.saving):
             log.log("[Saving checkpoint]")
             torch.save(states, checkpoint_path)
 
