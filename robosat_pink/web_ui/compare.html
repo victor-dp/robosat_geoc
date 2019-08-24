@@ -38,7 +38,7 @@ function load_json(url, callback)
   x.send(null); }
 
 function display(xyz, is_help)
-{ document.getElementById("tile").innerHTML = "<img id='image' src='{{base_url}}" + xyz.path() + ".{{ext}}' />";
+{ document.getElementById("tile").innerHTML = "<img id='image' src='{{base_url}}" + "/" + xyz.path() + ".{{ext}}' />";
   if (xyz.is_sel()) { document.getElementById("image").style.border = "3px solid #cc0099" }
                else { document.getElementById("image").style.border = "3px solid #ffffff" }; clip(false); help(is_help) }
 
