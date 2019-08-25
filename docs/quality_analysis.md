@@ -57,6 +57,7 @@ wget -nc -nv --show-progress -O ds/grid_058.tif https://oin-hotosm.s3.amazonaws.
 rsp tile --zoom 19 --nodata_threshold 10 ds/*tif ds/images
 rsp cover --dir ds/images ds/images/cover
 ```
+<a href="http://www.datapink.tools/rsp/quality_analysis/ds/images/"><img src="img/quality_analysis/images.png" /></a>
 
 
 Retrieve and tile labels:
@@ -98,6 +99,7 @@ sudo su postgres -c 'psql -c "UPDATE building SET geom=ST_MakeValid(geom) WHERE 
 # Generate Labels
 rsp rasterize --pg "user=rsp host=localhost password=pass dbname=tanzania" --sql "SELECT ST_Buffer(geom, -0.25) FROM building WHERE condition IN ('Complete', 'Incomplete') AND ST_Intersects(TILE_GEOM, geom)" --type Building --config tanzania.toml --cover ds/images/cover ds/labels
 ```
+<a href="http://www.datapink.tools/rsp/quality_analysis/ds/labels/"><img src="img/quality_analysis/labels.png" /></a>
 
 
 
@@ -119,19 +121,29 @@ rsp subset --dir ds/labels --cover ds/validation/cover ds/validation/labels
 ```
 
 
-Train, and check model and dataset accuracy
--------------------------------------------
+Train, and predict:
+------------------
 ```bash
 rsp train --config tanzania.toml --epochs 10 --bs 4 --lr 0.000025 ds ds/pth
 
 rsp predict --config tanzania.toml --checkpoint ds/pth/checkpoint-00010.pth ds ds/masks
+```
+<a href="http://www.datapink.tools/rsp/quality_analysis/ds/masks/"><img src="img/quality_analysis/masks.png" /></a>
+
+
+Compare predicted masks against labels:
+---------------------------------------
+```bash
 rsp compare --images ds/images ds/masks ds/labels --mode stack ds/compare
 rsp compare --mode list --geojson --labels ds/labels --masks ds/masks --maximum_qod 80 ds/compare/tiles.json
 rsp compare --mode side --images ds/images ds/compare --labels ds/labels --masks ds/masks --maximum_qod 80 ds/compare_side
 ```
+<a href="http://www.datapink.tools/rsp/quality_analysis/ds/compare/"><img src="img/quality_analysis/compare.png" /></a>
+<a href="http://www.datapink.tools/rsp/quality_analysis/ds/compare_side/"><img src="img/quality_analysis/compare_side.png" /></a>
 
 
-# Retriveve and tile Predict Imagery
+Retriveve and tile Predict Imagery:
+----------------------------------
 ```bash
 mkdir predict
 wget -nc -nv --show-progress -O predict/grid_034.tif https://oin-hotosm.s3.amazonaws.com/5ae242fd0b093000130afd32/0/5ae242fd0b093000130afd33.tif
@@ -148,9 +160,11 @@ wget -nc -nv --show-progress -O predict/grid_066.tif https://oin-hotosm.s3.amazo
 rsp tile --zoom 19 --nodata_threshold 10 predict/*tif predict/images
 rsp cover --dir predict/images predict/images/cover
 ```
+<a href="http://www.datapink.tools/rsp/quality_analysis/predict/images/"><img src="img/quality_analysis/predict_images.png" /></a>
 
 
-# Retrieve OSM data
+Retrieve OSM data:
+------------------
 ```bash
 mkdir osm
 wget -nc -nv --show-progress -O osm/tanzania.pbf https://download.geofabrik.de/africa/tanzania-latest.osm.pbf
@@ -158,18 +172,24 @@ osmium extract --bbox 39.017258,-5.708914,39.765701,-6.588899 -o osm/zanzibar.pb
 rsp extract --type Building osm/zanzibar.pbf osm/buildings.json
 rsp rasterize --config tanzania.toml --geojson osm/buildings.json --cover predict/images/cover --type Building predict/osm
 ```
+<a href="http://www.datapink.tools/rsp/quality_analysis/predict/osm/"><img src="img/quality_analysis/osm.png" /></a>
 
-# Predict and compare to OSM
+
+Predict and compare against OSM:
+--------------------------------
 ```
-rsp predict --config tanzania.toml --checkpoint ds/pth/checkpoint-00010.pth predict predict/masks
+rsp predict --confggig tanzania.toml --checkpoint ds/pth/checkpoint-00010.pth predict predict/masks
 
 rsp compare --images predict/images predict/osm predict/masks --mode stack predict/compare
 rsp compare --mode list --geojson --labels predict/osm --masks predict/masks --maximum_qod 80 predict/compare/tiles.json
 rsp compare --mode side --images predict/images predict/compare --labels predict/osm --masks predict/masks --maximum_qod 80 predict/compare_side
 ```
+<a href="http://www.datapink.tools/rsp/quality_analysis/predict/compare/"><img src="img/quality_analysis/predict_compare.png" /></a>
+<a href="http://www.datapink.tools/rsp/quality_analysis/predict/compare_side/"><img src="img/quality_analysis/predict_compare_side.png" /></a>
 
 
-# Vectorize prediction masks
+Vectorize prediction masks:
+---------------------------
 ```bash
 rsp vectorize --config tanzania.toml --type Building predict/masks building.json
 ogr2ogr -f "PostgreSQL" PG:"user=rsp host=localhost dbname=tanzania password=pass" building.json -nlt PROMOTE_TO_MULTI -nln predict_building -lco GEOMETRY_NAME=geom
