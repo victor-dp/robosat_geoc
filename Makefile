@@ -131,10 +131,13 @@ check_doc:
 
 # Check rsp commands embeded in Tutorials
 check_tuto:
-	@echo "Checking Tutorial OpenData to OpenDataset:"
-	@echo "NOTICE: will take quite a while"
+	@mkdir tuto
 	@echo "==================================================================================="
-	@rm -rf ds && sed -n -e '/```bash/,/```/ p' docs/from_opendata_to_opendataset.md | sed -e '/```/d' > .CHECK && sh .CHECK
+	@echo "Checking Tutorial Quality Analysis:"
+	@cd tuto ; mkdir qa && sed -n -e '/```bash/,/```/ p' ../docs/quality_analysis.md | sed -e '/```/d' > qa/.CHECK && cd qa && sh .CHECK
+	@echo "==================================================================================="
+	@echo "Checking Tutorial OpenData to OpenDataset:"
+	@cd tuto ; mkdir gl && sed -n -e '/```bash/,/```/ p' docs/from_opendata_to_opendataset.md | sed -e '/```/d' > gl/.CHECK && cd gl && sh .CHECK
 	@echo "==================================================================================="
 
 

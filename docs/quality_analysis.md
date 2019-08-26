@@ -177,7 +177,7 @@ rsp rasterize --config tanzania.toml --geojson osm/buildings.json --cover predic
 
 Predict and compare against OSM:
 --------------------------------
-```
+```bash
 rsp predict --config tanzania.toml --checkpoint ds/pth/checkpoint-00010.pth predict predict/masks
 
 rsp compare --images predict/images predict/osm predict/masks --mode stack predict/compare
