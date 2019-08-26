@@ -120,7 +120,7 @@ class Miou(torch.nn.Module):
         return mIoU
 ```
 
-Callable with `rsp train --loss miou`
+Callable with `rsp train --loss Miou`
 
 </details>
 
@@ -131,9 +131,11 @@ To allows `rsp train` and `rsp predict` to use a model of your own:
 - If not alredy done, retrieve RoboSat.pink code source, and proceed to dev install: `make install`.
 - Create in `robosat_pink/models` directory a `yourmodelname.py` file.
 - This file must contains at least a `Model_name` class, with `__init__` and `forward` methods.
+- `shape_in` and `shape_out` as obvious parameters
+- Additional config information is restrain to train phase only (by design, to ensure ability to export model).
 - Then, to use it, with `rsp train` and `rsp predict` either:
-  - update config file value: `["model"]["name"]`
-  - use `--model` parameter
+  - update config file value: `["model"]["nn"]`
+  - use `--nn` parameter
 
 <details><summary>Click me, for a UNet model example</summary>
 
@@ -143,14 +145,14 @@ import torch.nn as nn
 
 
 class Unet(nn.Module):
-    """UNet - cf https://arxiv.org/abs/1505.04597"""
 
-    def __init__(self, config):
+    def __init__(self, shape_in, shape_out, train_config=None):
 
-        num_classes = len(config["classes"])
-        num_channels = 0
-        for channel in config["channels"]:
-            num_channels += len(channel["bands"])
+        self.doc = """UNet - cf https://arxiv.org/abs/1505.04597"""
+        self.version = 1
+
+        num_classes = shape_out[0]
+        num_channels = shape_in[0]
         assert num_channels == 3, "This basic UNet example is RGB only."
 
         super().__init__()
@@ -227,6 +229,6 @@ def Upsample(num_in):
     return nn.ConvTranspose2d(num_in, num_in // 2, kernel_size=2, stride=2)
 ```
 
-Callable with `rsp train --model unet`
+Callable with `rsp train --nn Unet`
 
 </details>
