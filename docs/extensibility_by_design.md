@@ -156,6 +156,40 @@ Callable with `rsp train --loss Miou`
 </details>
 
 
+## Use an alternate Data Augmentation setting ##
+
+To allows `rsp train` to use a data augmentation setting of your own:
+- If not alredy done, retrieve RoboSat.pink code source, and proceed to dev install: `make install`.
+- Create in `robosat_pink/da` directory, a yourda.py file.
+- Albumentations syntax documentation:  <a href="https://github.com/albu/albumentations/blob/master/docs/examples.rst">https://github.com/albu/albumentations/blob/master/docs/examples.rst</a>
+- Then, to use it with `rsp train`, either:
+  - update config file value: `["model"]["da"]`
+  - use `--da` parameter
+
+<details><summary>Click me, for a Minimal DataAugmentation example</summary>
+
+```
+from albumentations import Compose, Flip, Transpose
+  
+def transform(config, image, mask):
+
+    try:
+        p = config["model"]["dap"]
+    except:
+        p = 1
+
+    assert 0 <= p <= 1
+
+    return Compose(
+        [
+            Flip(), # implicit p=0.5
+            Transpose(p=0.3)
+        ]
+    )(image=image, mask=mask, p=p)
+```
+Callable with `rsp train --da Yourda`
+</details>
+
 
 ## Use an alternate Neural Network Model ##
 To allows `rsp train` and `rsp predict` to use a model of your own:
