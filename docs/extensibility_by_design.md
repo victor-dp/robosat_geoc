@@ -84,6 +84,36 @@ Callable with `rsp extract --type Park`
 </details>
 
 
+## Use an alternate Metric ##
+
+To allows `rsp train` to use a metric function of your own:
+- If not alredy done, retrieve RoboSat.pink code source, and proceed to dev install: `make install`.
+- Create in `robosat_pink/metrics` directory a yourmetricname.py file.
+- This file must contains at least a class `get` function , with `get(label, predicted, config=None)` protototype, and returning a [0-1] float.
+- Take note, that both label vars and predicted are located on GPU device (moving them back by any computation on CPU, would affect training performances).
+- Then, to use it with `rsp train`, update config file value: `["model"]["metrics"]`, and add it's name in the list (in lowercase).
+
+<details><summary>Click me, for a simple Precision metric example</summary>
+
+```
+from robosat_pink.metrics.core import confusion
+  
+
+def get(label, predicted, config=None):
+
+    tn, fn, fp, tp = confusion(label, predicted)
+
+    try:
+        precision = tp / (tp + fp)
+    except ZeroDivisionError:
+        precision = 0.0
+
+    return precision
+</details>
+
+
+
+
 ## Use an alternate Loss function ##
 
 To allows `rsp train` to use a loss function of your own:
