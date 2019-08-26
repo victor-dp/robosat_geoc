@@ -191,6 +191,6 @@ rsp compare --mode side --images predict/images predict/compare --labels predict
 Vectorize prediction masks:
 ---------------------------
 ```bash
-rsp vectorize --config tanzania.toml --type Building predict/masks building.json
+rsp vectorize --config tanzania.toml --type Building predict/masks predict/building.json
 ogr2ogr -f "PostgreSQL" PG:"user=rsp host=localhost dbname=tanzania password=pass" building.json -nlt PROMOTE_TO_MULTI -nln predict_building -lco GEOMETRY_NAME=geom
 ```
