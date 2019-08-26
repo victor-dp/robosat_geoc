@@ -37,6 +37,7 @@ Documentation:
 
 ### Tutorials:
 - <a href="https://github.com/datapink/robosat.pink/tree/master/docs/from_opendata_to_opendataset.md">How to use plain OpenData to create a decent training OpenDataSet</a>
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/extensibility_by_design.md">How to extend RoboSat.pink features, and use it as a Framework</a>
 
 ### Config file:
 - <a href="https://github.com/datapink/robosat.pink/tree/master/docs/config.md">RoboSat.pink configuration file</a>
