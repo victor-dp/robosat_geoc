@@ -109,6 +109,7 @@ def get(label, predicted, config=None):
         precision = 0.0
 
     return precision
+```
 </details>
 
 
