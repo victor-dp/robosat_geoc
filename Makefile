@@ -131,13 +131,13 @@ check_doc:
 
 # Check rsp commands embeded in Tutorials
 check_tuto:
-	@mkdir tuto
+	@mkdir tuto 
 	@echo "==================================================================================="
-	@echo "Checking Tutorial Quality Analysis:"
-	@cd tuto ; mkdir qa && sed -n -e '/```bash/,/```/ p' ../docs/quality_analysis.md | sed -e '/```/d' > qa/.CHECK && cd qa && sh .CHECK
+	@echo "Checking 101"
+	@cd tuto && mkdir 101 && sed -n -e '/```bash/,/```/ p' ../docs/101.md | sed -e '/```/d' > 101/.CHECK && cd 101 && sh .CHECK && cd ..
 	@echo "==================================================================================="
 	@echo "Checking Tutorial OpenData to OpenDataset:"
-	@cd tuto ; mkdir gl && sed -n -e '/```bash/,/```/ p' docs/from_opendata_to_opendataset.md | sed -e '/```/d' > gl/.CHECK && cd gl && sh .CHECK
+	@cd tuto && mkdir gl && sed -n -e '/```bash/,/```/ p' docs/from_opendata_to_opendataset.md | sed -e '/```/d' > gl/.CHECK && cd gl && sh .CHECK && cd ..
 	@echo "==================================================================================="
 
 
