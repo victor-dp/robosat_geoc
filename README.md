@@ -61,6 +61,7 @@ Documentation:
 ### Presentations slides:
   - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">@PyParis 2018</a>
   - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">@FOSDEM 2019</a>
+  - <a href="http://www.datapink.com/presentations/2019-foss4g-cv.pdf">@FOSS4G 2019</a>
 
 
 Installs:
