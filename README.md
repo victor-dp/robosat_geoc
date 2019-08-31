@@ -22,13 +22,16 @@ Main Features:
 --------------
 - Provides several command line tools, you can combine together to build your own workflow
 - Follows geospatial standards to ease interoperability and data preparation 
-- Build-in cutting edge Computer Vision model and loss implementations (and allows to replace by your owns)
-- Support either RGB or multibands imagery (as multispectral or hyperspectral)
-- Allows Data Fusion (from imagery or rasterized vectors)
-- Web-UI tools to easily display, hilight or select results
+- Build-in cutting edge Computer Vision model, Data Augmentation and Loss implementations (and allows to replace by your owns)
+- Support either RGB and multibands imagery, and allows Data Fusion 
+- Web-UI tools to easily display, hilight or select results (and allow to use your own templates)
 - High performances
+- Eeasily extensible by design
 
 
+
+
+<img alt="Draw me RoboSat.pink" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/draw_me_robosat_pink.png" />
 
 
  
@@ -59,14 +62,13 @@ Documentation:
 - <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-info">`rsp info`</a> Print RoboSat.pink version informations
 
 ### Presentations slides:
-  - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">@PyParis 2018</a>
-  - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">@FOSDEM 2019</a>
   - <a href="http://www.datapink.com/presentations/2019-foss4g-cv.pdf">@FOSS4G 2019</a>
+  - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">@FOSDEM 2019</a>
+  - <a href="http://www.datapink.com/presentations/2018-pyparis.pdf">@PyParis 2018</a>
 
 
 
-### Draw me RoboSat.pink
-<img alt="Draw me RoboSat.pink" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/draw_me_robosat_pink.png" />
+
 
 
 Installs:
@@ -152,6 +154,13 @@ OpenStreetMap Data to Get Faster Better Semantic Maps</a>
 - <a href="https://arxiv.org/abs/1809.06839">Albumentations: fast and flexible image augmentations</a>
 
 
+
+
+
+
+
+
+
 Contributions and Services:
 ---------------------------
 
@@ -166,6 +175,27 @@ Contributions and Services:
 - Expertise and training on RoboSat.pink are also provided by <a href="http://datapink.com">DataPink</a>.
 
 - And if you want to support the whole project, because it means for your own business, funding is also welcome.
+
+
+
+
+Request for funding:
+--------------------
+
+- Increase (again) prediction accuracy :
+  - to extract linear features
+  - on low resolution imagery
+  - even with few labels
+  - feature extraction when they are (really) close
+  - with multibands and Data Fusion
+
+- Add support for :
+ 	- PointCloud data support
+	 - Time Series Imagery
+  
+- Improve (again) performances
+
+
 
 
 Authors:
