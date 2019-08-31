@@ -126,8 +126,9 @@ sudo sh NVIDIA-Linux-x86_64-430.40.run -a -q --ui=none
 Architecture:
 ------------
 
-<img alt="Stacks" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/stacks.png" />
 RoboSat.pink use cherry-picked Open Source libs among Deep Learning, Computer Vision and GIS stacks.
+
+<img alt="Stacks" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/stacks.png" />
 
 
 
@@ -179,8 +180,7 @@ Contributions and Services:
 
 
 
-Request for funding:
---------------------
+### Requests for funding:
 
 - Increase (again) prediction accuracy :
   - to extract linear features
