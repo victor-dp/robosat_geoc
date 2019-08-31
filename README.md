@@ -182,15 +182,15 @@ Contributions and Services:
 ### Requests for funding:
 
 - Increase (again) prediction accuracy :
-  - to extract linear features
   - on low resolution imagery
   - even with few labels
   - feature extraction when they are (really) close
   - with multibands and Data Fusion
 
 - Add support for :
- 	- PointCloud data support
-	 - Time Series Imagery
+  - Linear features extraction
+  - PointCloud data support
+  - Time Series Imagery
   
 - Improve (again) performances
 
