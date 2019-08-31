@@ -64,6 +64,11 @@ Documentation:
   - <a href="http://www.datapink.com/presentations/2019-foss4g-cv.pdf">@FOSS4G 2019</a>
 
 
+
+### Draw me RoboSat.pink
+<img alt="Draw me RoboSat.pink" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/draw_me_robosat_pink.png" />
+
+
 Installs:
 --------
 
@@ -112,39 +117,6 @@ sudo sh NVIDIA-Linux-x86_64-430.40.run -a -q --ui=none
 
 
 
-
-
-DataSet:
--------
-
-- Training and validation datasets have to be tiled, using <a href="https://en.wikipedia.org/wiki/Tiled_web_map">XYZ tiles format</a>.
-- A Dataset directory, so containing XYZ tiles, can be split as:
-```
-dataset
-├── training
-│   ├── images
-│   └── labels
-└── validation
-    ├── images
-    └── labels
-```
-- Tiles images formats could be any able to be read by GDAL.
-- Tiles labels are expected to be PNG with single band.
-- Tools producing XYZ tiles directory, generate also a web map client, for visual inspection.
-
-
-
-Data Preparation:
------------------
-
-
-Several ways to create your own training dataset, upon input data type:
-
-
-
-<img alt="Data Preparation" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/data_preparation.png" />
-
-NOTA: several inputs connected to a single arrow point means a logical OR (e.g. WMS or XYZ or TMS).
 
 
 
