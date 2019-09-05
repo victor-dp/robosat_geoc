@@ -6,7 +6,7 @@ import mercantile
 
 from PIL import Image
 
-from robosat_pink.tools.rasterize import geojson_tile_burn, geojson_reproject
+from robosat_pink.geojson import geojson_tile_burn, geojson_reproject
 
 
 def get_parking():
