@@ -2,14 +2,15 @@ import os
 import csv
 import json
 import math
+import collections
 
 from tqdm import tqdm
 from random import shuffle
 from mercantile import tiles, xy_bounds
-from supermercado import burntiles
 from rasterio import open as rasterio_open
 from rasterio.warp import transform_bounds
 
+from robosat_pink.geojson import geojson_srid, geojson_parse_feature
 from robosat_pink.tiles import tiles_from_dir, tiles_from_csv
 
 
@@ -77,12 +78,14 @@ def main(args):
     if args.geojson:
         print("RoboSat.pink - cover from {} at zoom {}".format(args.geojson, args.zoom))
         with open(os.path.expanduser(args.geojson)) as f:
-            features = json.load(f)
+            feature_collection = json.load(f)
+            srid = geojson_srid(feature_collection)
+            feature_map = collections.defaultdict(list)
 
-        for feature in tqdm(features["features"], ascii=True, unit="feature"):
-            cover.extend(map(tuple, burntiles.burn([feature], args.zoom).tolist()))
+            for i, feature in enumerate(tqdm(feature_collection["features"], ascii=True, unit="feature")):
+                feature_map = geojson_parse_feature(args.zoom, srid, feature_map, feature)
 
-        cover = list(set(cover))  # tiles can overlap for multiple features; unique tile ids
+        cover = feature_map.keys()
 
     if args.bbox:
         print("RoboSat.pink - cover from {} at zoom {}".format(args.bbox, args.zoom))
