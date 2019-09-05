@@ -188,9 +188,11 @@ Contributions and Services:
   - with multibands and Data Fusion
 
 - Add support for :
+  - MultiClass classification
   - Linear features extraction
   - PointCloud data support
   - Time Series Imagery
+  - StreetView Imagery
   
 - Improve (again) performances
 
