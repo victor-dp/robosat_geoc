@@ -199,7 +199,7 @@ def main(args):
                     split = split.reshape((args.ts, args.ts, 1))  # H,W -> H,W,C
 
                 assert image.shape == split.shape
-                image[:, :, :] += split[:, :, :]
+                image[np.where(image == 0)] += split[np.where(image == 0)]
 
             if not args.label and is_nodata(image, threshold=args.nodata_threshold):
                 progress.update()
