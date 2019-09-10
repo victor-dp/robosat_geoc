@@ -60,16 +60,17 @@ def main(args):
         if not os.path.isdir(dst_dir):
             os.makedirs(dst_dir, exist_ok=True)
 
-        elif args.delete:
+        if args.delete:
             os.remove(src)
-
+            assert not os.path.lexists(src)
         elif args.copy:
             shutil.copyfile(src, dst)
-
+            assert os.path.exists(dst)
         else:
             if os.path.islink(dst):
                 os.remove(dst)
             os.symlink(os.path.relpath(src, os.path.dirname(dst)), dst)
+            assert os.path.islink(dst)
 
     if tiles and not args.no_web_ui and not args.delete:
         assert len(ext) == 1, "ERROR: Mixed extensions, can't generate Web UI"
