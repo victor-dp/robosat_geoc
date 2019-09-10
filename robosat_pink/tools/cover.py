@@ -126,7 +126,7 @@ def main(args):
         s = 0
         covers = []
         for e in cover_splits:
-            covers.append(cover[s : s + e - 1])
+            covers.append(cover[s : s + e])
             s += e
     else:
         covers = [cover]
