@@ -59,7 +59,7 @@ def main(args):
 
     if args.splits:
         splits = [int(split) for split in args.splits.split("/")]
-        assert len(splits) == len(args.out) and sum(splits) == 100, "Invalid split value or incoherent with out paths."
+        assert len(splits) == len(args.out) and 0 < sum(splits) <= 100, "Invalid split value or incoherent with out paths."
 
     assert not (not args.zoom and (args.geojson or args.bbox or args.raster)), "Zoom parameter is required."
 
@@ -120,10 +120,12 @@ def main(args):
 
     if args.splits:
         shuffle(cover)  # in-place
-        splits = [math.floor(len(cover) * split / 100) for i, split in enumerate(splits, 1)]
+        cover_splits = [math.floor(len(cover) * split / 100) for i, split in enumerate(splits, 1)]
+        if len(splits) > 1 and sum(map(int, splits)) == 100 and len(cover) > sum(map(int, splits)):
+            cover_splits[0] = len(cover) - sum(map(int, cover_splits[1:])) # no tile waste
         s = 0
         covers = []
-        for e in splits:
+        for e in cover_splits:
             covers.append(cover[s : s + e - 1])
             s += e
     else:
