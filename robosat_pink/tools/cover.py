@@ -122,7 +122,7 @@ def main(args):
         shuffle(cover)  # in-place
         cover_splits = [math.floor(len(cover) * split / 100) for i, split in enumerate(splits, 1)]
         if len(splits) > 1 and sum(map(int, splits)) == 100 and len(cover) > sum(map(int, splits)):
-            cover_splits[0] = len(cover) - sum(map(int, cover_splits[1:])) # no tile waste
+            cover_splits[0] = len(cover) - sum(map(int, cover_splits[1:]))  # no tile waste
         s = 0
         covers = []
         for e in cover_splits:
