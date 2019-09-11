@@ -31,14 +31,17 @@ def add_parser(subparser, formatter_class):
 
     out = parser.add_argument_group("Outputs")
     out.add_argument("--zoom", type=int, help="zoom level of tiles [required with --geojson or --bbox]")
+    out.add_argument("--extent", action="store_true", help="if set, rather than a cover, output a bbox extent")
     out.add_argument("--splits", type=str, help="if set, shuffle and split in several cover subpieces. [e.g 50/15/35]")
-    out.add_argument("out", type=str, nargs="+", help="cover csv output paths [required]")
+    out.add_argument("out", type=str, nargs="*", help="cover csv output paths [required except for extent]")
 
     parser.set_defaults(func=main)
 
 
 def main(args):
 
+    assert not (args.extent and args.splits), "--splits and --extent are mutually exclusive options."
+    assert args.extent and len(args.out) <= 1, "--extent option imply a single output."
     assert (
         int(args.bbox is not None)
         + int(args.geojson is not None)
@@ -104,6 +107,7 @@ def main(args):
         cover = [tile for tile in tiles_from_dir(args.dir, xyz=not (args.no_xyz))]
 
     _cover = []
+    extent_w, extent_s, extent_n, extent_e = (180.0, 90.0, -180.0, -90.0)
     for tile in tqdm(cover, ascii=True, unit="tile"):
         if args.zoom and tile.z != args.zoom:
             w, s, n, e = transform_bounds("EPSG:3857", "EPSG:4326", *xy_bounds(tile))
@@ -115,7 +119,13 @@ def main(args):
                 if unique:
                     _cover.append(t)
         else:
+            if args.extent:
+                w, s, n, e = transform_bounds("EPSG:3857", "EPSG:4326", *xy_bounds(tile))
             _cover.append(tile)
+
+        if args.extent:
+            extent_w, extent_s, extent_n, extent_e = (min(extent_w, w), min(extent_s, s), max(extent_n, n), max(extent_e, e))
+
     cover = _cover
 
     if args.splits:
@@ -131,10 +141,22 @@ def main(args):
     else:
         covers = [cover]
 
-    for i, cover in enumerate(covers):
+    if args.extent:
+        if args.out and os.path.dirname(args.out[0]) and not os.path.isdir(os.path.dirname(args.out[0])):
+            os.makedirs(os.path.dirname(args.out[0]), exist_ok=True)
 
-        if os.path.dirname(args.out[i]) and not os.path.isdir(os.path.dirname(args.out[i])):
-            os.makedirs(os.path.dirname(args.out[i]), exist_ok=True)
+        extent = "{:.8f},{:.8f},{:.8f},{:.8f}".format(extent_w, extent_s, extent_n, extent_e)
 
-        with open(args.out[i], "w") as fp:
-            csv.writer(fp).writerows(cover)
+        if args.out:
+            with open(args.out[0], "w") as fp:
+                fp.write(extent)
+        else:
+            print(extent)
+    else:
+        for i, cover in enumerate(covers):
+
+            if os.path.dirname(args.out[i]) and not os.path.isdir(os.path.dirname(args.out[i])):
+                os.makedirs(os.path.dirname(args.out[i]), exist_ok=True)
+
+            with open(args.out[i], "w") as fp:
+                csv.writer(fp).writerows(cover)
