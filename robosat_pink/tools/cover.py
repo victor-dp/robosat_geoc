@@ -41,7 +41,7 @@ def add_parser(subparser, formatter_class):
 def main(args):
 
     assert not (args.extent and args.splits), "--splits and --extent are mutually exclusive options."
-    assert args.extent and len(args.out) <= 1, "--extent option imply a single output."
+    assert not (args.extent and len(args.out) > 1), "--extent option imply a single output."
     assert (
         int(args.bbox is not None)
         + int(args.geojson is not None)
