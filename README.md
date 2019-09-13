@@ -3,7 +3,7 @@
  
 
 <h1 align='center'>RoboSat.pink</h1>
-<h2 align='center'>Computer Vision ecosystem for GeoSpatial imagery</h2>
+<h2 align='center'>Computer Vision framework for GeoSpatial imagery, at scale</h2>
 
 <p align=center>
   <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_side_clean/"><img src="https://pbs.twimg.com/media/DpjonykWwAANpPr.jpg" alt="RoboSat.pink buildings segmentation from Imagery" /></a>
