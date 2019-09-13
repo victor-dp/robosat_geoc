@@ -112,7 +112,7 @@ sudo sh NVIDIA-Linux-x86_64-430.40.run -a -q --ui=none
 ### NOTAS: 
 - Requires: Python 3.6 or 3.7
 - GPU is not strictly mandatory, but `rsp train` and `rsp predict` would be -that- slower without.
-- To test RoboSat.pink install, launch in a terminal: `rsp -h`
+- To test RoboSat.pink install, launch in a terminal: `rsp -h` or `rsp info`
 - Upon your ```pip``` PATH setting, you may have to update it: ```export PATH=$PATH:.local/bin```
 
 
@@ -131,13 +131,10 @@ RoboSat.pink use cherry-picked Open Source libs among Deep Learning, Computer Vi
 
 
 
-
-Related resources:
------------------
-- <a href="https://github.com/mapbox/robosat">Historical MapBox RoboSat github directory</a>
+GeoSpatial OpenDataSets:
+------------------------
 - <a href="https://github.com/chrieke/awesome-satellite-imagery-datasets">Christoph Rieke's Awesome Satellite Imagery Datasets</a>
 - <a href="https://zhangbin0917.github.io/2018/06/12/%E9%81%A5%E6%84%9F%E6%95%B0%E6%8D%AE%E9%9B%86/">Zhang Bin, Earth Observation OpenDataset blog</a> 
-- <a href="https://landscape.satsummit.io/analysis/spectral-bands.html">Satellites in Global Development</a>
 
 
 Bibliography:
