@@ -84,6 +84,37 @@ Callable with `rsp extract --type Park`
 </details>
 
 
+## Use an alternate Metric ##
+
+To allows `rsp train` to use a metric function of your own:
+- If not alredy done, retrieve RoboSat.pink code source, and proceed to dev install: `make install`.
+- Create in `robosat_pink/metrics` directory a yourmetricname.py file.
+- This file must contains at least a class `get` function , with `get(label, predicted, config=None)` protototype, and returning a [0-1] float.
+- Take note, that both label vars and predicted are located on GPU device (moving them back by any computation on CPU, would affect training performances).
+- Then, to use it with `rsp train`, update config file value: `["model"]["metrics"]`, and add it's name in the list (in lowercase).
+
+<details><summary>Click me, for a simple Precision metric example</summary>
+
+```
+from robosat_pink.metrics.core import confusion
+  
+
+def get(label, predicted, config=None):
+
+    tn, fn, fp, tp = confusion(label, predicted)
+
+    try:
+        precision = tp / (tp + fp)
+    except ZeroDivisionError:
+        precision = 0.0
+
+    return precision
+```
+</details>
+
+
+
+
 ## Use an alternate Loss function ##
 
 To allows `rsp train` to use a loss function of your own:
@@ -120,10 +151,44 @@ class Miou(torch.nn.Module):
         return mIoU
 ```
 
-Callable with `rsp train --loss miou`
+Callable with `rsp train --loss Miou`
 
 </details>
 
+
+## Use an alternate Data Augmentation setting ##
+
+To allows `rsp train` to use a data augmentation setting of your own:
+- If not alredy done, retrieve RoboSat.pink code source, and proceed to dev install: `make install`.
+- Create in `robosat_pink/da` directory, a yourda.py file.
+- Albumentations syntax documentation:  <a href="https://github.com/albu/albumentations/blob/master/docs/examples.rst">https://github.com/albu/albumentations/blob/master/docs/examples.rst</a>
+- Then, to use it with `rsp train`, either:
+  - update config file value: `["model"]["da"]`
+  - use `--da` parameter
+
+<details><summary>Click me, for a Minimal DataAugmentation example</summary>
+
+```
+from albumentations import Compose, Flip, Transpose
+  
+def transform(config, image, mask):
+
+    try:
+        p = config["model"]["dap"]
+    except:
+        p = 1
+
+    assert 0 <= p <= 1
+
+    return Compose(
+        [
+            Flip(), # implicit p=0.5
+            Transpose(p=0.3)
+        ]
+    )(image=image, mask=mask, p=p)
+```
+Callable with `rsp train --da Yourda`
+</details>
 
 
 ## Use an alternate Neural Network Model ##
@@ -131,9 +196,11 @@ To allows `rsp train` and `rsp predict` to use a model of your own:
 - If not alredy done, retrieve RoboSat.pink code source, and proceed to dev install: `make install`.
 - Create in `robosat_pink/models` directory a `yourmodelname.py` file.
 - This file must contains at least a `Model_name` class, with `__init__` and `forward` methods.
+- `shape_in` and `shape_out` as obvious parameters
+- Additional config information is restrain to train phase only (by design, to ensure ability to export model).
 - Then, to use it, with `rsp train` and `rsp predict` either:
-  - update config file value: `["model"]["name"]`
-  - use `--model` parameter
+  - update config file value: `["model"]["nn"]`
+  - use `--nn` parameter
 
 <details><summary>Click me, for a UNet model example</summary>
 
@@ -143,14 +210,14 @@ import torch.nn as nn
 
 
 class Unet(nn.Module):
-    """UNet - cf https://arxiv.org/abs/1505.04597"""
 
-    def __init__(self, config):
+    def __init__(self, shape_in, shape_out, train_config=None):
 
-        num_classes = len(config["classes"])
-        num_channels = 0
-        for channel in config["channels"]:
-            num_channels += len(channel["bands"])
+        self.doc = """UNet - cf https://arxiv.org/abs/1505.04597"""
+        self.version = 1
+
+        num_classes = shape_out[0]
+        num_channels = shape_in[0]
         assert num_channels == 3, "This basic UNet example is RGB only."
 
         super().__init__()
@@ -227,6 +294,6 @@ def Upsample(num_in):
     return nn.ConvTranspose2d(num_in, num_in // 2, kernel_size=2, stride=2)
 ```
 
-Callable with `rsp train --model unet`
+Callable with `rsp train --nn Unet`
 
 </details>

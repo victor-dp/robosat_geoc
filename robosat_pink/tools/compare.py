@@ -1,5 +1,4 @@
 import os
-import sys
 import json
 import torch
 import concurrent.futures as futures
@@ -60,28 +59,23 @@ def main(args):
     print("RoboSat.pink - compare {} on CPU, with {} workers".format(args.mode, args.workers))
 
     if not args.masks or not args.labels:
-        if args.mode == "list":
-            sys.exit("ERROR: Parameters masks and labels are mandatories in list mode.")
-        if args.minimum_fg > 0 or args.maximum_fg < 100 or args.minimum_qod > 0 or args.maximum_qod < 100:
-            sys.exit("ERROR: Parameters masks and labels are mandatories in QoD filtering.")
+        assert args.mode != "list", "Parameters masks and labels are mandatories in list mode."
+        assert args.minimum_fg == 0.0 and args.maximum_fg == 100.0, "Both masks and labels mandatory in QoD filtering."
+        assert args.minimum_qod == 0.0 and args.maximum_qod == 100.0, "Both masks and labels mandatory in QoD filtering."
 
     if args.images:
         tiles = [tile for tile in tiles_from_dir(args.images[0])]
         for image in args.images[1:]:
-            assert sorted(tiles) == sorted([tile for tile in tiles_from_dir(image)])
+            assert sorted(tiles) == sorted([tile for tile in tiles_from_dir(image)]), "Unconsistent images directories"
 
     if args.labels and args.masks:
         tiles_masks = [tile for tile in tiles_from_dir(args.masks)]
         tiles_labels = [tile for tile in tiles_from_dir(args.labels)]
         if args.images:
-            assert sorted(tiles) == sorted(tiles_masks) == sorted(tiles_labels)
+            assert sorted(tiles) == sorted(tiles_masks) == sorted(tiles_labels), "Unconsistent images/label/mask directories"
         else:
-            assert sorted(tiles_masks) == sorted(tiles_labels)
+            assert sorted(tiles_masks) == sorted(tiles_labels), "Label and Mask directories are not consistent"
             tiles = tiles_masks
-    try:
-        pass
-    except:
-        sys.exit("ERROR: inconsistent input coverage")
 
     tiles_list = []
     tiles_compare = []
@@ -98,7 +92,7 @@ def main(args):
                 label = np.array(Image.open(os.path.join(args.labels, z, x, "{}.png".format(y))))
                 mask = np.array(Image.open(os.path.join(args.masks, z, x, "{}.png".format(y))))
 
-                assert label.shape == mask.shape
+                assert label.shape == mask.shape, "Inconsistent tiles (size or dimensions)"
 
                 try:
                     dist, fg_ratio, qod = compare(torch.as_tensor(label, device="cpu"), torch.as_tensor(mask, device="cpu"))
@@ -179,7 +173,7 @@ def main(args):
 
     if args.mode == "side" and not args.no_web_ui:
         template = "compare.html" if not args.web_ui_template else args.web_ui_template
-        web_ui(args.out, base_url, tiles, tiles_compare, args.format, template)
+        web_ui(args.out, base_url, tiles, tiles_compare, args.format, template, union_tiles=False)
 
     if args.mode == "stack" and not args.no_web_ui:
         template = "leaflet.html" if not args.web_ui_template else args.web_ui_template

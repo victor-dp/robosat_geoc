@@ -1,16 +1,16 @@
 import os
-import sys
 import csv
 import json
 import math
+import collections
 
 from tqdm import tqdm
 from random import shuffle
 from mercantile import tiles, xy_bounds
-from supermercado import burntiles
 from rasterio import open as rasterio_open
 from rasterio.warp import transform_bounds
 
+from robosat_pink.geojson import geojson_srid, geojson_parse_feature
 from robosat_pink.tiles import tiles_from_dir, tiles_from_csv
 
 
@@ -31,46 +31,40 @@ def add_parser(subparser, formatter_class):
 
     out = parser.add_argument_group("Outputs")
     out.add_argument("--zoom", type=int, help="zoom level of tiles [required with --geojson or --bbox]")
+    out.add_argument("--extent", action="store_true", help="if set, rather than a cover, output a bbox extent")
     out.add_argument("--splits", type=str, help="if set, shuffle and split in several cover subpieces. [e.g 50/15/35]")
-    out.add_argument("out", type=str, nargs="+", help="cover csv output paths [required]")
+    out.add_argument("out", type=str, nargs="*", help="cover csv output paths [required except for extent]")
 
     parser.set_defaults(func=main)
 
 
 def main(args):
 
-    if (
+    assert not (args.extent and args.splits), "--splits and --extent are mutually exclusive options."
+    assert not (args.extent and len(args.out) > 1), "--extent option imply a single output."
+    assert (
         int(args.bbox is not None)
         + int(args.geojson is not None)
         + int(args.dir is not None)
         + int(args.raster is not None)
         + int(args.cover is not None)
-        != 1
-    ):
-        sys.exit("ERROR: One, and only one, input type must be provided, among: --dir, --bbox, --cover or --geojson.")
+        == 1
+    ), "One, and only one, input type must be provided, among: --dir, --bbox, --cover or --geojson."
 
     if args.bbox:
         try:
             w, s, e, n, crs = args.bbox.split(",")
             w, s, e, n = map(float, (w, s, e, n))
         except:
-            try:
-                crs = None
-                w, s, e, n = map(float, args.bbox.split(","))
-            except:
-                sys.exit("ERROR: invalid bbox parameter.")
+            crs = None
+            w, s, e, n = map(float, args.bbox.split(","))
+        assert isinstance(w, float) and isinstance(s, float), "Invalid bbox parameter."
 
     if args.splits:
+        splits = [int(split) for split in args.splits.split("/")]
+        assert len(splits) == len(args.out) and 0 < sum(splits) <= 100, "Invalid split value or incoherent with out paths."
 
-        try:
-            splits = [int(split) for split in args.splits.split("/")]
-            assert len(splits) == len(args.out)
-            assert sum(splits) == 100
-        except:
-            sys.exit("ERROR: Invalid split value or incoherent with provided out paths.")
-
-    if not args.zoom and (args.geojson or args.bbox or args.raster):
-        sys.exit("ERROR: Zoom parameter is required.")
+    assert not (not args.zoom and (args.geojson or args.bbox or args.raster)), "Zoom parameter is required."
 
     args.out = [os.path.expanduser(out) for out in args.out]
 
@@ -79,33 +73,28 @@ def main(args):
     if args.raster:
         print("RoboSat.pink - cover from {} at zoom {}".format(args.raster, args.zoom))
         with rasterio_open(os.path.expanduser(args.raster)) as r:
-            try:
-                w, s, e, n = transform_bounds(r.crs, "EPSG:4326", *r.bounds)
-            except:
-                sys.exit("ERROR: unable to deal with raster projection")
+            w, s, e, n = transform_bounds(r.crs, "EPSG:4326", *r.bounds)
+            assert isinstance(w, float) and isinstance(s, float), "Unable to deal with raster projection"
 
             cover = [tile for tile in tiles(w, s, e, n, args.zoom)]
 
     if args.geojson:
         print("RoboSat.pink - cover from {} at zoom {}".format(args.geojson, args.zoom))
         with open(os.path.expanduser(args.geojson)) as f:
-            features = json.load(f)
+            feature_collection = json.load(f)
+            srid = geojson_srid(feature_collection)
+            feature_map = collections.defaultdict(list)
 
-        try:
-            for feature in tqdm(features["features"], ascii=True, unit="feature"):
-                cover.extend(map(tuple, burntiles.burn([feature], args.zoom).tolist()))
-        except:
-            sys.exit("ERROR: invalid or unsupported GeoJSON.")
+            for i, feature in enumerate(tqdm(feature_collection["features"], ascii=True, unit="feature")):
+                feature_map = geojson_parse_feature(args.zoom, srid, feature_map, feature)
 
-        cover = list(set(cover))  # tiles can overlap for multiple features; unique tile ids
+        cover = feature_map.keys()
 
     if args.bbox:
         print("RoboSat.pink - cover from {} at zoom {}".format(args.bbox, args.zoom))
         if crs:
-            try:
-                w, s, e, n = transform_bounds(crs, "EPSG:4326", w, s, e, n)
-            except:
-                sys.exit("ERROR: unable to deal with raster projection")
+            w, s, e, n = transform_bounds(crs, "EPSG:4326", w, s, e, n)
+            assert isinstance(w, float) and isinstance(s, float), "Unable to deal with raster projection"
 
         cover = [tile for tile in tiles(w, s, e, n, args.zoom)]
 
@@ -118,6 +107,7 @@ def main(args):
         cover = [tile for tile in tiles_from_dir(args.dir, xyz=not (args.no_xyz))]
 
     _cover = []
+    extent_w, extent_s, extent_n, extent_e = (180.0, 90.0, -180.0, -90.0)
     for tile in tqdm(cover, ascii=True, unit="tile"):
         if args.zoom and tile.z != args.zoom:
             w, s, n, e = transform_bounds("EPSG:3857", "EPSG:4326", *xy_bounds(tile))
@@ -129,24 +119,44 @@ def main(args):
                 if unique:
                     _cover.append(t)
         else:
+            if args.extent:
+                w, s, n, e = transform_bounds("EPSG:3857", "EPSG:4326", *xy_bounds(tile))
             _cover.append(tile)
+
+        if args.extent:
+            extent_w, extent_s, extent_n, extent_e = (min(extent_w, w), min(extent_s, s), max(extent_n, n), max(extent_e, e))
+
     cover = _cover
 
     if args.splits:
         shuffle(cover)  # in-place
-        splits = [math.floor(len(cover) * split / 100) for i, split in enumerate(splits, 1)]
+        cover_splits = [math.floor(len(cover) * split / 100) for i, split in enumerate(splits, 1)]
+        if len(splits) > 1 and sum(map(int, splits)) == 100 and len(cover) > sum(map(int, splits)):
+            cover_splits[0] = len(cover) - sum(map(int, cover_splits[1:]))  # no tile waste
         s = 0
         covers = []
-        for e in splits:
-            covers.append(cover[s : s + e - 1])
+        for e in cover_splits:
+            covers.append(cover[s : s + e])
             s += e
     else:
         covers = [cover]
 
-    for i, cover in enumerate(covers):
+    if args.extent:
+        if args.out and os.path.dirname(args.out[0]) and not os.path.isdir(os.path.dirname(args.out[0])):
+            os.makedirs(os.path.dirname(args.out[0]), exist_ok=True)
 
-        if os.path.dirname(args.out[i]) and not os.path.isdir(os.path.dirname(args.out[i])):
-            os.makedirs(os.path.dirname(args.out[i]), exist_ok=True)
+        extent = "{:.8f},{:.8f},{:.8f},{:.8f}".format(extent_w, extent_s, extent_n, extent_e)
 
-        with open(args.out[i], "w") as fp:
-            csv.writer(fp).writerows(cover)
+        if args.out:
+            with open(args.out[0], "w") as fp:
+                fp.write(extent)
+        else:
+            print(extent)
+    else:
+        for i, cover in enumerate(covers):
+
+            if os.path.dirname(args.out[i]) and not os.path.isdir(os.path.dirname(args.out[i])):
+                os.makedirs(os.path.dirname(args.out[i]), exist_ok=True)
+
+            with open(args.out[i], "w") as fp:
+                csv.writer(fp).writerows(cover)

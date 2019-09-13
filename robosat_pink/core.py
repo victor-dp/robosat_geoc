@@ -152,7 +152,7 @@ def check_color(color):
 #
 # Web UI
 #
-def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
+def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template, union_tiles=True):
 
     out = os.path.expanduser(out)
     template = os.path.expanduser(template)
@@ -184,4 +184,4 @@ def web_ui(out, base_url, coverage_tiles, selected_tiles, ext, template):
 
     if selected_tiles:
         with open(os.path.join(out, "tiles.json"), "w", encoding="utf-8") as fp:
-            fp.write(tiles_to_geojson(selected_tiles))
+            fp.write(tiles_to_geojson(selected_tiles, union_tiles))

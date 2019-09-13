@@ -1,6 +1,4 @@
 import os
-import sys
-import math
 from tqdm import tqdm
 import concurrent.futures as futures
 
@@ -136,15 +134,14 @@ def main(args):
 
                 w, s, e, n = mercantile.xy_bounds(tile)
 
-                # inspired by rio-tiler, cf: https://github.com/mapbox/rio-tiler/pull/45
                 warp_vrt = WarpedVRT(
                     raster,
                     crs="epsg:3857",
                     resampling=Resampling.bilinear,
                     add_alpha=False,
                     transform=from_bounds(w, s, e, n, args.ts, args.ts),
-                    width=math.ceil((e - w) / transform.a),
-                    height=math.ceil((s - n) / transform.e),
+                    width=args.ts,
+                    height=args.ts,
                 )
                 data = warp_vrt.read(out_shape=(len(raster.indexes), args.ts, args.ts), window=warp_vrt.window(w, s, e, n))
                 image = np.moveaxis(data, 0, 2)  # C,H,W -> H,W,C
@@ -166,8 +163,7 @@ def main(args):
                 if args.label:
                     ret = tile_label_to_file(out, mercantile.Tile(x=x, y=y, z=z), palette, image)
 
-                if not ret:
-                    sys.exit("Error: Unable to write tile {} from raster {}.".format(str(tile), raster))
+                assert ret, "Unable to write tile {} from raster {}.".format(str(tile), raster)
 
                 if len(tiles_map[tile_key]) == 1:
                     progress.update()
@@ -201,7 +197,7 @@ def main(args):
                     split = split.reshape((args.ts, args.ts, 1))  # H,W -> H,W,C
 
                 assert image.shape == split.shape
-                image[:, :, :] += split[:, :, :]
+                image[np.where(image == 0)] += split[np.where(image == 0)]
 
             if not args.label and is_nodata(image, threshold=args.nodata_threshold):
                 progress.update()
@@ -215,8 +211,7 @@ def main(args):
             if args.label:
                 ret = tile_label_to_file(args.out, tile, palette, image)
 
-            if not ret:
-                sys.exit("Error: Unable to write tile {}.".format(str(tile_key)))
+            assert ret, "Unable to write tile {} from raster {}.".format(str(tile_key))
 
             progress.update()
             return tile

@@ -8,17 +8,11 @@ import collections
 import numpy as np
 from tqdm import tqdm
 
-import mercantile
-from rasterio.crs import CRS
-from rasterio.transform import from_bounds
-from rasterio.features import rasterize
-from rasterio.warp import transform
-from supermercado import burntiles
-
 import psycopg2
 
 from robosat_pink.core import load_config, check_classes, make_palette, web_ui, Logs
 from robosat_pink.tiles import tiles_from_csv, tile_label_to_file, tile_bbox
+from robosat_pink.geojson import geojson_srid, geojson_tile_burn, geojson_parse_feature
 
 
 def add_parser(subparser, formatter_class):
@@ -48,84 +42,23 @@ def add_parser(subparser, formatter_class):
     parser.set_defaults(func=main)
 
 
-def geojson_reproject(feature, srid_in, srid_out):
-    """Reproject GeoJSON Polygon feature coords
-       Inspired by: https://gist.github.com/dnomadb/5cbc116aacc352c7126e779c29ab7abe
-    """
-
-    if feature["geometry"]["type"] == "Polygon":
-        xys = (zip(*ring) for ring in feature["geometry"]["coordinates"])
-        xys = (list(zip(*transform(CRS.from_epsg(srid_in), CRS.from_epsg(srid_out), *xy))) for xy in xys)
-
-        yield {"coordinates": list(xys), "type": "Polygon"}
-
-
-def geojson_tile_burn(tile, features, srid, ts, burn_value=1):
-    """Burn tile with GeoJSON features."""
-
-    shapes = ((geometry, burn_value) for feature in features for geometry in geojson_reproject(feature, srid, 3857))
-
-    bounds = tile_bbox(tile, mercator=True)
-    transform = from_bounds(*bounds, ts, ts)
-
-    try:
-        return rasterize(shapes, out_shape=(ts, ts), transform=transform)
-    except:
-        return None
-
-
 def main(args):
 
-    if args.pg:
-        if not args.sql:
-            sys.exit("ERROR: With PostgreSQL db, --sql must be provided")
-
-    if (args.sql and args.geojson) or (args.sql and not args.pg):
-        sys.exit("ERROR: You can use either --pg or --geojson inputs, but only one at once.")
+    assert not (args.sql and args.geojson), "You can only use at once --pg OR --geojson."
+    assert not (args.pg and not args.sql), "With PostgreSQL --pg, --sql must also be provided"
 
     config = load_config(args.config)
     check_classes(config)
 
     palette = make_palette([classe["color"] for classe in config["classes"]], complementary=True)
     index = [config["classes"].index(classe) for classe in config["classes"] if classe["title"] == args.type]
-    assert index, "ERROR: requested type is not contains in your config file classes."
+    assert index, "Requested type is not contains in your config file classes."
     burn_value = int(math.pow(2, index[0] - 1))  # 8bits One Hot Encoding
     assert 0 <= burn_value <= 128
 
     args.out = os.path.expanduser(args.out)
     os.makedirs(args.out, exist_ok=True)
     log = Logs(os.path.join(args.out, "log"), out=sys.stderr)
-
-    def geojson_parse_polygon(zoom, srid, feature_map, polygon, i):
-
-        try:
-            if srid != 4326:
-                polygon = [xy for xy in geojson_reproject({"type": "feature", "geometry": polygon}, srid, 4326)][0]
-
-            for i, ring in enumerate(polygon["coordinates"]):  # GeoJSON coordinates could be N dimensionals
-                polygon["coordinates"][i] = [[x, y] for point in ring for x, y in zip([point[0]], [point[1]])]
-
-            if polygon["coordinates"]:
-                for tile in burntiles.burn([{"type": "feature", "geometry": polygon}], zoom=zoom):
-                    feature_map[mercantile.Tile(*tile)].append({"type": "feature", "geometry": polygon})
-
-        except ValueError:
-            log.log("Warning: invalid feature {}, skipping".format(i))
-
-        return feature_map
-
-    def geojson_parse_geometry(zoom, srid, feature_map, geometry, i):
-
-        if geometry["type"] == "Polygon":
-            feature_map = geojson_parse_polygon(zoom, srid, feature_map, geometry, i)
-
-        elif geometry["type"] == "MultiPolygon":
-            for polygon in geometry["coordinates"]:
-                feature_map = geojson_parse_polygon(zoom, srid, feature_map, {"type": "Polygon", "coordinates": polygon}, i)
-        else:
-            log.log("Notice: {} is a non surfacic geometry type, skipping feature {}".format(geometry["type"], i))
-
-        return feature_map
 
     if args.geojson:
 
@@ -142,21 +75,13 @@ def main(args):
 
             with open(os.path.expanduser(geojson_file)) as geojson:
                 feature_collection = json.load(geojson)
+                srid = geojson_srid(feature_collection)
 
-                try:
-                    crs_mapping = {"CRS84": "4326", "900913": "3857"}
-                    srid = feature_collection["crs"]["properties"]["name"].split(":")[-1]
-                    srid = int(srid) if srid not in crs_mapping else int(crs_mapping[srid])
-                except:
-                    srid = int(4326)
+                feature_map = collections.defaultdict(list)
 
                 for i, feature in enumerate(tqdm(feature_collection["features"], ascii=True, unit="feature")):
+                    feature_map = geojson_parse_feature(zoom, srid, feature_map, feature)
 
-                    if feature["geometry"]["type"] == "GeometryCollection":
-                        for geometry in feature["geometry"]["geometries"]:
-                            feature_map = geojson_parse_geometry(zoom, srid, feature_map, geometry, i)
-                    else:
-                        feature_map = geojson_parse_geometry(zoom, srid, feature_map, feature["geometry"], i)
         features = args.geojson
 
     if args.pg:

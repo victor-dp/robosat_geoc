@@ -41,8 +41,8 @@ Web UI:
 ```
 usage: rsp cover [-h] [--dir DIR] [--bbox BBOX] [--geojson GEOJSON]
                  [--cover COVER] [--raster RASTER] [--no_xyz] [--zoom ZOOM]
-                 [--splits SPLITS]
-                 out [out ...]
+                 [--extent] [--splits SPLITS]
+                 [out [out ...]]
 
 optional arguments:
  -h, --help         show this help message and exit
@@ -59,8 +59,9 @@ Tiles:
 
 Outputs:
  --zoom ZOOM        zoom level of tiles [required with --geojson or --bbox]
+ --extent           if set, rather than a cover, output a bbox extent
  --splits SPLITS    if set, shuffle and split in several cover subpieces. [e.g 50/15/35]
- out                cover csv output paths [required]
+ out                cover csv output paths [required except for extent]
 ```
 ## rsp download
 ```
