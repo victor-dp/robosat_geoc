@@ -114,10 +114,7 @@ sudo sh NVIDIA-Linux-x86_64-430.40.run -a -q --ui=none
 - GPU is not strictly mandatory, but `rsp train` and `rsp predict` would be -that- slower without.
 - To test RoboSat.pink install, launch in a terminal: `rsp -h` or `rsp info`
 - Upon your ```pip``` PATH setting, you may have to update it: ```export PATH=$PATH:.local/bin```
-- To remove NVIDIA Nouveau driver, if needed:
-```
-sudo sh -c "echo blacklist nouveau > /etc/modprobe.d/blacklist-nvidia-nouveau.conf && update-initramfs -u && reboot"
-```
+- To remove NVIDIA Nouveau driver, if needed: ```sudo sh -c "echo blacklist nouveau > /etc/modprobe.d/blacklist-nvidia-nouveau.conf && update-initramfs -u && reboot"```
 
 
 
