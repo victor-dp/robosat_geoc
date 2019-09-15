@@ -84,12 +84,6 @@ or
 pip3 install git+https://github.com/datapink/robosat.pink     # For current dev version
 ```
 
-### With Conda, using a virtual env:
-```
-conda create -n robosat_pink python=3.6 && conda activate robosat_pink
-pip install robosat.pink                                      # For latest stable version        
-```
-
 ### With Ubuntu 19.04, from scratch:
 
 ```
