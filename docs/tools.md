@@ -123,10 +123,11 @@ Output:
 ```
 ## rsp info
 ```
-usage: rsp info [-h]
+usage: rsp info [-h] [--processes]
 
 optional arguments:
- -h, --help  show this help message and exit
+ -h, --help   show this help message and exit
+ --processes  if set, output GPU processes list
 ```
 ## rsp predict
 ```
