@@ -80,8 +80,8 @@ it_pre:
 # Integration Tests: Training
 it_train:
 	@echo "==================================================================================="
-	rsp train --config config.toml --bs 2 --lr 0.00025 --epochs 2 it it/pth
-	rsp train --config config.toml --bs 2 --lr 0.00025 --epochs 3 --resume --checkpoint it/pth/checkpoint-00002.pth it it/pth
+	rsp train --config config.toml --workers 8 --bs 8 --lr 0.00025 --epochs 2 it it/pth
+	rsp train --config config.toml --workers 8 --bs 8 --lr 0.00025 --epochs 3 --resume --checkpoint it/pth/checkpoint-00002.pth it it/pth
 
 
 # Integration Tests: Post Training
@@ -132,12 +132,12 @@ check_doc:
 # Check rsp commands embeded in Tutorials
 check_tuto:
 	@mkdir tuto 
-	@echo "==================================================================================="
-	@echo "Checking 101"
-	@cd tuto && mkdir 101 && sed -n -e '/```bash/,/```/ p' ../docs/101.md | sed -e '/```/d' > 101/.CHECK && cd 101 && sh .CHECK && cd ..
+	#@echo "==================================================================================="
+	#@echo "Checking 101"
+	#@cd tuto && mkdir 101 && sed -n -e '/```bash/,/```/ p' ../docs/101.md | sed -e '/```/d' > 101/.CHECK && cd 101 && sh .CHECK && cd ..
 	@echo "==================================================================================="
 	@echo "Checking Tutorial OpenData to OpenDataset:"
-	@cd tuto && mkdir gl && sed -n -e '/```bash/,/```/ p' docs/from_opendata_to_opendataset.md | sed -e '/```/d' > gl/.CHECK && cd gl && sh .CHECK && cd ..
+	@cd tuto && mkdir gl && sed -n -e '/```bash/,/```/ p' ../docs/from_opendata_to_opendataset.md | sed -e '/```/d' > gl/.CHECK && cd gl && sh .CHECK && cd ..
 	@echo "==================================================================================="
 
 

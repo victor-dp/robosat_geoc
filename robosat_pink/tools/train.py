@@ -144,8 +144,8 @@ def main(args):
             nn_doc = nn.module.doc
             nn_version = nn.module.version
         except AttributeError:
+            nn_doc = nn.doc
             nn_version = nn.version
-            nn_doc == nn.doc
 
         states = {
             "uuid": UUID,
