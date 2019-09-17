@@ -1,4 +1,5 @@
 import os
+import sys
 import csv
 import json
 import math
@@ -71,7 +72,7 @@ def main(args):
     cover = []
 
     if args.raster:
-        print("RoboSat.pink - cover from {} at zoom {}".format(args.raster, args.zoom))
+        sys.stderr.write("RoboSat.pink - cover from {} at zoom {}".format(args.raster, args.zoom))
         with rasterio_open(os.path.expanduser(args.raster)) as r:
             w, s, e, n = transform_bounds(r.crs, "EPSG:4326", *r.bounds)
             assert isinstance(w, float) and isinstance(s, float), "Unable to deal with raster projection"
@@ -79,7 +80,7 @@ def main(args):
             cover = [tile for tile in tiles(w, s, e, n, args.zoom)]
 
     if args.geojson:
-        print("RoboSat.pink - cover from {} at zoom {}".format(args.geojson, args.zoom))
+        sys.stderr.write("RoboSat.pink - cover from {} at zoom {}".format(args.geojson, args.zoom))
         with open(os.path.expanduser(args.geojson)) as f:
             feature_collection = json.load(f)
             srid = geojson_srid(feature_collection)
@@ -91,7 +92,7 @@ def main(args):
         cover = feature_map.keys()
 
     if args.bbox:
-        print("RoboSat.pink - cover from {} at zoom {}".format(args.bbox, args.zoom))
+        sys.stderr.write("RoboSat.pink - cover from {} at zoom {}".format(args.bbox, args.zoom))
         if crs:
             w, s, e, n = transform_bounds(crs, "EPSG:4326", w, s, e, n)
             assert isinstance(w, float) and isinstance(s, float), "Unable to deal with raster projection"
@@ -99,11 +100,11 @@ def main(args):
         cover = [tile for tile in tiles(w, s, e, n, args.zoom)]
 
     if args.cover:
-        print("RoboSat.pink - cover from {}".format(args.cover))
+        sys.stderr.write("RoboSat.pink - cover from {}".format(args.cover))
         cover = [tile for tile in tiles_from_csv(args.cover)]
 
     if args.dir:
-        print("RoboSat.pink - cover from {}".format(args.dir))
+        sys.stderr.write("RoboSat.pink - cover from {}".format(args.dir))
         cover = [tile for tile in tiles_from_dir(args.dir, xyz=not (args.no_xyz))]
 
     _cover = []

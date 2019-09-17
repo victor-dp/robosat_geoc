@@ -83,7 +83,7 @@ def check_model(config):
 # Logs
 #
 class Logs:
-    def __init__(self, path, out=sys.stdout):
+    def __init__(self, path, out=sys.stderr):
         """Create a logs instance on a logs file."""
 
         self.fp = None

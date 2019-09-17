@@ -1,4 +1,5 @@
 import os
+import sys
 from tqdm import tqdm
 import concurrent.futures as futures
 
@@ -83,7 +84,7 @@ def main(args):
     splits_path = os.path.join(os.path.expanduser(args.out), ".splits")
     tiles_map = {}
 
-    print("RoboSat.pink - tile on CPU, with {} workers".format(args.workers))
+    sys.stderr.write("RoboSat.pink - tile on CPU, with {} workers".format(args.workers))
 
     bands = -1
     for path in args.rasters:
