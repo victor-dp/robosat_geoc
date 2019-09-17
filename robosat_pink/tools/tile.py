@@ -84,7 +84,7 @@ def main(args):
     splits_path = os.path.join(os.path.expanduser(args.out), ".splits")
     tiles_map = {}
 
-    sys.stderr.write("RoboSat.pink - tile on CPU, with {} workers".format(args.workers))
+    print("RoboSat.pink - tile on CPU, with {} workers".format(args.workers), file=sys.stderr, flush=True)
 
     bands = -1
     for path in args.rasters:

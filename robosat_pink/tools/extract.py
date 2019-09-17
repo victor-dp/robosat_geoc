@@ -19,7 +19,7 @@ def add_parser(subparser, formatter_class):
 
 def main(args):
 
-    sys.stderr.write("RoboSat.pink - extract {} from {}. Could take some time. Please wait.".format(args.type, args.pbf))
+    print("RoboSat.pink - extract {} from {}. Could take time.".format(args.type, args.pbf), file=sys.stderr, flush=True)
 
     module = load_module("robosat_pink.osm.{}".format(args.type.lower()))
     osmium_handler = getattr(module, "{}Handler".format(args.type))()

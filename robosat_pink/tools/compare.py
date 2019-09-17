@@ -57,7 +57,7 @@ def main(args):
     if not args.workers:
         args.workers = os.cpu_count()
 
-    sys.stderr.write("RoboSat.pink - compare {} on CPU, with {} workers".format(args.mode, args.workers))
+    print("RoboSat.pink - compare {} on CPU, with {} workers".format(args.mode, args.workers), file=sys.stderr, flush=True)
 
     if not args.masks or not args.labels:
         assert args.mode != "list", "Parameters masks and labels are mandatories in list mode."

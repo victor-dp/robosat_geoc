@@ -25,9 +25,9 @@ def main(args):
     model_module = load_module("robosat_pink.models.{}".format(chkpt["nn"].lower()))
     nn = getattr(model_module, chkpt["nn"])(chkpt["shape_in"], chkpt["shape_out"]).to("cpu")
 
-    sys.stderr.write("RoboSat.pink - export model to {}".format(args.type))
-    sys.stderr.write("Model: {} - UUID: {} - Torch {}".format(chkpt["nn"], chkpt["uuid"], torch.__version__))
-    sys.stderr.write(chkpt["doc_string"])
+    print("RoboSat.pink - export model to {}".format(args.type), file=sys.stderr)
+    print("Model: {} - UUID: {} - Torch {}".format(chkpt["nn"], chkpt["uuid"], torch.__version__), file=sys.stderr)
+    print(chkpt["doc_string"], file=sys.stderr, flush=True)
 
     try:  # https://github.com/pytorch/pytorch/issues/9176
         nn.module.state_dict(chkpt["state_dict"])
