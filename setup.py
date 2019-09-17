@@ -1,7 +1,7 @@
 """
 RoboSat.pink
 ----------
-Semantic Segmentation ecosystem for GeoSpatial Imagery
+Computer Vision framework for GeoSpatial Imagery
 
 <http://www.RoboSat.pink>
 """
@@ -29,7 +29,7 @@ setup(
     license="MIT",
     maintainer="DataPink",
     maintainer_email="robosat@datapink.com",
-    description="Semantic Segmentation ecosystem for GeoSpatial Imagery",
+    description="Computer Vision framework for GeoSpatial Imagery",
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=find_packages(exclude=["tests"]),
