@@ -62,6 +62,7 @@ Documentation:
 - <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-info">`rsp info`</a> Print RoboSat.pink version informations
 
 ### Presentations slides:
+  - <a href="http://www.datapink.com/presentations/2019-sotm.pdf">@SOTM 2019</a>
   - <a href="http://www.datapink.com/presentations/2019-foss4g-cv.pdf">@FOSS4G 2019</a>
   - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">@FOSDEM 2019</a>
 
