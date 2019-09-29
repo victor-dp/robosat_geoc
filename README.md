@@ -1,4 +1,4 @@
-<a href="https://twitter.com/RobosatPink"><img src="https://img.shields.io/badge/Follow-%40RoboSatPink-ff69b4.svg" /></a>  <a href="https://gitter.im/RoboSatPink/community"><img src="https://img.shields.io/gitter/room/robosatpink/community.svg?color=ff69b4&style=popout" /></a> <img src="https://pepy.tech/badge/robosat-pink/month" align="right"/>
+<a href="https://twitter.com/RobosatPink"><img src="https://img.shields.io/badge/Follow-%40RoboSatPink-ff69b4.svg" /></a>  <a href="https://gitter.im/RoboSatPink/community"><img src="https://img.shields.io/gitter/room/robosatpink/community.svg?color=ff69b4&style=popout" /></a> <a href="https://pepy.tech/project/robosat.pink"><img src="https://pepy.tech/badge/robosat-pink/month" align="right" /></a>
 
 <h1 align='center'>RoboSat.pink</h1>
 <h2 align='center'>Computer Vision framework for GeoSpatial imagery</h2>
