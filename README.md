@@ -190,13 +190,8 @@ Authors:
 
 
 
-Citation:
----------
-
-To cite RoboSat.pink in publications thanks to use:
-
-Olivier Courtin and Daniel J. Hofmann (2019). Computer Vision framework for GeoSpatial Imagery. DataPink. URL http://RoboSat.pink
-
+Citing:
+-------
 ```
   @Manual{,
     title = {{RoboSat.pink} Computer Vision framework for GeoSpatial Imagery},
