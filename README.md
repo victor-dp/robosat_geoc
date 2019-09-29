@@ -64,7 +64,6 @@ Documentation:
 ### Presentations slides:
   - <a href="http://www.datapink.com/presentations/2019-sotm.pdf">@SOTM 2019</a>
   - <a href="http://www.datapink.com/presentations/2019-foss4g-cv.pdf">@FOSS4G 2019</a>
-  - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">@FOSDEM 2019</a>
 
 
 
@@ -190,5 +189,24 @@ Contributions and Services:
 
 Authors:
 --------
-- Daniel J. Hofmann <https://github.com/daniel-j-h>
 - Olivier Courtin <https://github.com/ocourtin>
+- Daniel J. Hofmann <https://github.com/daniel-j-h>
+
+
+
+Citation:
+---------
+
+To cite RoboSat.pink in publications thanks to use:
+
+Olivier Courtin and Daniel J. Hofmann (2019). Computer Vision framework for GeoSpatial Imagery. DataPink. URL http://RoboSat.pink
+
+```
+  @Manual{,
+    title = {{RoboSat.pink} Computer Vision framework for GeoSpatial Imagery},
+    author = {Olivier Courtin, Daniel J. Hofmann},
+    organization = {DataPink},
+    year = {2019},
+    url = {http://RoboSat.pink},
+  }
+```
