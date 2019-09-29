@@ -27,10 +27,9 @@ def add_parser(subparser, formatter_class):
     inp.add_argument("--geojson", type=str, help="a geojson file path")
     inp.add_argument("--cover", type=str, help="a cover file path")
     inp.add_argument("--raster", type=str, help="a raster file path")
-    help = "SQL to retrieve geometry features [e.g SELECT geom FROM a_table WHERE ST_Intersects(TILE_GEOM, geom)]"
-    inp.add_argument("--sql", type=str, help=help)
+    inp.add_argument("--sql", type=str, help="SQL to retrieve geometry features [e.g SELECT geom FROM a_table]")
 
-    db = parser.add_argument_group("Spatial DataBase [mandatory with --sql input]")
+    db = parser.add_argument_group("Spatial DataBase [required with --sql input]")
     db.add_argument("--pg", type=str, help="PostgreSQL dsn using psycopg2 syntax (e.g 'dbname=db user=postgres')")
 
     tile = parser.add_argument_group("Tiles")

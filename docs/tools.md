@@ -53,9 +53,9 @@ Input [one among the following is required]:
  --geojson GEOJSON  a geojson file path
  --cover COVER      a cover file path
  --raster RASTER    a raster file path
- --sql SQL          SQL to retrieve geometry features [e.g SELECT geom FROM a_table WHERE ST_Intersects(TILE_GEOM, geom)]
+ --sql SQL          SQL to retrieve geometry features [e.g SELECT geom FROM a_table]
 
-Spatial DataBase [mandatory with --sql input]:
+Spatial DataBase [required with --sql input]:
  --pg PG            PostgreSQL dsn using psycopg2 syntax (e.g 'dbname=db user=postgres')
 
 Tiles:
