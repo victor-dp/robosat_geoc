@@ -142,6 +142,9 @@ usage: rsp info [-h] [--processes]
 optional arguments:
  -h, --help   show this help message and exit
  --processes  if set, output GPU processes list
+
+Usages:
+To kill GPU processes: rsp info --processes | xargs sudo kill -9
 ```
 ## rsp predict
 ```

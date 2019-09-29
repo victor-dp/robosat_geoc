@@ -8,7 +8,8 @@ import robosat_pink as rsp
 
 
 def add_parser(subparser, formatter_class):
-    parser = subparser.add_parser("info", help="Provide informations", formatter_class=formatter_class)
+    epilog = "Usages:\nTo kill GPU processes: rsp info --processes | xargs sudo kill -9"
+    parser = subparser.add_parser("info", help="Provide informations", formatter_class=formatter_class, epilog=epilog)
     parser.add_argument("--processes", action="store_true", help="if set, output GPU processes list")
     parser.set_defaults(func=main)
 
