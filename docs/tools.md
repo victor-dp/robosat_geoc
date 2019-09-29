@@ -95,14 +95,24 @@ Web UI:
 ```
 ## rsp export
 ```
-usage: rsp export [-h] --checkpoint CHECKPOINT [--type {onnx,jit}] out
+usage: rsp export [-h] --checkpoint CHECKPOINT [--type {onnx,jit,pth}]
+                  [--nn NN] [--loader LOADER] [--doc_string DOC_STRING]
+                  [--shape_in SHAPE_IN] [--shape_out SHAPE_OUT]
+                  out
 
 optional arguments:
  -h, --help               show this help message and exit
 
 Inputs:
  --checkpoint CHECKPOINT  model checkpoint to load [required]
- --type {onnx,jit}        output type [default: onnx]
+ --type {onnx,jit,pth}    output type [default: onnx]
+
+To set or override metadata pth parameters::
+ --nn NN                  nn name
+ --loader LOADER          nn loader
+ --doc_string DOC_STRING  nn documentation abstract
+ --shape_in SHAPE_IN      nn shape in (e.g 3,512,512)
+ --shape_out SHAPE_OUT    nn shape_out  (e.g 2,512,512)
 
 Output:
  out                      path to save export model to [required]
