@@ -1,6 +1,4 @@
-<a href="https://twitter.com/RobosatPink"><img src="https://img.shields.io/badge/Follow-%40RoboSatPink-ff69b4.svg" /></a>  <a href="https://gitter.im/RoboSatPink/community"><img src="https://img.shields.io/gitter/room/robosatpink/community.svg?color=ff69b4&style=popout" /></a> 
-
- 
+<a href="https://twitter.com/RobosatPink"><img src="https://img.shields.io/badge/Follow-%40RoboSatPink-ff69b4.svg" /></a>  <a href="https://gitter.im/RoboSatPink/community"><img src="https://img.shields.io/gitter/room/robosatpink/community.svg?color=ff69b4&style=popout" /></a> <img src="https://pepy.tech/badge/robosat-pink/month" align="right"/>
 
 <h1 align='center'>RoboSat.pink</h1>
 <h2 align='center'>Computer Vision framework for GeoSpatial imagery</h2>
@@ -137,9 +135,7 @@ Bibliography:
 Convolutional Neural Networks</a>
 - <a href="https://arxiv.org/abs/1806.00844">TernausNetV2: Fully Convolutional Network for Instance Segmentation</a>
 - <a href="https://arxiv.org/abs/1705.08790">The Lovász-Softmax loss: A tractable surrogate for the optimization of the IoU measure in neural networks</a>
-- <a href="https://hal.archives-ouvertes.fr/hal-01523573/document">Joint Learning from Earth Observation and
-OpenStreetMap Data to Get Faster Better Semantic Maps</a>
-- <a href="https://arxiv.org/abs/1809.06839">Albumentations: fast and flexible image augmentations</a>
+
 
 
 
