@@ -135,6 +135,7 @@ Bibliography:
 Convolutional Neural Networks</a>
 - <a href="https://arxiv.org/abs/1806.00844">TernausNetV2: Fully Convolutional Network for Instance Segmentation</a>
 - <a href="https://arxiv.org/abs/1705.08790">The Lovász-Softmax loss: A tractable surrogate for the optimization of the IoU measure in neural networks</a>
+- <a href="https://arxiv.org/abs/1809.06839">Albumentations: fast and flexible image augmentations</a>
 
 
 
