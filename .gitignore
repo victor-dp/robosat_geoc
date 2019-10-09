@@ -1,2 +1,7 @@
 .python-version
 __pycache__
+
+test
+.idea
+ds
+.DS_Store

@@ -7,6 +7,7 @@ class Cover:
                  raster=None,
                  no_xyz=None,
                  zoom=None,
+                 extent=None,
                  splits=None,
                  out=None):
         # Input [one among the following is required]:
@@ -27,6 +28,7 @@ class Cover:
         # Outputs:
         # "zoom level of tiles [required with --geojson or --bbox]
         self.zoom = zoom
+        self.extent = extent
         self.splits = splits
         self.out = out
 
@@ -43,7 +45,7 @@ class Download:
                  out=None,
                  web_ui_base_url=None,
                  web_ui_template=None,
-                 no_web_ui=None):
+                 no_web_ui=True):
         # Web Server
         # str, URL server endpoint, with: {z}/{x}/{y} or {xmin},{ymin},{xmax},{ymax} [required]
         self.url = url
@@ -88,7 +90,7 @@ class Rasterize:
                  ts=512,
                  web_ui_base_url=None,
                  web_ui_template=None,
-                 no_web_ui=None):
+                 no_web_ui=True):
         # Inputs [either --postgis or --geojson is required]
         # type=str, path to csv tiles cover file [required]
         self.cover = cover
@@ -124,7 +126,7 @@ class Subset:
                  out=None,
                  web_ui_base_url=None,
                  web_ui_template=None,
-                 no_web_ui=None):
+                 no_web_ui=True):
         # Inputs:
         # DIR, to XYZ tiles input dir path [required]
         self.dir = dir
@@ -152,7 +154,7 @@ class Train:
                  dataset=None,
                  loader=None,
                  workers=None,
-                 bs=None,
+                 bs=4,
                  lr=None,
                  ts=None,
                  nn=None,
