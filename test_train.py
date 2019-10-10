@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     # params_download = params.Download(
     #     type="XYZ",
-    #     url="http://127.0.0.1:7001/wmts/{z}/{x}/{y}?type=google",
+    #     url="http://172.16.105.155:7001/wmts/{z}/{x}/{y}?type=google",
     #     cover="ds/cover",
     #     out="ds/images")
     # download.main(params_download)
