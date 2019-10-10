@@ -14,11 +14,9 @@ help:
 	@echo "                  Do it, at least, on each CLI modifications, and before a release."
 	@echo "                  NOTA: It takes a while."
 	@echo ""
-	@echo " make kill        Kill all GPU processes running, from CUDA_VISIBLE_DEVICES GPUs."
-	@echo "                  Useful, to eradicate NVIDIA zombies processes..."
-	@echo ""
 	@echo " make pink        Python code beautifier,"
 	@echo "                  as Pink is the new Black ^^"
+
 
 
 # Dev install
@@ -80,8 +78,8 @@ it_pre:
 # Integration Tests: Training
 it_train:
 	@echo "==================================================================================="
-	rsp train --config config.toml --bs 2 --lr 0.00025 --epochs 2 it it/pth
-	rsp train --config config.toml --bs 2 --lr 0.00025 --epochs 3 --resume --checkpoint it/pth/checkpoint-00002.pth it it/pth
+	rsp train --config config.toml --workers 2 --bs 2 --lr 0.00025 --epochs 2 it it/pth
+	rsp train --config config.toml --workers 2 --bs 2 --lr 0.00025 --epochs 3 --resume --checkpoint it/pth/checkpoint-00002.pth it it/pth
 
 
 # Integration Tests: Post Training
@@ -137,7 +135,7 @@ check_tuto:
 	@cd tuto && mkdir 101 && sed -n -e '/```bash/,/```/ p' ../docs/101.md | sed -e '/```/d' > 101/.CHECK && cd 101 && sh .CHECK && cd ..
 	@echo "==================================================================================="
 	@echo "Checking Tutorial OpenData to OpenDataset:"
-	@cd tuto && mkdir gl && sed -n -e '/```bash/,/```/ p' docs/from_opendata_to_opendataset.md | sed -e '/```/d' > gl/.CHECK && cd gl && sh .CHECK && cd ..
+	@cd tuto && mkdir gl && sed -n -e '/```bash/,/```/ p' ../docs/from_opendata_to_opendataset.md | sed -e '/```/d' > gl/.CHECK && cd gl && sh .CHECK && cd ..
 	@echo "==================================================================================="
 
 
@@ -146,18 +144,3 @@ pypi: check
 	rm -rf dist RoboSat.pink.egg-info
 	python3 setup.py sdist
 	twine upload dist/* -r pypi
-
-
-# Kill all NVIDIA processes running
-kill:
-	@[ "$$CUDA_VISIBLE_DEVICES" ] || echo "CUDA_VISIBLE_DEVICES is not set"
-	@echo "Looking to processes related to GPUs: "$$CUDA_VISIBLE_DEVICES
-	@rm -f .PID
-	@for i in `echo $$CUDA_VISIBLE_DEVICES | tr ',' " "`; do \
-	lsof /dev/nvidia$$i | awk '{print $$2}' | tail -n +2 | uniq >> .PID ; \
-	done
-	@test -s .PID || echo "No GPU process running." & touch .PID
-	@cat .PID | sort | uniq | tr '\n' ' ' | xargs --no-run-if-empty echo > .PID_KILL
-	@cat .PID_KILL | xargs --no-run-if-empty echo "Processes to kill:"
-	@cat .PID_KILL | xargs --no-run-if-empty sudo kill -9
-	@rm -f .PID .PID_KILL

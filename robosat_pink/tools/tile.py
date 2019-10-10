@@ -1,4 +1,5 @@
 import os
+import sys
 from tqdm import tqdm
 import concurrent.futures as futures
 
@@ -34,6 +35,8 @@ def add_parser(subparser, formatter_class):
     out = parser.add_argument_group("Output")
     out.add_argument("--zoom", type=int, required=True, help="zoom level of tiles [required]")
     out.add_argument("--ts", type=int, default=512, help="tile size in pixels [default: 512]")
+    help = "nodata pixel value, used by default to remove coverage border's tile [default: 0]"
+    out.add_argument("--nodata", type=int, default=0, choices=range(0, 256), metavar="[0-255]", help=help)
     help = "Skip tile if nodata pixel ratio > threshold. [default: 100]"
     out.add_argument("--nodata_threshold", type=int, default=100, choices=range(0, 101), metavar="[0-100]", help=help)
     out.add_argument("out", type=str, help="output directory path [required]")
@@ -53,18 +56,18 @@ def add_parser(subparser, formatter_class):
     parser.set_defaults(func=main)
 
 
-def is_nodata(image, no_data=0, threshold=5):
+def is_nodata(image, nodata, threshold):
 
     if (
-        np.all(image[0, :, :] == no_data)
-        or np.all(image[-1, :, :] == no_data)
-        or np.all(image[:, 0, :] == no_data)
-        or np.all(image[:, -1, :] == no_data)
+        np.all(image[0, :, :] == nodata)
+        or np.all(image[-1, :, :] == nodata)
+        or np.all(image[:, 0, :] == nodata)
+        or np.all(image[:, -1, :] == nodata)
     ):
-        return True  # pixel border is no_data, on all bands
+        return True  # pixel border is nodata, on all bands
 
     C, W, H = image.shape
-    return np.sum(image[:, :, :] == no_data) > ((threshold * C * 100) / (W * H))
+    return np.sum(image[:, :, :] == nodata) > ((threshold * C * 100) / (W * H))
 
 
 def main(args):
@@ -83,7 +86,7 @@ def main(args):
     splits_path = os.path.join(os.path.expanduser(args.out), ".splits")
     tiles_map = {}
 
-    print("RoboSat.pink - tile on CPU, with {} workers".format(args.workers))
+    print("RoboSat.pink - tile on CPU, with {} workers".format(args.workers), file=sys.stderr, flush=True)
 
     bands = -1
     for path in args.rasters:
@@ -147,7 +150,7 @@ def main(args):
                 image = np.moveaxis(data, 0, 2)  # C,H,W -> H,W,C
 
                 tile_key = (str(tile.x), str(tile.y), str(tile.z))
-                if not args.label and len(tiles_map[tile_key]) == 1 and is_nodata(image, threshold=args.nodata_threshold):
+                if not args.label and len(tiles_map[tile_key]) == 1 and is_nodata(image, args.nodata, args.nodata_threshold):
                     progress.update()
                     continue
 
@@ -199,7 +202,7 @@ def main(args):
                 assert image.shape == split.shape
                 image[np.where(image == 0)] += split[np.where(image == 0)]
 
-            if not args.label and is_nodata(image, threshold=args.nodata_threshold):
+            if not args.label and is_nodata(image, args.nodata, args.nodata_threshold):
                 progress.update()
                 return
 

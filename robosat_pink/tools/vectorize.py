@@ -1,3 +1,4 @@
+import sys
 from tqdm import tqdm
 
 import numpy as np
@@ -31,7 +32,7 @@ def main(args):
     check_classes(config)
     index = [i for i in (list(range(len(config["classes"])))) if config["classes"][i]["title"] == args.type]
     assert index, "Requested type {} not found among classes title in the config file.".format(args.type)
-    print("RoboSat.pink - vectorize {} from {}".format(args.type, args.masks))
+    print("RoboSat.pink - vectorize {} from {}".format(args.type, args.masks), file=sys.stderr, flush=True)
 
     out = open(args.out, "w", encoding="utf-8")
     assert out, "Unable to write in output file"

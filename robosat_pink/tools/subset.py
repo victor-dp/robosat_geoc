@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 
 import mercantile
@@ -35,7 +36,7 @@ def main(args):
     assert args.out or args.delete, "out parameter is required"
     args.out = os.path.expanduser(args.out)
 
-    print("RoboSat.pink - subset {} with cover {}, on CPU".format(args.dir, args.cover))
+    print("RoboSat.pink - subset {} with cover {}, on CPU".format(args.dir, args.cover), file=sys.stderr, flush=True)
 
     ext = set()
     tiles = set(tiles_from_csv(os.path.expanduser(args.cover)))
@@ -45,7 +46,7 @@ def main(args):
         if isinstance(tile, mercantile.Tile):
             src_tile = tile_from_xyz(args.dir, tile.x, tile.y, tile.z)
             if not src_tile:
-                print("WARNING: skipping tile {}".format(tile))
+                print("WARNING: skipping tile {}".format(tile), file=sys.stderr, flush=True)
                 continue
             _, src = src_tile
             dst_dir = os.path.join(args.out, str(tile.z), str(tile.x))

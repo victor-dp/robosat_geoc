@@ -40,8 +40,8 @@ Web UI:
 ## rsp cover
 ```
 usage: rsp cover [-h] [--dir DIR] [--bbox BBOX] [--geojson GEOJSON]
-                 [--cover COVER] [--raster RASTER] [--no_xyz] [--zoom ZOOM]
-                 [--extent] [--splits SPLITS]
+                 [--cover COVER] [--raster RASTER] [--sql SQL] [--pg PG]
+                 [--no_xyz] [--zoom ZOOM] [--extent] [--splits SPLITS]
                  [out [out ...]]
 
 optional arguments:
@@ -53,6 +53,10 @@ Input [one among the following is required]:
  --geojson GEOJSON  a geojson file path
  --cover COVER      a cover file path
  --raster RASTER    a raster file path
+ --sql SQL          SQL to retrieve geometry features [e.g SELECT geom FROM a_table]
+
+Spatial DataBase [required with --sql input]:
+ --pg PG            PostgreSQL dsn using psycopg2 syntax (e.g 'dbname=db user=postgres')
 
 Tiles:
  --no_xyz           if set, tiles are not expected to be XYZ based.
@@ -95,14 +99,24 @@ Web UI:
 ```
 ## rsp export
 ```
-usage: rsp export [-h] --checkpoint CHECKPOINT [--type {onnx,jit}] out
+usage: rsp export [-h] --checkpoint CHECKPOINT [--type {onnx,jit,pth}]
+                  [--nn NN] [--loader LOADER] [--doc_string DOC_STRING]
+                  [--shape_in SHAPE_IN] [--shape_out SHAPE_OUT]
+                  out
 
 optional arguments:
  -h, --help               show this help message and exit
 
 Inputs:
  --checkpoint CHECKPOINT  model checkpoint to load [required]
- --type {onnx,jit}        output type [default: onnx]
+ --type {onnx,jit,pth}    output type [default: onnx]
+
+To set or override metadata pth parameters::
+ --nn NN                  nn name
+ --loader LOADER          nn loader
+ --doc_string DOC_STRING  nn documentation abstract
+ --shape_in SHAPE_IN      nn shape in (e.g 3,512,512)
+ --shape_out SHAPE_OUT    nn shape_out  (e.g 2,512,512)
 
 Output:
  out                      path to save export model to [required]
@@ -123,10 +137,14 @@ Output:
 ```
 ## rsp info
 ```
-usage: rsp info [-h]
+usage: rsp info [-h] [--processes]
 
 optional arguments:
- -h, --help  show this help message and exit
+ -h, --help   show this help message and exit
+ --processes  if set, output GPU processes list
+
+Usages:
+To kill GPU processes: rsp info --processes | xargs sudo kill -9
 ```
 ## rsp predict
 ```
@@ -213,7 +231,7 @@ Web UI:
 ```
 ## rsp tile
 ```
-usage: rsp tile [-h] [--cover COVER] --zoom ZOOM [--ts TS]
+usage: rsp tile [-h] [--cover COVER] --zoom ZOOM [--ts TS] [--nodata [0-255]]
                 [--nodata_threshold [0-100]] [--label] [--config CONFIG]
                 [--workers WORKERS] [--web_ui_base_url WEB_UI_BASE_URL]
                 [--web_ui_template WEB_UI_TEMPLATE] [--no_web_ui]
@@ -229,6 +247,7 @@ Inputs:
 Output:
  --zoom ZOOM                        zoom level of tiles [required]
  --ts TS                            tile size in pixels [default: 512]
+ --nodata [0-255]                   nodata pixel value, used by default to remove coverage border's tile [default: 0]
  --nodata_threshold [0-100]         Skip tile if nodata pixel ratio > threshold. [default: 100]
  out                                output directory path [required]
 

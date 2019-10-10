@@ -1,9 +1,7 @@
-<a href="https://twitter.com/RobosatPink"><img src="https://img.shields.io/badge/Follow-%40RoboSatPink-ff69b4.svg" /></a>  <a href="https://gitter.im/RoboSatPink/community"><img src="https://img.shields.io/gitter/room/robosatpink/community.svg?color=ff69b4&style=popout" /></a> 
-
- 
+<a href="https://twitter.com/RobosatPink"><img src="https://img.shields.io/badge/Follow-%40RoboSatPink-ff69b4.svg" /></a>  <a href="https://gitter.im/RoboSatPink/community"><img src="https://img.shields.io/gitter/room/robosatpink/community.svg?color=ff69b4&style=popout" /></a> <a href="https://pepy.tech/project/robosat.pink"><img src="https://pepy.tech/badge/robosat-pink/month" align="right" /></a>
 
 <h1 align='center'>RoboSat.pink</h1>
-<h2 align='center'>Computer Vision ecosystem for GeoSpatial imagery</h2>
+<h2 align='center'>Computer Vision framework for GeoSpatial imagery</h2>
 
 <p align=center>
   <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_side_clean/"><img src="https://pbs.twimg.com/media/DpjonykWwAANpPr.jpg" alt="RoboSat.pink buildings segmentation from Imagery" /></a>
@@ -62,8 +60,8 @@ Documentation:
 - <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-info">`rsp info`</a> Print RoboSat.pink version informations
 
 ### Presentations slides:
+  - <a href="http://www.datapink.com/presentations/2019-sotm.pdf">@SOTM 2019</a>
   - <a href="http://www.datapink.com/presentations/2019-foss4g-cv.pdf">@FOSS4G 2019</a>
-  - <a href="http://www.datapink.com/presentations/2019-fosdem.pdf">@FOSDEM 2019</a>
 
 
 
@@ -82,12 +80,6 @@ or
 
 ```
 pip3 install git+https://github.com/datapink/robosat.pink     # For current dev version
-```
-
-### With Conda, using a virtual env:
-```
-conda create -n robosat_pink python=3.6 && conda activate robosat_pink
-pip install robosat.pink                                      # For latest stable version        
 ```
 
 ### With Ubuntu 19.04, from scratch:
@@ -112,12 +104,9 @@ sudo sh NVIDIA-Linux-x86_64-430.40.run -a -q --ui=none
 ### NOTAS: 
 - Requires: Python 3.6 or 3.7
 - GPU is not strictly mandatory, but `rsp train` and `rsp predict` would be -that- slower without.
-- To test RoboSat.pink install, launch in a terminal: `rsp -h`
+- To test RoboSat.pink install, launch in a terminal: `rsp -h` or `rsp info`
 - Upon your ```pip``` PATH setting, you may have to update it: ```export PATH=$PATH:.local/bin```
-
-
-
-
+- If needed, to remove pre-existing Nouveau driver: ```sudo sh -c "echo blacklist nouveau > /etc/modprobe.d/blacklist-nvidia-nouveau.conf && update-initramfs -u && reboot"```
 
 
 
@@ -131,13 +120,10 @@ RoboSat.pink use cherry-picked Open Source libs among Deep Learning, Computer Vi
 
 
 
-
-Related resources:
------------------
-- <a href="https://github.com/mapbox/robosat">Historical MapBox RoboSat github directory</a>
+GeoSpatial OpenDataSets:
+------------------------
 - <a href="https://github.com/chrieke/awesome-satellite-imagery-datasets">Christoph Rieke's Awesome Satellite Imagery Datasets</a>
 - <a href="https://zhangbin0917.github.io/2018/06/12/%E9%81%A5%E6%84%9F%E6%95%B0%E6%8D%AE%E9%9B%86/">Zhang Bin, Earth Observation OpenDataset blog</a> 
-- <a href="https://landscape.satsummit.io/analysis/spectral-bands.html">Satellites in Global Development</a>
 
 
 Bibliography:
@@ -149,9 +135,8 @@ Bibliography:
 Convolutional Neural Networks</a>
 - <a href="https://arxiv.org/abs/1806.00844">TernausNetV2: Fully Convolutional Network for Instance Segmentation</a>
 - <a href="https://arxiv.org/abs/1705.08790">The Lovász-Softmax loss: A tractable surrogate for the optimization of the IoU measure in neural networks</a>
-- <a href="https://hal.archives-ouvertes.fr/hal-01523573/document">Joint Learning from Earth Observation and
-OpenStreetMap Data to Get Faster Better Semantic Maps</a>
 - <a href="https://arxiv.org/abs/1809.06839">Albumentations: fast and flexible image augmentations</a>
+
 
 
 
@@ -201,5 +186,19 @@ Contributions and Services:
 
 Authors:
 --------
-- Daniel J. Hofmann <https://github.com/daniel-j-h>
 - Olivier Courtin <https://github.com/ocourtin>
+- Daniel J. Hofmann <https://github.com/daniel-j-h>
+
+
+
+Citing:
+-------
+```
+  @Manual{,
+    title = {{RoboSat.pink} Computer Vision framework for GeoSpatial Imagery},
+    author = {Olivier Courtin, Daniel J. Hofmann},
+    organization = {DataPink},
+    year = {2019},
+    url = {http://RoboSat.pink},
+  }
+```
