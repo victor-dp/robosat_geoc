@@ -1,7 +1,10 @@
-from robosat_pink.tools import params, cover, download, rasterize, subset, train
-import shutil
-import sys
 import os
+import sys
+import shutil
+from robosat_pink.tools import params, cover, download, rasterize, subset, train
+import multiprocessing
+multiprocessing.set_start_method('spawn', True)
+
 
 if __name__ == "__main__":
     # example
@@ -22,7 +25,8 @@ if __name__ == "__main__":
 
     # params_download = params.Download(
     #     type="XYZ",
-    #     url="http://172.16.105.155:7001/wmts/{z}/{x}/{y}?type=google",
+    #     # url="http://172.16.105.155:7001/wmts/{z}/{x}/{y}?type=google",
+    #     url="http://localhost:7001/wmts/{z}/{x}/{y}?type=google",
     #     cover="ds/cover",
     #     out="ds/images")
     # download.main(params_download)

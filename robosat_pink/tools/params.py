@@ -5,6 +5,8 @@ class Cover:
                  geojson=None,
                  cover=None,
                  raster=None,
+                 sql=None,
+                 pg=None,
                  no_xyz=None,
                  zoom=None,
                  extent=None,
@@ -21,6 +23,9 @@ class Cover:
         self.cover = cover
         # a raster file path
         self.raster = raster
+
+        self.sql = sql
+        self.pg = pg
 
         # Tiles:
         self.no_xyz = no_xyz
@@ -162,10 +167,10 @@ class Train:
                  da=None,
                  dap=1.0,
                  epochs=10,
-                 resume=None,
+                 resume=0,
                  checkpoint=None,
-                 no_validation=None,
-                 no_training=None,
+                 no_validation=False,
+                 no_training=False,
                  saving=1,
                  out=None):
         # train", Trains a model on a dataset", formatter_class=formatter_class)
