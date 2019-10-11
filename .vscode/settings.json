@@ -1,4 +1,4 @@
 {
-  "python.pythonPath": "/home/wcubuntu/anaconda3/bin/python",
+  "python.pythonPath": "/home/app/anaconda3/envs/robosat_pink/bin/python",
   "editor.formatOnSave": true
 }
