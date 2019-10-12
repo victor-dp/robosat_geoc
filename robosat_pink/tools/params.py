@@ -215,6 +215,7 @@ class Train:
 
 class Predict:
     def __init__(self,
+                 dataset=None,
                  checkpoint=None,
                  config=None,
                  out=None,
@@ -225,6 +226,7 @@ class Predict:
                  no_web_ui=None):
         # Inputs:
         # dataset, predict dataset directory path [required]
+        self.dataset = dataset
         # CHECKPOINT, path to the trained model to use [required]
         self.checkpoint = checkpoint
         self.config = config  # CONFIG, path to config file [required]
@@ -243,3 +245,22 @@ class Predict:
         # WEB_UI_TEMPLATE  alternate Web UI template path
         self.web_ui_template = web_ui_template
         self.no_web_ui = no_web_ui  # desactivate Web UI output
+
+
+class Vectorize:
+    def __init__(self,
+                 masks=None,
+                 type=None,
+                 config=None,
+                 out=None):
+        # Inputs:
+        # input masks directory path [required]
+        self.masks = masks
+        # type of features to extract (i.e class title) [required]
+        self.type = type
+        # path to config file [required]
+        self.config = config
+
+        # Outputs:
+        # path to output file to store features in [required]
+        self.out = out
