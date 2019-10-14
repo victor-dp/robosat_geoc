@@ -24,7 +24,7 @@ class TestBurn(unittest.TestCase):
         # The tile below has a parking lot in our fixtures.
         tile = mercantile.Tile(70762, 104119, 18)
 
-        rasterized = geojson_tile_burn(tile, parking_fc["features"], 4326, 512)
+        rasterized = geojson_tile_burn(tile, parking_fc["features"], 4326, (512, 512))
         rasterized = Image.fromarray(rasterized, mode="P")
 
         # rasterized.save('rasterized.png')
@@ -40,7 +40,7 @@ class TestBurn(unittest.TestCase):
         # This tile does not have a parking lot in our fixtures.
         tile = mercantile.Tile(69623, 104946, 18)
 
-        rasterized = geojson_tile_burn(tile, parking_fc["features"], 4326, 512)
+        rasterized = geojson_tile_burn(tile, parking_fc["features"], 4326, (512, 512))
         rasterized = Image.fromarray(rasterized, mode="P")
 
         self.assertEqual(rasterized.size, (512, 512))

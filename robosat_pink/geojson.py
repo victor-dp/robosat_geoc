@@ -74,9 +74,9 @@ def geojson_tile_burn(tile, features, srid, ts, burn_value=1):
     shapes = ((geometry, burn_value) for feature in features for geometry in geojson_reproject(feature, srid, 3857))
 
     bounds = tile_bbox(tile, mercator=True)
-    transform = from_bounds(*bounds, ts, ts)
+    transform = from_bounds(*bounds, *ts)
 
     try:
-        return rasterize(shapes, out_shape=(ts, ts), transform=transform)
+        return rasterize(shapes, out_shape=ts, transform=transform)
     except:
         return None

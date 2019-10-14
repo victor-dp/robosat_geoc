@@ -32,7 +32,7 @@ def add_parser(subparser, formatter_class):
     out = parser.add_argument_group("Outputs")
     out.add_argument("out", type=str, help="output directory path [required]")
     out.add_argument("--append", action="store_true", help="Append to existing tile if any, useful to multiclass labels")
-    out.add_argument("--ts", type=int, default=512, help="output tile size [default: 512]")
+    out.add_argument("--ts", type=str, default="512,512", help="output tile size [default: 512,512]")
 
     ui = parser.add_argument_group("Web UI")
     ui.add_argument("--web_ui_base_url", type=str, help="alternate Web UI base URL")
@@ -46,6 +46,7 @@ def main(args):
 
     assert not (args.sql and args.geojson), "You can only use at once --pg OR --geojson."
     assert not (args.pg and not args.sql), "With PostgreSQL --pg, --sql must also be provided"
+    assert len(args.ts.split(",")) == 2, "--ts expect width,height value (e.g 512,512)"
 
     config = load_config(args.config)
     check_classes(config)
@@ -140,11 +141,11 @@ def main(args):
 
             if geojson:
                 num = len(geojson)
-                out = geojson_tile_burn(tile, geojson, 4326, args.ts, burn_value)
+                out = geojson_tile_burn(tile, geojson, 4326, list(map(int, args.ts.split(","))), burn_value)
 
             if not geojson or out is None:
                 num = 0
-                out = np.zeros(shape=(args.ts, args.ts), dtype=np.uint8)
+                out = np.zeros(shape=list(map(int, args.ts.split(","))), dtype=np.uint8)
 
             tile_label_to_file(args.out, tile, palette, out, append=args.append)
             cover.write("{},{},{}  {}{}".format(tile.x, tile.y, tile.z, num, os.linesep))
