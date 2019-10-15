@@ -3,10 +3,11 @@ import sys
 import shutil
 from robosat_pink.tools import params, cover, download, rasterize, subset, train
 import multiprocessing
+import config
 multiprocessing.set_start_method('spawn', True)
 
 
-if __name__ == "__main__":
+def main(extent, sql, rs_host="http://localhost:7001", type="tdt"):
     # example
     # rsp cover --bbox 4.795,45.628,4.935,45.853 --zoom 18 ds/cover
     # rsp download --type WMS 'https://download.data.grandlyon.com/wms/grandlyon?SERVICE=WMS&REQUEST=GetMap&VERSION=1.3.0&LAYERS=Ortho2015_vue_ensemble_16cm_CC46&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={xmin},{ymin},{xmax},{ymax}&FORMAT=image/jpeg' ds/cover ds/images
@@ -19,27 +20,27 @@ if __name__ == "__main__":
 
     # params_cover = params.Cover(
     #     # bbox="4.842052459716797,45.76126587962455,4.854111671447754,45.770336923575734",
-    #     bbox="118.085517,24.465897,118.124342,24.499751",
+    #     bbox=extent,
     #     zoom=18, out=["ds/cover"])
     # cover.main(params_cover)
 
     # params_download = params.Download(
-    #     type="XYZ",
-    #     # url="http://172.16.105.155:7001/wmts/{z}/{x}/{y}?type=google",
-    #     url="http://localhost:7001/wmts/{z}/{x}/{y}?type=google",
+    #     url=rs_host+"/wmts/{z}/{x}/{y}?type="+type,
     #     cover="ds/cover",
     #     out="ds/images")
     # download.main(params_download)
 
-    # params_rasterize = params.Rasterize(
-    #     config="data/config.toml",
-    #     type="Building",
-    #     ts=256,
-    #     geojson=["data/buildings.json"],
-    #     cover="ds/cover",
-    #     out="ds/labels"
-    # )
-    # rasterize.main(params_rasterize)
+    params_rasterize = params.Rasterize(
+        config="data/config.toml",
+        type="Building",
+        ts=256,
+        # geojson=["data/buildings.json"],
+        pg=config.pg,
+        sql=sql,
+        cover="ds/cover",
+        out="ds/labels"
+    )
+    rasterize.main(params_rasterize)
 
     # params_cover2 = params.Cover(
     #     dir='ds/images',
@@ -76,13 +77,13 @@ if __name__ == "__main__":
     # )
     # subset.main(params_subset_validation_labels)
 
-    params_train = params.Train(
-        config='data/config.toml',
-        epochs=10,
-        ts=(256, 256),
-        dataset='ds',
-        out='ds/model'
-    )
-    train.main(params_train)
+    # params_train = params.Train(
+    #     config='data/config.toml',
+    #     epochs=10,
+    #     ts=(256, 256),
+    #     dataset='ds',
+    #     out='ds/model'
+    # )
+    # train.main(params_train)
 
     sys.exit(0)
