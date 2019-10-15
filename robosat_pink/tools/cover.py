@@ -66,7 +66,7 @@ def main(args):
         except:
             crs = None
             w, s, e, n = map(float, args.bbox.split(","))
-        assert isinstance(w, float) and isinstance(s, float), "Invalid bbox parameter."
+        assert isinstance(w, float) and isinstance(s, float) and w < e and s < n, "Invalid bbox parameter."
 
     if args.splits:
         splits = [int(split) for split in args.splits.split("/")]
