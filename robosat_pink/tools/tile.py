@@ -34,7 +34,7 @@ def add_parser(subparser, formatter_class):
 
     out = parser.add_argument_group("Output")
     out.add_argument("--zoom", type=int, required=True, help="zoom level of tiles [required]")
-    out.add_argument("--ts", type=int, default=512, help="tile size in pixels [default: 512]")
+    out.add_argument("--ts", type=str, default="512,512", help="tile size in pixels [default: 512,512]")
     help = "nodata pixel value, used by default to remove coverage border's tile [default: 0]"
     out.add_argument("--nodata", type=int, default=0, choices=range(0, 256), metavar="[0-255]", help=help)
     help = "Skip tile if nodata pixel ratio > threshold. [default: 100]"
@@ -67,7 +67,7 @@ def is_nodata(image, nodata, threshold):
         return True  # pixel border is nodata, on all bands
 
     C, W, H = image.shape
-    return np.sum(image[:, :, :] == nodata) > ((threshold * C * 100) / (W * H))
+    return np.sum(image[:, :, :] == nodata) >= W * H * (threshold / 100)
 
 
 def main(args):
@@ -80,6 +80,9 @@ def main(args):
         check_classes(config)
         colors = [classe["color"] for classe in config["classes"]]
         palette = make_palette(*colors)
+
+    assert len(args.ts.split(",")) == 2, "--ts expect width,height value (e.g 512,512)"
+    width, height = list(map(int, args.ts.split(",")))
 
     cover = [tile for tile in tiles_from_csv(os.path.expanduser(args.cover))] if args.cover else None
 
@@ -142,11 +145,11 @@ def main(args):
                     crs="epsg:3857",
                     resampling=Resampling.bilinear,
                     add_alpha=False,
-                    transform=from_bounds(w, s, e, n, args.ts, args.ts),
-                    width=args.ts,
-                    height=args.ts,
+                    transform=from_bounds(w, s, e, n, width, height),
+                    width=width,
+                    height=height,
                 )
-                data = warp_vrt.read(out_shape=(len(raster.indexes), args.ts, args.ts), window=warp_vrt.window(w, s, e, n))
+                data = warp_vrt.read(out_shape=(len(raster.indexes), width, height), window=warp_vrt.window(w, s, e, n))
                 image = np.moveaxis(data, 0, 2)  # C,H,W -> H,W,C
 
                 tile_key = (str(tile.x), str(tile.y), str(tile.z))
@@ -186,7 +189,7 @@ def main(args):
             if len(tiles_map[tile_key]) == 1:
                 return
 
-            image = np.zeros((args.ts, args.ts, bands), np.uint8)
+            image = np.zeros((width, height, bands), np.uint8)
 
             x, y, z = map(int, tile_key)
             for i in range(len(tiles_map[tile_key])):
@@ -197,7 +200,7 @@ def main(args):
                     split = tile_image_from_file(path)
                 if args.label:
                     split = tile_label_from_file(path)
-                    split = split.reshape((args.ts, args.ts, 1))  # H,W -> H,W,C
+                    split = split.reshape((width, height, 1))  # H,W -> H,W,C
 
                 assert image.shape == split.shape
                 image[np.where(image == 0)] += split[np.where(image == 0)]

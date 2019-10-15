@@ -162,9 +162,10 @@ Contributions and Services:
 - And if you want to support the whole project, because it means for your own business, funding is also welcome.
 
 
-
-
 ### Requests for funding:
+
+We've already identified several new features and research papers able to improve again RoboSat.pink,
+your funding would make a difference to implement them on a coming release:
 
 - Increase (again) prediction accuracy :
   - on low resolution imagery

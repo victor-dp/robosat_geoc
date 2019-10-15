@@ -25,7 +25,7 @@ def add_parser(subparser, formatter_class):
     hp = parser.add_argument_group("Hyper Parameters [if set override config file value]")
     hp.add_argument("--bs", type=int, help="batch size")
     hp.add_argument("--lr", type=float, help="learning rate")
-    hp.add_argument("--ts", type=int, help="tile size")
+    hp.add_argument("--ts", type=str, help="tile size")
     hp.add_argument("--nn", type=str, help="neurals network name")
     hp.add_argument("--loss", type=str, help="model loss")
     hp.add_argument("--da", type=str, help="kind of data augmentation")
@@ -51,7 +51,7 @@ def main(args):
     config["model"]["loader"] = args.loader if args.loader else config["model"]["loader"]
     config["model"]["bs"] = args.bs if args.bs else config["model"]["bs"]
     config["model"]["lr"] = args.lr if args.lr else config["model"]["lr"]
-    config["model"]["ts"] = args.ts if args.ts else config["model"]["ts"]
+    config["model"]["ts"] = tuple(map(int, args.ts.split(","))) if args.ts else config["model"]["ts"]
     config["model"]["nn"] = args.nn if args.nn else config["model"]["nn"]
     config["model"]["loss"] = args.loss if args.loss else config["model"]["loss"]
     config["model"]["da"] = args.da if args.da else config["model"]["da"]
