@@ -164,7 +164,8 @@ Contributions and Services:
 
 ### Requests for funding:
 
-We've already identified several research papers able to improve again RoboSat.pink, your funding would make a difference to implement them on a coming release:
+We've already identified several new features and research papers able to improve again RoboSat.pink,
+your funding would make a difference to implement them on a coming release:
 
 - Increase (again) prediction accuracy :
   - on low resolution imagery
