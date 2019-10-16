@@ -1,9 +1,9 @@
 import os
 import sys
 import shutil
-from robosat_geoc.robosat_pink.tools import params, cover, download, rasterize, subset, train
+from robosat_pink.tools import params, cover, download, rasterize, subset, train
 import multiprocessing
-from robosat_geoc import config
+import config
 import time
 multiprocessing.set_start_method('spawn', True)
 

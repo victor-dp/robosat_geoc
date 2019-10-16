@@ -1,4 +1,4 @@
-from robosat_geoc.robosat_pink.tools import params, cover, download, rasterize, predict, vectorize
+from robosat_pink.tools import params, cover, download, rasterize, predict, vectorize
 import time
 import shutil
 import json
