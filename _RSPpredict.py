@@ -12,7 +12,7 @@ def main(extent, rs_host="http://localhost:5000/v1/wmts", map="tdt", auto_delete
     # rsp vectorize --type --config masks out
 
     ts = time.time()
-    path = "ds/predict" + str(ts)
+    path = "ds/predict_" + str(ts)
 
     params_cover = params.Cover(
         bbox=extent,
