@@ -30,7 +30,7 @@ def main(extent, rs_host="http://localhost:5000/v1/wmts", map="tdt", auto_delete
 
     params_predict = params.Predict(
         dataset=path,
-        checkpoint='data/model/checkpoint-00010.pth',
+        checkpoint=os.getcwd()+'/robosat_geoc/'+'data/model/checkpoint-00010.pth',
         config=os.getcwd()+'/robosat_geoc/'+"data/config.toml",
         out=path + "/masks"
     )
