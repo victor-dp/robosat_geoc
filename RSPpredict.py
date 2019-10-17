@@ -1,3 +1,4 @@
+import os
 from robosat_geoc.robosat_pink.tools import params, cover, download, rasterize, predict, vectorize
 import time
 import shutil
@@ -30,7 +31,7 @@ def main(extent, rs_host="http://localhost:5000/v1/wmts", map="tdt", auto_delete
     params_predict = params.Predict(
         dataset=path,
         checkpoint='data/model/checkpoint-00010.pth',
-        config="data/config.toml",
+        config=os.getcwd()+'/robosat_geoc/'+"data/config.toml",
         out=path + "/masks"
     )
     predict.main(params_predict)
@@ -38,7 +39,7 @@ def main(extent, rs_host="http://localhost:5000/v1/wmts", map="tdt", auto_delete
     params_vectorize = params.Vectorize(
         masks=path + "/masks",
         type="Building",
-        config="data/config.toml",
+        config=os.getcwd()+'/robosat_geoc/'+"data/config.toml",
         out=path + "/vectors.json"
     )
     vectorize.main(params_vectorize)
