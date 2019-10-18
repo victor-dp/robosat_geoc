@@ -86,7 +86,7 @@ def main(extent, rs_host="http://localhost:5000/v1/wmts", map="tdt", auto_delete
         ts=(256, 256),
         dataset=path,
         checkpoint=os.getcwd()+'/robosat_geoc/'+"data/model/checkpoint-00010.pth",
-        out='data/model'
+        out=os.getcwd()+'/robosat_geoc/'+'data/model'
     )
     train.main(params_train)
 
