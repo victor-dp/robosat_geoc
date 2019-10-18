@@ -33,16 +33,16 @@ def main(extent, rs_host="http://localhost:5000/v1/wmts", map="tdt", auto_delete
     download.main(params_download)
 
     params_rasterize = params.Rasterize(
-        config="data/config.toml",
+        config=os.getcwd()+'/robosat_geoc/'+"data/config.toml",
         type="Building",
-        ts=256,
+        ts=256, 
         # geojson=["data/buildings.json"],
         pg=config.pg,
         sql='SELECT geom FROM "'+config.building_table + \
             '" WHERE ST_Intersects(TILE_GEOM, geom)',
         cover=path + "/cover",
         out=path + "/labels"
-    )
+    ) 
     rasterize.main(params_rasterize)
 
     params_cover2 = params.Cover(
@@ -81,14 +81,15 @@ def main(extent, rs_host="http://localhost:5000/v1/wmts", map="tdt", auto_delete
     subset.main(params_subset_validation_labels)
 
     params_train = params.Train(
-        config='data/config.toml',
+        config=os.getcwd()+'/robosat_geoc/'+'data/config.toml',
         epochs=10,
         ts=(256, 256),
         dataset=path,
-        checkpoint="data/model/checkpoint-00010.pth",
-        out='data/model'
+        checkpoint=os.getcwd()+'/robosat_geoc/'+"data/model/checkpoint-00010.pth",
+        out=os.getcwd()+'/robosat_geoc/'+'data/model'
     )
     train.main(params_train)
 
     if auto_delete:
         shutil.rmtree(path)
+# 2 mins
