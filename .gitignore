@@ -1,6 +1,10 @@
 .python-version
 __pycache__
 
+build
+dist
+RoboSat_geoc.egg-info
+
 test
 .idea
 ds
