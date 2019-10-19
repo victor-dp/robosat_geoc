@@ -14,17 +14,24 @@ def predict(extent, dataPath, dsPath, map="tdt", auto_delete=False):
 
 
 if __name__ == "__main__":
-    startTime = datetime.now()
+    # config.toml & checkpoint.pth data directory
     dataPath = "data"
+
+    # training dataset directory
+    startTime = datetime.now()
     ts = time.time()
     dsPath = "ds/train_" + str(ts)
+
+    # map extent for training or predicting
     extent = "116.28993598937751,39.94242576681765,116.2948812791335,39.9454852957874"
     # extent = "116.3094,39.9313,116.3114,39.9323"
 
+    # trainging
     train(extent, dataPath, dsPath)
 
+    # predicting
     # print(predict(extent, dataPath, dsPath))
 
     endTime = datetime.now()
     timeSpend = (endTime-startTime).seconds
-    print("训练或预测完成！共计耗时：", timeSpend, "秒！")
+    print("Training or Predicting DONE！All spends：", timeSpend, "seconds！")
