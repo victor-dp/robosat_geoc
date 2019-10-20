@@ -6,7 +6,7 @@ import json
 from robosat_pink.geoc import config as CONFIG, params
 
 
-def main(extent, dataPath, dsPath, map="tdt", auto_delete=False):
+def main(extent, dataPath, dsPath, pthPath, map="tdt", auto_delete=False):
     params_cover = params.Cover(
         bbox=extent,
         zoom=18, out=[dsPath + "/cover"])
@@ -22,7 +22,7 @@ def main(extent, dataPath, dsPath, map="tdt", auto_delete=False):
 
     params_predict = params.Predict(
         dataset=dsPath,
-        checkpoint=dataPath+'/model/checkpoint-00010.pth',
+        checkpoint=pthPath,
         config=dataPath+"/config.toml",
         out=dsPath + "/masks"
     )
