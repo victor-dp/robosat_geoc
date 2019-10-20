@@ -1,5 +1,5 @@
 """
-RoboSat.pink
+RoboSat_geoc
 ----------
 Computer Vision framework for GeoSpatial Imagery
 <https://github.com/geocompass/robosat_geoc>
