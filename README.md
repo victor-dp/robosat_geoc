@@ -7,16 +7,22 @@
   <a href="https://github.com/geocompass/robosat_geoc"><img src="https://raw.githubusercontent.com/geocompass/robosat_geoc/master/docs/img/readme/top_example.jpeg" alt="RoboSat_Geoc buildings segmentation from Imagery" /></a>
 </p>
 
+
+
 ## 简介：
 
 `RoboSat.geoc` 由 [mapbox/robosat](https://github.com/mapbox/robosat) 及 [Robosat.pink](https://github.com/datapink/robosat.pink) fork 而来。
 
 利用深度学习工具，可以很方便的使用标准 WMTS 影像对建筑物轮廓提取进行训练和预测。
 
+
+
 ## 目的：
 
 - `Mapbox/Robosat` 是非常不错的建筑物提取工具，`Robosat.pink` 对其做了重构和改造，使其易用性得到了提升。
 - `Robosat.geoc` 在 `Robosat.pink` 的基础上，做了自动化和工程化改造，并可以结合 [rs_buildings_extraction](https://github.com/geocompass/rs_buildings_extraction) ，使用可视化界面和接口的方式进行训练和预测，很方便的用于生产环境。
+
+
 
 ## 主要功能：
 
@@ -27,13 +33,15 @@
   - 支持 RGB 和多波段影像，并允许数据融合
   - 提供了 Web 界面工具，可以轻松的显示、对比、选择训练结果
   - 高性能
-  - 很松的能够拓展
+  - 很轻松的能够拓展
   - 等等
 - 将深度学习训练标注（`label`) 数据以 PostGIS 的方式存储，对 GISer 极其友好
 - 提供了 WMTS 瓦片服务代理工具，可将天地图、谷歌影像等作为影像数据源（Robosat 不支持类似 `http://this_is_host?x={x}&y={y}&z={z}` 形式的 URL，仅支持类似 `http://this_is_host/z/x/y`
 - 对 `RoboSat.pink` 做了自动化改造，无需手动逐个输入命令行，一键式训练或预测
 - 简化调试方式，仅需提供待训练或预测的范围（`extent`）
 - 自动化训练限定为 `PostgreSQL + PostGIS` 数据源作为深度学习标注
+
+
 
 ## 说明文档:
 
@@ -69,11 +77,38 @@
 - 使用 PyCharm：
   - 在 PyCharm 的`Settings` 中[配置 Project Interpreter](https://www.jetbrains.com/help/pycharm/using-wsl-as-a-remote-interpreter.html) 的 WSL 参数。
 
-### 如何作为 packages：
+### 如何作为 Packages：
 
 - 构建：`python setup.py build`
 - 安装：`python setup.py install`
 - 在工程中调用：`from robosat_pink.geoc import RSPtrain` & `from robosat_pink.geoc import RSPpredict`
+
+
+
+## RoboSat.pink 使用教程
+
+### 必读教程:
+
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/101.md">RoboSat.pink 101</a>
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/from_opendata_to_opendataset.md">How to use plain OpenData to create a decent training OpenDataSet</a>
+- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/extensibility_by_design.md">How to extend RoboSat.pink features, and use it as a Framework</a>
+
+### Tools:
+
+- <a href="https://github.com/geocompass/robosat_geoc/tree/master/docs/tools.md#rsp-cover">`rsp cover`</a> Generate a tiles covering, in csv format: X,Y,Z
+- <a href="https://github.com/geocompass/robosat_geoc/tree/master/docs/tools.md#rsp-download">`rsp download`</a> Downloads tiles from a remote server (XYZ, WMS, or TMS)
+- <a href="https://github.com/geocompass/robosat_geoc/tree/master/docs/tools.md#rsp-extract">`rsp extract`</a> Extracts GeoJSON features from OpenStreetMap .pbf
+- <a href="https://github.com/geocompass/robosat_geoc/tree/master/docs/tools.md#rsp-rasterize">`rsp rasterize`</a> Rasterize vector features (GeoJSON or PostGIS), to raster tiles
+- <a href="https://github.com/geocompass/robosat_geoc/tree/master/docs/tools.md#rsp-subset">`rsp subset`</a> Filter images in a slippy map dir using a csv tiles cover
+- <a href="https://github.com/geocompass/robosat_geoc/tree/master/docs/tools.md#rsp-tile">`rsp tile`</a> Tile raster coverage
+- <a href="https://github.com/geocompass/robosat_geoc/tree/master/docs/tools.md#rsp-train">`rsp train`</a> Trains a model on a dataset
+- <a href="https://github.com/geocompass/robosat_geoc/tree/master/docs/tools.md#rsp-export">`rsp export`</a> Export a model to ONNX or Torch JIT
+- <a href="https://github.com/geocompass/robosat_geoc/tree/master/docs/tools.md#rsp-predict">`rsp predict`</a> Predict masks, from given inputs and an already trained model
+- <a href="https://github.com/geocompass/robosat_geoc/tree/master/docs/tools.md#rsp-compare">`rsp compare`</a> Compute composite images and/or metrics to compare several XYZ dirs
+- <a href="https://github.com/geocompass/robosat_geoc/tree/master/docs/tools.md#rsp-vectorize">`rsp vectorize`</a> Extract simplified GeoJSON features from segmentation masks
+- <a href="https://github.com/geocompass/robosat_geoc/tree/master/docs/tools.md#rsp-info">`rsp info`</a> Print RoboSat.pink version informations
+
+
 
 ## 本项目作者:
 
