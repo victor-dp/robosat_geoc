@@ -16,3 +16,4 @@ pyproj>=1.9.6
 toml
 webcolors
 psycopg2-binary
+flask >=1.0
