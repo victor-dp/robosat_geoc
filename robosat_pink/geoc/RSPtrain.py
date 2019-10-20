@@ -4,12 +4,14 @@ import shutil
 import multiprocessing
 
 from robosat_pink.tools import cover, download, rasterize, subset, train
-from robosat_pink.geoc import config as CONFIG, params
+from robosat_pink.geoc import config as CONFIG, params, utils
 
 multiprocessing.set_start_method('spawn', True)
 
 
-def main(extent, dataPath, dsPath, pthNum, epochs=10, map="tdt", auto_delete=False):
+def main(extent, dataPath, dsPath, epochs=10, map="tdt", auto_delete=False):
+    # training or predict checkpoint.pth number
+    pthNum = utils.getLastPth(dataPath)
 
     params_cover = params.Cover(
         bbox=extent,
@@ -86,4 +88,6 @@ def main(extent, dataPath, dsPath, pthNum, epochs=10, map="tdt", auto_delete=Fal
 
     if auto_delete:
         shutil.rmtree(dsPath)
+
+    return True
 # 2 mins

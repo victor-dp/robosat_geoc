@@ -3,11 +3,16 @@ from robosat_pink.tools import cover, download, rasterize, predict, vectorize
 import time
 import shutil
 import json
-from robosat_pink.geoc import config as CONFIG, params
+import multiprocessing
+
+from robosat_pink.geoc import config as CONFIG, params, utils
+
+multiprocessing.set_start_method('spawn', True)
 
 
-def main(extent, dataPath, dsPath, pthNum, map="tdt", auto_delete=False):
-
+def main(extent, dataPath, dsPath, map="tdt", auto_delete=False):
+    # training or predict checkpoint.pth number
+    pthNum = utils.getLastPth(dataPath)
     if pthNum == 0:
         return None
 
