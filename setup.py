@@ -2,7 +2,7 @@
 RoboSat.pink
 ----------
 Computer Vision framework for GeoSpatial Imagery
-<http://www.RoboSat.pink>
+<https://github.com/geocompass/robosat_geoc>
 """
 
 from setuptools import setup, find_packages
@@ -27,7 +27,7 @@ setup(
     download_url="https://github.com/geocompass/robosat_geoc/releases",
     license="MIT",
     maintainer="GEO-COMPASS",
-    maintainer_email="wucan@geo-compass.com",
+    maintainer_email="wucangeo@gmail.com",
     description="Computer Vision framework for GeoSpatial Imagery",
     long_description=long_description,
     long_description_content_type="text/markdown",
