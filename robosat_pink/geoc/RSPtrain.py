@@ -9,7 +9,7 @@ from robosat_pink.geoc import config as CONFIG, params
 multiprocessing.set_start_method('spawn', True)
 
 
-def main(extent, dataPath, dsPath, pthPath, map="tdt", auto_delete=False):
+def main(extent, dataPath, dsPath, pthNum, epochs=10, map="tdt", auto_delete=False):
 
     params_cover = params.Cover(
         bbox=extent,
@@ -71,14 +71,17 @@ def main(extent, dataPath, dsPath, pthPath, map="tdt", auto_delete=False):
 
     params_train = params.Train(
         config=dataPath+'/config.toml',
-        epochs=10,
+        epochs=epochs,
         ts="256, 256",
         dataset=dsPath,
-        # checkpoint=dataPath+"/model/checkpoint-00010.pth",
         out=dataPath+'/model'
     )
-    if pthPath:
+    if pthNum:
+        pthPath = dataPath + "/model/checkpoint-" + \
+            str(pthNum).zfill(5)+".pth"
         params_train.checkpoint = pthPath
+        params_train.resume = True
+        params_train.epochs = pthNum+epochs
     train.main(params_train)
 
     if auto_delete:

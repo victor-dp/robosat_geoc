@@ -6,7 +6,11 @@ import json
 from robosat_pink.geoc import config as CONFIG, params
 
 
-def main(extent, dataPath, dsPath, pthPath, map="tdt", auto_delete=False):
+def main(extent, dataPath, dsPath, pthNum, map="tdt", auto_delete=False):
+
+    if pthNum == 0:
+        return None
+
     params_cover = params.Cover(
         bbox=extent,
         zoom=18, out=[dsPath + "/cover"])
@@ -19,6 +23,9 @@ def main(extent, dataPath, dsPath, pthPath, map="tdt", auto_delete=False):
         out=dsPath + "/images",
         timeout=20)
     download.main(params_download)
+
+    pthPath = dataPath + "/model/checkpoint-" + \
+        str(pthNum).zfill(5)+".pth"
 
     params_predict = params.Predict(
         dataset=dsPath,

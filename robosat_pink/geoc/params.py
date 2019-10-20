@@ -167,7 +167,7 @@ class Train:
                  da=None,
                  dap=1.0,
                  epochs=10,
-                 resume=0,
+                 resume=False,
                  checkpoint=None,
                  no_validation=False,
                  no_training=False,
