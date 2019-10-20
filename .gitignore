@@ -1,2 +1,14 @@
 .python-version
 __pycache__
+
+build
+dist
+RoboSat_geoc.egg-info
+
+test
+.idea
+ds
+.DS_Store
+.vscode/settings.json
+dp
+data/model

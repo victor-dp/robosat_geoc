@@ -1,205 +1,85 @@
-<a href="https://twitter.com/RobosatPink"><img src="https://img.shields.io/badge/Follow-%40RoboSatPink-ff69b4.svg" /></a>  <a href="https://gitter.im/RoboSatPink/community"><img src="https://img.shields.io/gitter/room/robosatpink/community.svg?color=ff69b4&style=popout" /></a> <a href="https://pepy.tech/project/robosat.pink"><img src="https://pepy.tech/badge/robosat-pink/month" align="right" /></a>
+<a href="https://twitter.com/RobosatPink"><img src="https://img.shields.io/badge/Follow-%40RoboSatPink-ff69b4.svg" /></a> <a href="https://gitter.im/RoboSatPink/community"><img src="https://img.shields.io/gitter/room/robosatpink/community.svg?color=ff69b4&style=popout" /></a> <a href="https://pepy.tech/project/robosat.pink"><img src="https://pepy.tech/badge/robosat-pink/month" align="right" /></a>
 
-<h1 align='center'>RoboSat.pink</h1>
-<h2 align='center'>Computer Vision framework for GeoSpatial imagery</h2>
-
+<h1 align='center'>RoboSat_geoc</h1>
+<h2 align='center'>从标准WMTS影像中提取建筑物的深度学习框架</h2>
+<h4 align='center'>forked by <a href="https://github.com/datapink/robosat.pink" >mapbox/robosat</a> & <a href="https://github.com/datapink/robosat.pink" >Robosat.pink</a></h4>
 <p align=center>
-  <a href="http://www.datapink.tools/rsp/opendata_to_opendataset/compare_side_clean/"><img src="https://pbs.twimg.com/media/DpjonykWwAANpPr.jpg" alt="RoboSat.pink buildings segmentation from Imagery" /></a>
+  <a href="https://github.com/geocompass/robosat_geoc"><img src="https://raw.githubusercontent.com/geocompass/robosat_geoc/master/docs/img/readme/top_example.jpeg" alt="RoboSat_Geoc buildings segmentation from Imagery" /></a>
 </p>
 
+## 简介：
 
+`RoboSat.geoc` 由 [mapbox/robosat](https://github.com/mapbox/robosat) 及 [Robosat.pink](https://github.com/datapink/robosat.pink) fork 而来。
 
-Purposes:
----------
-- DataSet Quality Analysis
-- Change Detection highlighter
-- Features extraction and completion
+利用深度学习工具，可以很方便的使用标准 WMTS 影像对建筑物轮廓提取进行训练和预测。
 
+## 目的：
 
-Main Features:
---------------
-- Provides several command line tools, you can combine together to build your own workflow
-- Follows geospatial standards to ease interoperability and data preparation 
-- Build-in cutting edge Computer Vision model, Data Augmentation and Loss implementations (and allows to replace by your owns)
-- Support either RGB and multibands imagery, and allows Data Fusion 
-- Web-UI tools to easily display, hilight or select results (and allow to use your own templates)
-- High performances
-- Eeasily extensible by design
+- `Mapbox/Robosat` 是非常不错的建筑物提取工具，`Robosat.pink` 对其做了重构和改造，使其易用性得到了提升。
+- `Robosat.geoc` 在 `Robosat.pink` 的基础上，做了自动化和工程化改造，并可以结合 [rs_buildings_extraction](https://github.com/geocompass/rs_buildings_extraction) ，使用可视化界面和接口的方式进行训练和预测，很方便的用于生产环境。
 
+## 主要功能：
 
+- 继承了`RoboSat.pink` 的所有功能：
+  - 提供了命令行工具，可以很方便的进行批处理
+  - 遵循了 WMTS 服务标准，方便遥感影像数据的准备
+  - 内置了最先进的计算机视觉模型，并可以自行拓展
+  - 支持 RGB 和多波段影像，并允许数据融合
+  - 提供了 Web 界面工具，可以轻松的显示、对比、选择训练结果
+  - 高性能
+  - 很松的能够拓展
+  - 等等
+- 将深度学习训练标注（`label`) 数据以 PostGIS 的方式存储，对 GISer 极其友好
+- 提供了 WMTS 瓦片服务代理工具，可将天地图、谷歌影像等作为影像数据源（Robosat 不支持类似 `http://this_is_host?x={x}&y={y}&z={z}` 形式的 URL，仅支持类似 `http://this_is_host/z/x/y`
+- 对 `RoboSat.pink` 做了自动化改造，无需手动逐个输入命令行，一键式训练或预测
+- 简化调试方式，仅需提供待训练或预测的范围（`extent`）
+- 自动化训练限定为 `PostgreSQL + PostGIS` 数据源作为深度学习标注
 
+## 说明文档:
 
-<img alt="Draw me RoboSat.pink" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/draw_me_robosat_pink.png" />
+### 训练数据准备：
 
+- 安装 `PostgreSQL + PostGIS`，创建数据库，添加 `PostGIS` 扩展 `create extension postgis;`
+- 使用 `shp2pgsql` 等工具将已有的建筑物轮廓数据导入 `PostGIS` 作为深度学习标注数据，或者使用 `QGIS` 等工具连接 `PostGIS` 并加载遥感影像底图进行绘制建筑物轮廓
 
- 
-Documentation:
---------------
+### 如何安装：
 
-### Tutorials:
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/101.md">RoboSat.pink 101</a>
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/from_opendata_to_opendataset.md">How to use plain OpenData to create a decent training OpenDataSet</a>
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/extensibility_by_design.md">How to extend RoboSat.pink features, and use it as a Framework</a>
+- 对于 MacOS 或 Linux：
+  - 下载代码：`git clone https://github.com/geocompass/robosat_geoc.git`
+  - 安装依赖：`python install -r requirements.txt` （若使用 Anaconda 需要注意 python 路径，后同）
+- 对于 Windows：
+  - 在 Windows 安装依赖时会报 `GLAL` 相关错误，目前没有比较好的解决办法
+  - 建议使用 WSL，[在 Windows 中安装 Ubuntu SubLinux](https://docs.microsoft.com/zh-cn/windows/wsl/install-win10)
+  - 配合 [Windows Terminal](https://www.microsoft.com/zh-cn/p/windows-terminal-preview/9n0dx20hk701) ，使用 Ubuntu 命令行工具
+  - 使用上述 MacOS 或 Linux 安装方式进行部署
 
-### Config file:
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/config.md">RoboSat.pink configuration file</a>
+### 如何运行：
 
-### Tools:
+- 设置已有的建筑物轮廓标注数据
+  - 设置 PostGIS 连接： `robosat_pink/geoc/config.py` 中的 `POSTGRESQL`
+  - 设置已有建筑物轮廓数据表：`robosat_pink/geoc/config.py` 中的 `BUILDING_TABLE`
+- 后台运行 WMTS 代理工具：`python xyz_proxy.py &`
+- 设置训练或预测范围：`./test.py` 中的 `extent`
+- 开始训练或预测：`python test.py`
 
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-cover">`rsp cover`</a> Generate a tiles covering, in csv format: X,Y,Z
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-download">`rsp download`</a> Downloads tiles from a remote server (XYZ, WMS, or TMS)
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-extract">`rsp extract`</a> Extracts GeoJSON features from OpenStreetMap .pbf
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-rasterize">`rsp rasterize`</a> Rasterize vector features (GeoJSON or PostGIS), to raster tiles
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-subset">`rsp subset`</a> Filter images in a slippy map dir using a csv tiles cover
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-tile">`rsp tile`</a> Tile raster coverage
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-train">`rsp train`</a> Trains a model on a dataset
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-export">`rsp export`</a> Export a model to ONNX or Torch JIT
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-predict">`rsp predict`</a> Predict masks, from given inputs and an already trained model
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-compare">`rsp compare`</a> Compute composite images and/or metrics to compare several XYZ dirs
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-vectorize">`rsp vectorize`</a> Extract simplified GeoJSON features from segmentation masks
-- <a href="https://github.com/datapink/robosat.pink/tree/master/docs/tools.md#rsp-info">`rsp info`</a> Print RoboSat.pink version informations
+### Windows 中如何开发：
 
-### Presentations slides:
-  - <a href="http://www.datapink.com/presentations/2019-sotm.pdf">@SOTM 2019</a>
-  - <a href="http://www.datapink.com/presentations/2019-foss4g-cv.pdf">@FOSS4G 2019</a>
+- 使用 VSCode：
+  - 使用 [Remote-WSL](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-wsl) 拓展连接 WSL 的 Ubuntu，连接该项目文件夹进行开发
+- 使用 PyCharm：
+  - 在 PyCharm 的`Settings` 中[配置 Project Interpreter](https://www.jetbrains.com/help/pycharm/using-wsl-as-a-remote-interpreter.html) 的 WSL 参数。
 
+### 如何作为 packages：
 
+- 构建：`python setup.py build`
+- 安装：`python setup.py install`
+- 在工程中调用：`from robosat_pink.geoc import RSPtrain` & `from robosat_pink.geoc import RSPpredict`
 
+## 本项目作者:
 
+- 吴灿 [https://github.com/wucangeo](https://github.com/wucangeo)
+- Liii18 [https://github.com/liii18](https://github.com/liii18)
 
+## 欢迎 Issues
 
-Installs:
---------
-
-### With PIP:
-```
-pip3 install RoboSat.pink                                     # For latest stable version
-```
-
-or
-
-```
-pip3 install git+https://github.com/datapink/robosat.pink     # For current dev version
-```
-
-### With Ubuntu 19.04, from scratch:
-
-```
-sudo sh -c "apt update && apt install -y build-essential python3-pip"
-pip3 install RoboSat.pink && export PATH=$PATH:~/.local/bin
-wget http://us.download.nvidia.com/XFree86/Linux-x86_64/430.40/NVIDIA-Linux-x86_64-430.40.run
-sudo sh NVIDIA-Linux-x86_64-430.40.run -a -q --ui=none
-```
-
-### With CentOS 7, from scratch:
-```
-sudo sh -c "yum -y update && yum install -y python36 wget && python3.6 -m ensurepip"
-pip3 install --user RoboSat.pink
-sudo sh -c "yum groupinstall -y 'Development Tools' && yum install -y kernel-devel epel-release"
-wget http://us.download.nvidia.com/XFree86/Linux-x86_64/430.40/NVIDIA-Linux-x86_64-430.40.run
-sudo sh NVIDIA-Linux-x86_64-430.40.run -a -q --ui=none
-```
-
-
-### NOTAS: 
-- Requires: Python 3.6 or 3.7
-- GPU is not strictly mandatory, but `rsp train` and `rsp predict` would be -that- slower without.
-- To test RoboSat.pink install, launch in a terminal: `rsp -h` or `rsp info`
-- Upon your ```pip``` PATH setting, you may have to update it: ```export PATH=$PATH:.local/bin```
-- If needed, to remove pre-existing Nouveau driver: ```sudo sh -c "echo blacklist nouveau > /etc/modprobe.d/blacklist-nvidia-nouveau.conf && update-initramfs -u && reboot"```
-
-
-
-
-Architecture:
-------------
-
-RoboSat.pink use cherry-picked Open Source libs among Deep Learning, Computer Vision and GIS stacks.
-
-<img alt="Stacks" src="https://raw.githubusercontent.com/datapink/robosat.pink/master/docs/img/readme/stacks.png" />
-
-
-
-GeoSpatial OpenDataSets:
-------------------------
-- <a href="https://github.com/chrieke/awesome-satellite-imagery-datasets">Christoph Rieke's Awesome Satellite Imagery Datasets</a>
-- <a href="https://zhangbin0917.github.io/2018/06/12/%E9%81%A5%E6%84%9F%E6%95%B0%E6%8D%AE%E9%9B%86/">Zhang Bin, Earth Observation OpenDataset blog</a> 
-
-
-Bibliography:
--------------
-
-- <a href="https://arxiv.org/abs/1505.04597">U-Net: Convolutional Networks for Biomedical Image Segmentation</a>
-- <a href="https://arxiv.org/abs/1512.03385">Deep Residual Learning for Image Recognition</a>
-- <a href="https://arxiv.org/pdf/1804.08024.pdf">Angiodysplasia Detection and Localization Using Deep
-Convolutional Neural Networks</a>
-- <a href="https://arxiv.org/abs/1806.00844">TernausNetV2: Fully Convolutional Network for Instance Segmentation</a>
-- <a href="https://arxiv.org/abs/1705.08790">The Lovász-Softmax loss: A tractable surrogate for the optimization of the IoU measure in neural networks</a>
-- <a href="https://arxiv.org/abs/1809.06839">Albumentations: fast and flexible image augmentations</a>
-
-
-
-
-
-
-
-
-
-
-Contributions and Services:
----------------------------
-
-- Pull Requests are welcome ! Feel free to send code...
-  Don't hesitate either to initiate a prior discussion via <a href="https://gitter.im/RoboSatPink/community">gitter</a> or ticket on any implementation question.
-  And give also a look at <a href="https://github.com/datapink/robosat.pink/blob/master/docs/makefile.md">Makefile rules</a>.
-
-- If you want to collaborate through code production and maintenance on a long term basis, please get in touch, co-edition with an ad hoc governance can be considered.
-
-- If you want a new feature, but don't want to implement it, <a href="http://datapink.com">DataPink</a> provide core-dev services.
-
-- Expertise and training on RoboSat.pink are also provided by <a href="http://datapink.com">DataPink</a>.
-
-- And if you want to support the whole project, because it means for your own business, funding is also welcome.
-
-
-### Requests for funding:
-
-We've already identified several new features and research papers able to improve again RoboSat.pink,
-your funding would make a difference to implement them on a coming release:
-
-- Increase (again) prediction accuracy :
-  - on low resolution imagery
-  - even with few labels
-  - feature extraction when they are (really) close
-  - with multibands and Data Fusion
-
-- Add support for :
-  - MultiClass classification
-  - Linear features extraction
-  - PointCloud data support
-  - Time Series Imagery
-  - StreetView Imagery
-  
-- Improve (again) performances
-
-
-
-
-Authors:
---------
-- Olivier Courtin <https://github.com/ocourtin>
-- Daniel J. Hofmann <https://github.com/daniel-j-h>
-
-
-
-Citing:
--------
-```
-  @Manual{,
-    title = {{RoboSat.pink} Computer Vision framework for GeoSpatial Imagery},
-    author = {Olivier Courtin, Daniel J. Hofmann},
-    organization = {DataPink},
-    year = {2019},
-    url = {http://RoboSat.pink},
-  }
-```
+欢迎提一个 [Issue](https://github.com/geocompass/robosat_geoc/issues)

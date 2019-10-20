@@ -2,7 +2,6 @@
 RoboSat.pink
 ----------
 Computer Vision framework for GeoSpatial Imagery
-
 <http://www.RoboSat.pink>
 """
 
@@ -22,19 +21,21 @@ with open(path.join(here, "requirements.txt")) as f:
     install_requires = f.read().splitlines()
 
 setup(
-    name="RoboSat.pink",
+    name="RoboSat_geoc",
     version=version,
-    url="https://github.com/datapink/robosat.pink",
-    download_url="https://github.com/datapink/robosat.pink/releases",
+    url="https://github.com/geocompass/robosat_geoc",
+    download_url="https://github.com/geocompass/robosat_geoc/releases",
     license="MIT",
-    maintainer="DataPink",
-    maintainer_email="robosat@datapink.com",
+    maintainer="GEO-COMPASS",
+    maintainer_email="wucan@geo-compass.com",
     description="Computer Vision framework for GeoSpatial Imagery",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=find_packages(exclude=["tests"]),
+    packages=find_packages(
+        exclude=["tests", ".idea", ".vscode", "data", "ds"]),
     install_requires=install_requires,
-    entry_points={"console_scripts": ["rsp = robosat_pink.tools.__main__:main"]},
+    entry_points={"console_scripts": [
+        "rsp = robosat_pink.tools.__main__:main"]},
     include_package_data=True,
     python_requires=">=3.6",
     classifiers=[
