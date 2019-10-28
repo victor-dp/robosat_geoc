@@ -16,43 +16,51 @@ def main(extent, dataPath, dsPath, map="tdt", auto_delete=False):
     if pthNum == 0:
         return None
 
-    params_cover = params.Cover(
-        bbox=extent,
-        zoom=18, out=[dsPath + "/cover"])
-    cover.main(params_cover)
+    # params_cover = params.Cover(
+    #     bbox=extent,
+    #     zoom=18, out=[dsPath + "/cover"])
+    # cover.main(params_cover)
 
-    params_download = params.Download(
-        type="XYZ",
-        url=CONFIG.WMTS_HOST+"/{z}/{x}/{y}?type="+map,
-        cover=dsPath + "/cover",
-        out=dsPath + "/images",
-        timeout=20)
-    download.main(params_download)
+    # params_download = params.Download(
+    #     type="XYZ",
+    #     url=CONFIG.WMTS_HOST+"/{z}/{x}/{y}?type="+map,
+    #     cover=dsPath + "/cover",
+    #     out=dsPath + "/images",
+    #     timeout=20)
+    # download.main(params_download)
 
-    pthPath = dataPath + "/model/checkpoint-" + \
-        str(pthNum).zfill(5)+".pth"
+    # pthPath = dataPath + "/model/checkpoint-" + \
+    #     str(pthNum).zfill(5)+".pth"
 
-    params_predict = params.Predict(
-        dataset=dsPath,
-        checkpoint=pthPath,
-        config=dataPath+"/config.toml",
-        out=dsPath + "/masks"
-    )
-    predict.main(params_predict)
+    # params_predict = params.Predict(
+    #     dataset=dsPath,
+    #     checkpoint=pthPath,
+    #     config=dataPath+"/config.toml",
+    #     out=dsPath + "/masks"
+    # )
+    # predict.main(params_predict)
 
-    params_vectorize = params.Vectorize(
+    # params_vectorize = params.Vectorize(
+    #     masks=dsPath + "/masks",
+    #     type="Building",
+    #     config=dataPath+"/config.toml",
+    #     out=dsPath + "/vectors.json"
+    # )
+    # vectorize.main(params_vectorize)
+
+    params_features = params.Features(
         masks=dsPath + "/masks",
-        type="Building",
-        config=dataPath+"/config.toml",
-        out=dsPath + "/vectors.json"
+        type="parking",
+        dataset=dataPath+"/config.toml",
+        out=dsPath + "/features.json"
     )
-    vectorize.main(params_vectorize)
-
+    features.main(params_features)
+    
     # 解析预测结果并返回
     jsonFile = open(dsPath + "/vectors.json", 'r')
     jsonObj = json.load(jsonFile)
 
-    if auto_delete:
-        shutil.rmtree(dsPath)
+    # if auto_delete:
+    #     shutil.rmtree(dsPath)
 
     return jsonObj
