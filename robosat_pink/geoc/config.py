@@ -1,9 +1,9 @@
 # PostgreSQL Connection String
-# POSTGRESQL = "host='localhost' dbname='tdt2018' user='postgres' password='postgres'"
-POSTGRESQL = "host='172.16.100.140' dbname='tdt2018' user='postgres' password='postgres'"
+POSTGRESQL = "host='localhost' dbname='test_db' user='postgres' password='southgis'"
+# POSTGRESQL = "host='172.16.100.140' dbname='tdt2018' user='postgres' password='postgres'"
 
 # building outline PostGIS data table using by training label
-BUILDING_TABLE = "BUIA"
+BUILDING_TABLE = "buia"
 
 # remote sensing image tiles download host url
 WMTS_HOST = "http://127.0.0.1:5000/v1/wmts"
